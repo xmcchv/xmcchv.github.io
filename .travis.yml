@@ -19,13 +19,11 @@ install:
   - npm install                 # 安装 hexo 项目相关的依赖
   - npm install hexo-theme-keep
   - npm install hexo-filter-mathjax
-  - npm audit fix
 
 # 执行脚本 
 script:                         
   - hexo clean                  # 清除 hexo 缓存
   - hexo generate               # 生成静态文件
-  - hexo deploy
 
 deploy:
   on:
