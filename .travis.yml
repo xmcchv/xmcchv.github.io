@@ -1,6 +1,6 @@
 # 编译环境、语言
 dist: xenial
-os: linux
+os: windows
 language: node_js
 
 # Node.js 版本
@@ -19,6 +19,7 @@ install:
   - npm install                 # 安装 hexo 项目相关的依赖
   - npm install hexo-theme-keep
   - npm install hexo-filter-mathjax
+  - npm audit fix
 
 # 执行脚本 
 script:                         
