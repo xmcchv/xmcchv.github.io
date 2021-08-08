@@ -24,6 +24,7 @@ install:
 script:                         
   - hexo clean                  # 清除 hexo 缓存
   - hexo generate               # 生成静态文件
+  - hexo deploy
 
 deploy:
   on:
