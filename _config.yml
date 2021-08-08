@@ -104,7 +104,7 @@ theme: keep
 deploy:
   type: git
   repo: git@github.com:xmcchv/xmcchv.github.io.git
-  branch: gh-pages
+  branch: master
 
 mathjax:
   tags: none # or 'ams' or 'all'
