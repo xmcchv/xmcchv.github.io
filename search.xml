@@ -3,7 +3,7 @@
   <entry>
     <title>深度卷积生成对抗网络-手写数字识别</title>
     <url>/2021/07/05/DCGANs/</url>
-    <content><![CDATA[<h2 id="深度卷积生成对抗网络"><a href="#深度卷积生成对抗网络" class="headerlink" title="深度卷积生成对抗网络"></a>深度卷积生成对抗网络</h2><p>生成对抗网络（GANs）是当今计算机科学领域最有趣的想法之一。两个模型通过对抗过程同时训练。一个生成器（“艺术家”）学习创造看起来真实的图像，而判别器（“艺术评论家”）学习区分真假图像。</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="深度卷积生成对抗网络"><a href="#深度卷积生成对抗网络" class="headerlink" title="深度卷积生成对抗网络"></a>深度卷积生成对抗网络</h2><p>生成对抗网络（GANs）是当今计算机科学领域最有趣的想法之一。两个模型通过对抗过程同时训练。一个生成器（“艺术家”）学习创造看起来真实的图像，而判别器（“艺术评论家”）学习区分真假图像。</p>
 <p>本笔记在 MNIST 数据集上演示了该过程。下方动画展示了当训练了 50 个epoch （全部数据集迭代50次） 时生成器所生成的一系列图片。图片从随机噪声开始，随着时间的推移越来越像手写数字。</p>
 <h4 id="本例为TensorFlow官网的例子"><a href="#本例为TensorFlow官网的例子" class="headerlink" title="本例为TensorFlow官网的例子"></a>本例为TensorFlow官网的例子</h4><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> glob</span><br><span class="line"><span class="keyword">import</span> imageio</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> PIL</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras <span class="keyword">import</span> layers</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> IPython <span class="keyword">import</span> display</span><br><span class="line"><span class="comment"># 使用GPU加速</span></span><br><span class="line">os.environ[<span class="string">&quot;CUDA_VISIBLE_DEVICES&quot;</span>] = <span class="string">&quot;0&quot;</span></span><br><span class="line">tf.config.experimental.list_physical_devices(<span class="string">&#x27;GPU&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">make_generator_model</span>():</span></span><br><span class="line">    model = tf.keras.Sequential()</span><br><span class="line">    model.add(layers.Dense(<span class="number">7</span>*<span class="number">7</span>*<span class="number">256</span>, use_bias=<span class="literal">False</span>, input_shape=(<span class="number">100</span>,)))</span><br><span class="line">    model.add(layers.BatchNormalization())</span><br><span class="line">    model.add(layers.LeakyReLU())</span><br><span class="line"></span><br><span class="line">    model.add(layers.Reshape((<span class="number">7</span>, <span class="number">7</span>, <span class="number">256</span>)))</span><br><span class="line">    <span class="keyword">assert</span> model.output_shape == (<span class="literal">None</span>, <span class="number">7</span>, <span class="number">7</span>, <span class="number">256</span>) <span class="comment"># 注意：batch size 没有限制</span></span><br><span class="line"></span><br><span class="line">    model.add(layers.Conv2DTranspose(<span class="number">128</span>, (<span class="number">5</span>, <span class="number">5</span>), strides=(<span class="number">1</span>, <span class="number">1</span>), padding=<span class="string">&#x27;same&#x27;</span>, use_bias=<span class="literal">False</span>))</span><br><span class="line">    <span class="keyword">assert</span> model.output_shape == (<span class="literal">None</span>, <span class="number">7</span>, <span class="number">7</span>, <span class="number">128</span>)</span><br><span class="line">    model.add(layers.BatchNormalization())</span><br><span class="line">    model.add(layers.LeakyReLU())</span><br><span class="line"></span><br><span class="line">    model.add(layers.Conv2DTranspose(<span class="number">64</span>, (<span class="number">5</span>, <span class="number">5</span>), strides=(<span class="number">2</span>, <span class="number">2</span>), padding=<span class="string">&#x27;same&#x27;</span>, use_bias=<span class="literal">False</span>))</span><br><span class="line">    <span class="keyword">assert</span> model.output_shape == (<span class="literal">None</span>, <span class="number">14</span>, <span class="number">14</span>, <span class="number">64</span>)</span><br><span class="line">    model.add(layers.BatchNormalization())</span><br><span class="line">    model.add(layers.LeakyReLU())</span><br><span class="line"></span><br><span class="line">    model.add(layers.Conv2DTranspose(<span class="number">1</span>, (<span class="number">5</span>, <span class="number">5</span>), strides=(<span class="number">2</span>, <span class="number">2</span>), padding=<span class="string">&#x27;same&#x27;</span>, use_bias=<span class="literal">False</span>, activation=<span class="string">&#x27;tanh&#x27;</span>))</span><br><span class="line">    <span class="keyword">assert</span> model.output_shape == (<span class="literal">None</span>, <span class="number">28</span>, <span class="number">28</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> model</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">make_discriminator_model</span>():</span></span><br><span class="line">    model = tf.keras.Sequential()</span><br><span class="line">    model.add(layers.Conv2D(<span class="number">64</span>, (<span class="number">5</span>, <span class="number">5</span>), strides=(<span class="number">2</span>, <span class="number">2</span>), padding=<span class="string">&#x27;same&#x27;</span>,input_shape=[<span class="number">28</span>, <span class="number">28</span>, <span class="number">1</span>]))</span><br><span class="line">    model.add(layers.LeakyReLU())</span><br><span class="line">    model.add(layers.Dropout(<span class="number">0.3</span>))</span><br><span class="line"></span><br><span class="line">    model.add(layers.Conv2D(<span class="number">128</span>, (<span class="number">5</span>, <span class="number">5</span>), strides=(<span class="number">2</span>, <span class="number">2</span>), padding=<span class="string">&#x27;same&#x27;</span>))</span><br><span class="line">    model.add(layers.LeakyReLU())</span><br><span class="line">    model.add(layers.Dropout(<span class="number">0.3</span>))</span><br><span class="line"></span><br><span class="line">    model.add(layers.Flatten())</span><br><span class="line">    model.add(layers.Dense(<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> model</span><br><span class="line"></span><br><span class="line">(train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()</span><br><span class="line"></span><br><span class="line">train_images = train_images.reshape(train_images.shape[<span class="number">0</span>], <span class="number">28</span>, <span class="number">28</span>, <span class="number">1</span>).astype(<span class="string">&#x27;float32&#x27;</span>)</span><br><span class="line">train_images = (train_images - <span class="number">127.5</span>) / <span class="number">127.5</span> <span class="comment"># 将图片标准化到 [-1, 1] 区间内</span></span><br><span class="line"></span><br><span class="line">BUFFER_SIZE = <span class="number">60000</span></span><br><span class="line">BATCH_SIZE = <span class="number">256</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 批量化和打乱数据</span></span><br><span class="line">train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用（尚未训练的）生成器创建一张图片。</span></span><br><span class="line">generator = make_generator_model()</span><br><span class="line"></span><br><span class="line">noise = tf.random.normal([<span class="number">1</span>, <span class="number">100</span>])</span><br><span class="line">generated_image = generator(noise, training=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">plt.imshow(generated_image[<span class="number">0</span>, :, :, <span class="number">0</span>], cmap=<span class="string">&#x27;gray&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用（尚未训练的）判别器来对图片的真伪进行判断。模型将被训练为为真实图片输出正值，为伪造图片输出负值。</span></span><br><span class="line">discriminator = make_discriminator_model()</span><br><span class="line">decision = discriminator(generated_image)</span><br><span class="line"><span class="built_in">print</span>(decision)</span><br><span class="line"><span class="comment"># 该方法量化判别器从判断真伪图片的能力。它将判别器对真实图片的预测值与值全为 1 的数组进行对比，将判别器对伪造（生成的）图片的预测值与值全为 0 的数组进行对比。</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">discriminator_loss</span>(<span class="params">real_output, fake_output</span>):</span></span><br><span class="line">    real_loss = cross_entropy(tf.ones_like(real_output), real_output)</span><br><span class="line">    fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)</span><br><span class="line">    total_loss = real_loss + fake_loss</span><br><span class="line">    <span class="keyword">return</span> total_loss</span><br><span class="line"><span class="comment"># 该方法返回计算交叉熵损失的辅助函数</span></span><br><span class="line">cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">generator_loss</span>(<span class="params">fake_output</span>):</span></span><br><span class="line">    <span class="keyword">return</span> cross_entropy(tf.ones_like(fake_output), fake_output)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 由于我们需要分别训练两个网络，判别器和生成器的优化器是不同的。</span></span><br><span class="line">generator_optimizer = tf.keras.optimizers.Adam(<span class="number">1e-4</span>)</span><br><span class="line">discriminator_optimizer = tf.keras.optimizers.Adam(<span class="number">1e-4</span>)</span><br><span class="line"></span><br><span class="line">checkpoint_dir = <span class="string">&#x27;./training_checkpoints&#x27;</span></span><br><span class="line">checkpoint_prefix = os.path.join(checkpoint_dir, <span class="string">&quot;ckpt&quot;</span>)</span><br><span class="line">checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,</span><br><span class="line">                                 discriminator_optimizer=discriminator_optimizer,</span><br><span class="line">                                 generator=generator,</span><br><span class="line">                                 discriminator=discriminator)</span><br><span class="line"></span><br><span class="line">EPOCHS = <span class="number">50</span></span><br><span class="line">noise_dim = <span class="number">100</span></span><br><span class="line">num_examples_to_generate = <span class="number">16</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 我们将重复使用该种子（因此在动画 GIF 中更容易可视化进度）</span></span><br><span class="line">seed = tf.random.normal([num_examples_to_generate, noise_dim])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 训练循环在生成器接收到一个随机种子作为输入时开始。该种子用于生产一张图片。判别器随后被用于区分真实图片（选自训练集）和伪造图片（由生成器生成）。针对这里的每一个模型都计算损失函数，并且计算梯度用于更新生成器与判别器。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 注意 `tf.function` 的使用</span></span><br><span class="line"><span class="comment"># 该注解使函数被“编译”</span></span><br><span class="line"><span class="meta">@tf.function</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train_step</span>(<span class="params">images</span>):</span></span><br><span class="line">    noise = tf.random.normal([BATCH_SIZE, noise_dim])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> gen_tape, tf.GradientTape() <span class="keyword">as</span> disc_tape:</span><br><span class="line">      generated_images = generator(noise, training=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">      real_output = discriminator(images, training=<span class="literal">True</span>)</span><br><span class="line">      fake_output = discriminator(generated_images, training=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">      gen_loss = generator_loss(fake_output)</span><br><span class="line">      disc_loss = discriminator_loss(real_output, fake_output)</span><br><span class="line"></span><br><span class="line">    gradients_of_generator = gen_tape.gradient(gen_loss, generator.trainable_variables)</span><br><span class="line">    gradients_of_discriminator = disc_tape.gradient(disc_loss, discriminator.trainable_variables)</span><br><span class="line"></span><br><span class="line">    generator_optimizer.apply_gradients(<span class="built_in">zip</span>(gradients_of_generator, generator.trainable_variables))</span><br><span class="line">    discriminator_optimizer.apply_gradients(<span class="built_in">zip</span>(gradients_of_discriminator, discriminator.trainable_variables))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span>(<span class="params">dataset, epochs</span>):</span></span><br><span class="line">  <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(epochs):</span><br><span class="line">    start = time.time()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> image_batch <span class="keyword">in</span> dataset:</span><br><span class="line">      train_step(image_batch)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 继续进行时为 GIF 生成图像</span></span><br><span class="line">    display.clear_output(wait=<span class="literal">True</span>)</span><br><span class="line">    generate_and_save_images(generator,epoch + <span class="number">1</span>,seed)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 每 15 个 epoch 保存一次模型</span></span><br><span class="line">    <span class="keyword">if</span> (epoch + <span class="number">1</span>) % <span class="number">15</span> == <span class="number">0</span>:</span><br><span class="line">      checkpoint.save(file_prefix = checkpoint_prefix)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span> (<span class="string">&#x27;Time for epoch &#123;&#125; is &#123;&#125; sec&#x27;</span>.<span class="built_in">format</span>(epoch + <span class="number">1</span>, time.time()-start))</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 最后一个 epoch 结束后生成图片</span></span><br><span class="line">  display.clear_output(wait=<span class="literal">True</span>)</span><br><span class="line">  generate_and_save_images(generator,epochs,seed)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">generate_and_save_images</span>(<span class="params">model, epoch, test_input</span>):</span></span><br><span class="line">  <span class="comment"># 注意 training` 设定为 False</span></span><br><span class="line">  <span class="comment"># 因此，所有层都在推理模式下运行（batchnorm）。</span></span><br><span class="line">  predictions = model(test_input, training=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">  fig = plt.figure(figsize=(<span class="number">4</span>,<span class="number">4</span>))</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(predictions.shape[<span class="number">0</span>]):</span><br><span class="line">      plt.subplot(<span class="number">4</span>, <span class="number">4</span>, i+<span class="number">1</span>)</span><br><span class="line">      plt.imshow(predictions[i, :, :, <span class="number">0</span>] * <span class="number">127.5</span> + <span class="number">127.5</span>, cmap=<span class="string">&#x27;gray&#x27;</span>)</span><br><span class="line">      plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line">  plt.savefig(<span class="string">&#x27;image_at_epoch_&#123;:04d&#125;.png&#x27;</span>.<span class="built_in">format</span>(epoch))</span><br><span class="line"></span><br><span class="line">train(train_dataset, EPOCHS)</span><br></pre></td></tr></table></figure>
 
@@ -25,7 +25,7 @@
   <entry>
     <title>Python学习-1</title>
     <url>/2021/07/03/Python%E5%AD%A6%E4%B9%A0-1/</url>
-    <content><![CDATA[<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><ol>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><ol>
 <li>一般格式</li>
 </ol>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># coding:utf-8     </span></span><br><span class="line"><span class="comment"># 一个空行</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="comment"># 两个空行</span></span><br><span class="line"><span class="built_in">print</span>(os.getcwd())</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;hello,world!&#x27;</span>)</span><br><span class="line"><span class="built_in">list</span> = [<span class="string">&quot;a&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="string">&quot;c&quot;</span>]</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">list</span>)</span><br><span class="line"><span class="comment"># 一个空行</span></span><br></pre></td></tr></table></figure>
@@ -131,27 +131,138 @@
       </tags>
   </entry>
   <entry>
-    <title>Hello World</title>
-    <url>/2021/12/26/hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a class="link"   href="https://hexo.io/" >Hexo<i class="fas fa-external-link-alt"></i></a>! This is your very first post. Check <a class="link"   href="https://hexo.io/docs/" >documentation<i class="fas fa-external-link-alt"></i></a> for more info. If you get any problems when using Hexo, you can find the answer in <a class="link"   href="https://hexo.io/docs/troubleshooting.html" >troubleshooting<i class="fas fa-external-link-alt"></i></a> or you can ask me on <a class="link"   href="https://github.com/hexojs/hexo/issues" >GitHub<i class="fas fa-external-link-alt"></i></a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+    <title>Ubuntu20.04+noetic+ORB_SLAM2安装记录</title>
+    <url>/2022/02/21/Ubuntu20-04-noetic-ORB-SLAM2%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="Ubuntu20-04-安装-noetic"><a href="#Ubuntu20-04-安装-noetic" class="headerlink" title="Ubuntu20.04 安装 noetic"></a>Ubuntu20.04 安装 noetic</h2><p>本段教程参考于 <a class="link"   href="https://www.guyuehome.com/12640" >https://www.guyuehome.com/12640<i class="fas fa-external-link-alt"></i></a></p>
+<ol>
+<li>安装过程与ROS官网一致，网络无法连接时可以换个服务器,或使用国内镜像<br> <img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/choose_best_server.png"
+                      alt="选择最快的服务器"
+                ><br> 安装完成后可以跑以下小乌龟的例子看一下是否ok</li>
+</ol>
+<ol start="2">
+<li>安装完成后需要 sudo rosdep init ,提示website may be down ,总之在浏览器中可以打开这个网址，但终端中不能访问到，复制代码，新建文件，手动放到目录/etc/ros/rosdep/sources.list.d下</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo rosdep init</span><br><span class="line">rosdep update</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a class="link"   href="https://hexo.io/docs/writing.html" >Writing<i class="fas fa-external-link-alt"></i></a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/raw_githubcontent_rosdep_init.png"
+                     
+                ></p>
+<pre><code><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo mkdir -p /etc/ros/rosdep/sources.list.d</span><br><span class="line"><span class="built_in">cd</span> /etc/ros/rosdep/sources.list.d</span><br><span class="line">sudo gedit 20-default.list</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a class="link"   href="https://hexo.io/docs/server.html" >Server<i class="fas fa-external-link-alt"></i></a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># os-specific listings first</span></span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/osx-homebrew.yaml osx</span><br><span class="line"></span><br><span class="line"><span class="comment"># generic</span></span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/base.yaml</span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/python.yaml</span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/ruby.yaml</span><br><span class="line">gbpdistro https://raw.githubusercontent.com/ros/rosdistro/master/releases/fuerte.yaml fuerte</span><br><span class="line"></span><br><span class="line"><span class="comment"># newer distributions (Groovy, Hydro, ...) must not be listed anymore, they are being fetched from the rosdistro index.yaml instead</span></span><br></pre></td></tr></table></figure>
+之后执行rosdep update
+若是githubusercontent不能访问，可以将其改为github
+</code></pre>
+<h2 id="创建ROS工作空间"><a href="#创建ROS工作空间" class="headerlink" title="创建ROS工作空间"></a>创建ROS工作空间</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mkdir -p ~/catkin_ws/src</span><br><span class="line"><span class="built_in">cd</span> ~/catkin_ws</span><br><span class="line">catkin_make</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在.bashrc 中添加</span></span><br><span class="line"><span class="built_in">source</span> /opt/ros/noetic/setup.bash</span><br><span class="line"><span class="built_in">source</span> ~/catkin_ws/devel/setup.bash</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a class="link"   href="https://hexo.io/docs/generating.html" >Generating<i class="fas fa-external-link-alt"></i></a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a class="link"   href="https://hexo.io/docs/one-command-deployment.html" >Deployment<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="编译usb-cam"><a href="#编译usb-cam" class="headerlink" title="编译usb_cam"></a>编译usb_cam</h2><p>[usb_cam下载链接] (<a class="link"   href="https://github.com/bosch-ros-pkg/usb_cam" >https://github.com/bosch-ros-pkg/usb_cam<i class="fas fa-external-link-alt"></i></a>)<br>在ros工作空间 src目录下进行</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/catkin_ws/src</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/ros-drivers/usb_cam.git</span><br><span class="line"><span class="built_in">cd</span> usb_cam</span><br><span class="line">mkdir build</span><br><span class="line"><span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+
+<h2 id="编译安装ORB-SLAM2"><a href="#编译安装ORB-SLAM2" class="headerlink" title="编译安装ORB_SLAM2"></a>编译安装ORB_SLAM2</h2><p>本段教程参考自( <a class="link"   href="https://www.cnblogs.com/MingruiYu/p/12286752.html" >https://www.cnblogs.com/MingruiYu/p/12286752.html<i class="fas fa-external-link-alt"></i></a> )</p>
+<ol>
+<li><p>Pangolin</p>
+<p> 安装教程见github <a class="link"   href="https://github.com/stevenlovegrove/Pangolin" >https://github.com/stevenlovegrove/Pangolin<i class="fas fa-external-link-alt"></i></a><br> 实测最新的pangolin需求c17过新 安装旧版V0.5就行</p>
+</li>
+<li><p>opencv</p>
+<p> 到opencv官网 <a class="link"   href="https://opencv.org/releases" >https://opencv.org/releases<i class="fas fa-external-link-alt"></i></a> 下载源码自行编译安装<br> 下载后解压</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/opencv</span><br><span class="line">mkdir build	 <span class="comment"># 创建工程编译所需文件夹</span></span><br><span class="line"><span class="built_in">cd</span> build</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#注意，后面的两个点千万不能省，代表了上级目录</span></span><br><span class="line">cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/<span class="built_in">local</span> ..</span><br><span class="line"></span><br><span class="line">make -j10     <span class="comment"># 多线程执行make任务</span></span><br><span class="line">sudo make install</span><br><span class="line"></span><br><span class="line">pkg-config --modversion opencv	<span class="comment">#查看安装版本</span></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li><p>Eigen</p>
+<p> 其下载和安装教程可见：(<a class="link"   href="http://eigen.tuxfamily.org).在ubuntu中,可以直接使用/" >http://eigen.tuxfamily.org)。在ubuntu中，可以直接使用<i class="fas fa-external-link-alt"></i></a> sudo apt-get install libeigen3-dev进行安装</p>
+<p> 注：关于Eigen3的安装路径，如果出现程序include不到Eigen3的情况，可以参考 (<a class="link"   href="https://www.cnblogs.com/newneul/p/8256803.html" >https://www.cnblogs.com/newneul/p/8256803.html<i class="fas fa-external-link-alt"></i></a>) 对Eigen3的位置进行调整。</p>
+</li>
+<li><p>安装ORB_SLAM2</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 在 /catkin_ws/src 目录下</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/raulmur/ORB_SLAM2.git</span><br><span class="line"><span class="built_in">cd</span> ORB_SLAM2</span><br><span class="line">chmod +x build.sh</span><br><span class="line">./build.sh</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="把摄像头数据发布到topic"><a href="#把摄像头数据发布到topic" class="headerlink" title="把摄像头数据发布到topic"></a>把摄像头数据发布到topic</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/catkin_ws</span><br><span class="line"><span class="comment"># 若是提示没有usb_cam什么的 运行 source /devel/setup.bash 重试</span></span><br><span class="line">roslaunch usb_cam usb_cam-test.launch</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改ros-mono-cc"><a href="#修改ros-mono-cc" class="headerlink" title="修改ros_mono.cc"></a>修改ros_mono.cc</h2><p>进入～/catkin_ws/src/ORB_SLAM2/Examples/ROS/ORB_SLAM2/src<br>打开 ros_mono.cc 把程序里面的topic改为 /usb_cam/image_raw<br>具体还要查看自己的rviz（即上一步打开的摄像头窗口的标题）<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ros_mono_usb_cam.png"
+                     
+                ></p>
+<h2 id="编译ros下的ORB-SLAM2"><a href="#编译ros下的ORB-SLAM2" class="headerlink" title="编译ros下的ORB_SLAM2"></a>编译ros下的ORB_SLAM2</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="variable">$ROS_PACKAGE_PATH</span></span><br><span class="line"><span class="comment"># 使用echo来检查ros package path 是否配置</span></span><br><span class="line"><span class="comment"># 在~/.bashrc 中添加 </span></span><br><span class="line"><span class="built_in">export</span> ROS_PACKAGE_PATH=<span class="variable">$&#123;ROS_PACKAGE_PATH&#125;</span>:/home/自己的用户名/catkin_ws/src/ORB_SLAM2/Examples/ROS</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#  然后进入～/catkin_ws/src/ORB_SLAM</span></span><br><span class="line">chmod +x build_ros.sh</span><br><span class="line">./build_ros.sh</span><br></pre></td></tr></table></figure>
+
+<h2 id="启动mono"><a href="#启动mono" class="headerlink" title="启动mono"></a>启动mono</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 在目录~/catkin_ws/src/ORB_SLAM2下</span></span><br><span class="line">rosrun ORB_SLAM2 Mono /home/xmcchv/catkin_ws/src/ORB_SLAM2/Vocabulary/ORBvoc.txt /home/xmcchv/catkin_ws/src/ORB_SLAM2/myUsb_cam.yaml</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>有两个参数，第二个参数是相机参数文件，根据自己的相机参数修改。<br>启动后正常如图<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ROS_ORB_SLAM2.png"
+                     
+                ></p>
+<h2 id="相机标定-获取参数"><a href="#相机标定-获取参数" class="headerlink" title="相机标定 获取参数"></a>相机标定 获取参数</h2><p>本段教程参考于( <a class="link"   href="https://blog.csdn.net/yx868yx/article/details/115366655" >https://blog.csdn.net/yx868yx/article/details/115366655<i class="fas fa-external-link-alt"></i></a> )<br>使用棋盘格 </p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/qipange.png"
+                     
+                ></p>
+<ol>
+<li><p>下载ros的相机标定包</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rosdep install camera_calibration</span><br><span class="line">rosmake camera_calibration</span><br></pre></td></tr></table></figure></li>
+<li><p>启动usb_cam</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 若失败 source一下 devel/setup.bash</span></span><br><span class="line">roslaunch usb_cam usb_cam-test.launch</span><br></pre></td></tr></table></figure></li>
+<li><p>启动标定程序</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.025 image:=/usb_cam/image_raw camera:=/usb_cam</span><br></pre></td></tr></table></figure>
+<p> 其中image:= 和camera:=后的内容需要根据自己电脑摄像头的话题和节点来修改，可以通过rqt_graph来查看。比如有的会是image:=/camera/image_raw camera:=/camera</p>
+</li>
+</ol>
+<pre><code>标定界面出现后，按照x（左右）、y（上下）、size（前后）、skew（倾斜）等方式移动棋盘，直到x,y,size,skew的进度条都变成绿色位置．
+
+此时可以按下CALIBRATE按钮，点击一下后，界面会卡住,此时不要做任何操作，直到运行标定程序的终端输出标定的结果
+有标定结果出来后，点击标定界面的SAVE按钮，再点commit按钮，标定结果保存在/tmp/calibrationdata.tar.gz这个压缩包中，到这里彩色相机的标定就结束了
+关闭标定程序,完成后Commit，在终端后会有标定结果yaml文件地址．默认一般为/home/用户名/.ros/camera_info/head_camera.yaml
+
+![](/images/cam_yaml.png)
+</code></pre>
+<ol start="4">
+<li><p>修改相机名称</p>
+<p> 如图<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/usb_cam-test_launch.png"
+                     
+                ><br> 修改/dev/video0 和 usb_cam<br> 与其他地方保持一致</p>
+</li>
+</ol>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p>总体安装教程</p>
+<p><a class="link"   href="https://blog.csdn.net/xmy306538517/article/details/59501718" >https://blog.csdn.net/xmy306538517/article/details/59501718<i class="fas fa-external-link-alt"></i></a><br><a class="link"   href="http://www.liuxiao.org/2016/07/ubuntu-orb-slam2-%E5%9C%A8-ros-%E4%B8%8A%E7%BC%96%E8%AF%91%E8%B0%83%E8%AF%95/" >http://www.liuxiao.org/2016/07/ubuntu-orb-slam2-%E5%9C%A8-ros-%E4%B8%8A%E7%BC%96%E8%AF%91%E8%B0%83%E8%AF%95/<i class="fas fa-external-link-alt"></i></a><br><a class="link"   href="https://blog.csdn.net/qinqinxiansheng/article/details/107079265" >https://blog.csdn.net/qinqinxiansheng/article/details/107079265<i class="fas fa-external-link-alt"></i></a></p>
+<p>编译build_ros.sh时报错<br><a class="link"   href="https://blog.csdn.net/weixin_41111088/article/details/89377368" >https://blog.csdn.net/weixin_41111088/article/details/89377368<i class="fas fa-external-link-alt"></i></a></p>
+<p>ORB_SLAM2编译build_ros.sh时报错<br><a class="link"   href="https://blog.csdn.net/chengmo123/article/details/104906376" >https://blog.csdn.net/chengmo123/article/details/104906376<i class="fas fa-external-link-alt"></i></a></p>
+<p>相机标定<br><a class="link"   href="https://blog.csdn.net/yx868yx/article/details/115366655" >https://blog.csdn.net/yx868yx/article/details/115366655<i class="fas fa-external-link-alt"></i></a></p>
+<p>ORB_SLAM2数据集<br><a class="link"   href="https://vision.in.tum.de/data/datasets/rgbd-dataset/download#freiburg2_pioneer_360" >https://vision.in.tum.de/data/datasets/rgbd-dataset/download#freiburg2_pioneer_360<i class="fas fa-external-link-alt"></i></a></p>
+<p>ORB_SLAM2编译build.sh 出错<br><a class="link"   href="https://blog.csdn.net/lixujie666/article/details/90023059" >https://blog.csdn.net/lixujie666/article/details/90023059<i class="fas fa-external-link-alt"></i></a></p>
+<p>小乌龟<br><a class="link"   href="https://blog.csdn.net/qq_21835111/article/details/99694286" >https://blog.csdn.net/qq_21835111/article/details/99694286<i class="fas fa-external-link-alt"></i></a></p>
 ]]></content>
+      <tags>
+        <tag>ROS</tag>
+        <tag>ORB_SLAM2</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>cmake编译</title>
+    <url>/2022/02/17/cmake%E7%BC%96%E8%AF%91/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="CMakeList-txt"><a href="#CMakeList-txt" class="headerlink" title="CMakeList.txt"></a>CMakeList.txt</h2><p>记录下CMakeList中包含的内容</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 声明cmake的最低版本</span><br><span class="line">cmake_minimum_version( VERSION 2.0 )</span><br><span class="line"></span><br><span class="line"># 声明一个cmake工程</span><br><span class="line">project( HelloSLAM )</span><br><span class="line"></span><br><span class="line"># 添加一个可执行程序</span><br><span class="line"># 语法 add_executable( 程序名 源代码文件 )</span><br><span class="line">add_executable( helloSLAM helloSLAM.cpp )</span><br><span class="line"></span><br><span class="line"># 编写库</span><br><span class="line"># 静态库 .a 静态库每次被调用都会生成一个副本</span><br><span class="line">add_library( hello libHelloSLAM.cpp )</span><br><span class="line"></span><br><span class="line"># 共享库 .so 共享库只有一个副本</span><br><span class="line">add_library( hello_shared SHARED libHelloSLAM.cpp )</span><br><span class="line"></span><br><span class="line"># 使用 .so 时 还需要定义一个头文件 提供了共享库的函数 以供调用</span><br><span class="line"># 链接 </span><br><span class="line">target_link_libraries( useHello hello_shared )</span><br><span class="line"></span><br><span class="line"># 编译</span><br><span class="line"># 在源文件同级目录下 mkdir build &amp;&amp; cd build &amp;&amp; cmake ..</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+]]></content>
+      <tags>
+        <tag>-cmake</tag>
+      </tags>
   </entry>
   <entry>
     <title>服装图像分类</title>
     <url>/2021/07/05/imgidentity/</url>
-    <content><![CDATA[<h2 id="服装图像分类"><a href="#服装图像分类" class="headerlink" title="服装图像分类"></a>服装图像分类</h2><p>将训练一个神经网络模型，对运动鞋和衬衫等服装图像进行分类。即使您不理解所有细节也没关系；这只是对完整 TensorFlow 程序的快速概述，详细内容会在您实际操作的同时进行介绍。</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="服装图像分类"><a href="#服装图像分类" class="headerlink" title="服装图像分类"></a>服装图像分类</h2><p>将训练一个神经网络模型，对运动鞋和衬衫等服装图像进行分类。即使您不理解所有细节也没关系；这只是对完整 TensorFlow 程序的快速概述，详细内容会在您实际操作的同时进行介绍。</p>
 <p>使用 Fashion MNIST 数据集，该数据集包含 10 个类别的 70,000 个灰度图像。这些图像以低分辨率（28x28 像素）展示了单件衣物，如下所示：<br><img  
                      lazyload
                      src="/images/loading.svg"
@@ -184,7 +295,7 @@
   <entry>
     <title>python学习-2</title>
     <url>/2021/07/03/python%E5%AD%A6%E4%B9%A0-2/</url>
-    <content><![CDATA[<h2 id="日期和时间"><a href="#日期和时间" class="headerlink" title="日期和时间"></a>日期和时间</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> time  <span class="comment"># 引入time模块</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 时间戳</span></span><br><span class="line">ticks = time.time()</span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;当前时间戳为:&quot;</span>, ticks</span><br><span class="line">当前时间戳为: <span class="number">1625322855.8431683</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 时间</span></span><br><span class="line">localtime = time.localtime(time.time())</span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;本地时间为 :&quot;</span>, localtime</span><br><span class="line"><span class="comment"># time.struct_time(tm_year=2021, tm_mon=7, tm_mday=3, tm_hour=22, </span></span><br><span class="line"><span class="comment"># tm_min=33, tm_sec=47, tm_wday=5, tm_yday=184, tm_isdst=0)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 格式化时间</span></span><br><span class="line"><span class="comment"># 格式化成2021-07-03 22:44:36形式</span></span><br><span class="line"><span class="built_in">print</span>(time.strftime(<span class="string">&quot;%Y-%m-%d %H:%M:%S&quot;</span>, time.localtime())) </span><br><span class="line"> </span><br><span class="line"><span class="comment"># 格式化成Sat Jul 03 22:44:36 2021形式</span></span><br><span class="line"><span class="built_in">print</span>(time.strftime(<span class="string">&quot;%a %b %d %H:%M:%S %Y&quot;</span>, time.localtime()))</span><br><span class="line">  </span><br><span class="line"><span class="comment"># 将格式字符串转换为时间戳</span></span><br><span class="line">a = <span class="string">&quot;Sat Jul 03 22:44:36 2021&quot;</span></span><br><span class="line"><span class="built_in">print</span>(time.mktime(time.strptime(a,<span class="string">&quot;%a %b %d %H:%M:%S %Y&quot;</span>)))</span><br><span class="line"></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">2021-07-03 22:45:30</span></span><br><span class="line"><span class="string">Sat Jul 03 22:45:30 2021</span></span><br><span class="line"><span class="string">1625323476.0</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br></pre></td></tr></table></figure>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="日期和时间"><a href="#日期和时间" class="headerlink" title="日期和时间"></a>日期和时间</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> time  <span class="comment"># 引入time模块</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 时间戳</span></span><br><span class="line">ticks = time.time()</span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;当前时间戳为:&quot;</span>, ticks</span><br><span class="line">当前时间戳为: <span class="number">1625322855.8431683</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 时间</span></span><br><span class="line">localtime = time.localtime(time.time())</span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;本地时间为 :&quot;</span>, localtime</span><br><span class="line"><span class="comment"># time.struct_time(tm_year=2021, tm_mon=7, tm_mday=3, tm_hour=22, </span></span><br><span class="line"><span class="comment"># tm_min=33, tm_sec=47, tm_wday=5, tm_yday=184, tm_isdst=0)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 格式化时间</span></span><br><span class="line"><span class="comment"># 格式化成2021-07-03 22:44:36形式</span></span><br><span class="line"><span class="built_in">print</span>(time.strftime(<span class="string">&quot;%Y-%m-%d %H:%M:%S&quot;</span>, time.localtime())) </span><br><span class="line"> </span><br><span class="line"><span class="comment"># 格式化成Sat Jul 03 22:44:36 2021形式</span></span><br><span class="line"><span class="built_in">print</span>(time.strftime(<span class="string">&quot;%a %b %d %H:%M:%S %Y&quot;</span>, time.localtime()))</span><br><span class="line">  </span><br><span class="line"><span class="comment"># 将格式字符串转换为时间戳</span></span><br><span class="line">a = <span class="string">&quot;Sat Jul 03 22:44:36 2021&quot;</span></span><br><span class="line"><span class="built_in">print</span>(time.mktime(time.strptime(a,<span class="string">&quot;%a %b %d %H:%M:%S %Y&quot;</span>)))</span><br><span class="line"></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">2021-07-03 22:45:30</span></span><br><span class="line"><span class="string">Sat Jul 03 22:45:30 2021</span></span><br><span class="line"><span class="string">1625323476.0</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br></pre></td></tr></table></figure>
 
 
 <h2 id="日历"><a href="#日历" class="headerlink" title="日历"></a>日历</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> calendar</span><br><span class="line">cal = calendar.month(<span class="number">2021</span>, <span class="number">7</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;以下输出2021年7月份的日历:\n&quot;</span>,cal)</span><br><span class="line"></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">以下输出2021年7月份的日历:</span></span><br><span class="line"><span class="string">      July 2021</span></span><br><span class="line"><span class="string">Mo Tu We Th Fr Sa Su</span></span><br><span class="line"><span class="string">          1  2  3  4</span></span><br><span class="line"><span class="string"> 5  6  7  8  9 10 11</span></span><br><span class="line"><span class="string">12 13 14 15 16 17 18</span></span><br><span class="line"><span class="string">19 20 21 22 23 24 25</span></span><br><span class="line"><span class="string">26 27 28 29 30 31</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br></pre></td></tr></table></figure>
@@ -216,7 +327,7 @@
   <entry>
     <title>python学习-3</title>
     <url>/2021/07/05/python%E5%AD%A6%E4%B9%A0-3/</url>
-    <content><![CDATA[<h2 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h2><p>Python中列表是可变的，这是它区别于字符串和元组的最重要的特点，一句话概括即：列表可以修改，而字符串和元组不能。</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h2><p>Python中列表是可变的，这是它区别于字符串和元组的最重要的特点，一句话概括即：列表可以修改，而字符串和元组不能。</p>
 <p>以下是 Python 中列表的方法：</p>
 <table>
 <thead>
@@ -339,7 +450,7 @@
   <entry>
     <title>python学习-4</title>
     <url>/2021/07/06/python%E5%AD%A6%E4%B9%A0-4/</url>
-    <content><![CDATA[<h2 id="面向对象"><a href="#面向对象" class="headerlink" title="面向对象"></a>面向对象</h2><p>面向对象技术简介</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="面向对象"><a href="#面向对象" class="headerlink" title="面向对象"></a>面向对象</h2><p>面向对象技术简介</p>
 <ul>
 <li>类(Class): 用来描述具有相同的属性和方法的对象的集合。它定义了该集合中每个对象所共有的属性和方法。对象是类的实例。</li>
 <li>类变量：类变量在整个实例化的对象中是公用的。类变量定义在类中且在函数体之外。类变量通常不作为实例变量使用。</li>
@@ -459,7 +570,7 @@
   <entry>
     <title>python学习-5</title>
     <url>/2021/07/07/python%E5%AD%A6%E4%B9%A0-5/</url>
-    <content><![CDATA[<h2 id="CGI编程"><a href="#CGI编程" class="headerlink" title="CGI编程"></a>CGI编程</h2><p>CGI(Common Gateway Interface)，通用网关接口，它是一段程序，运行在服务器上如：HTTP 服务器，提供同客户端 HTML 页面的接口。<br><img  
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="CGI编程"><a href="#CGI编程" class="headerlink" title="CGI编程"></a>CGI编程</h2><p>CGI(Common Gateway Interface)，通用网关接口，它是一段程序，运行在服务器上如：HTTP 服务器，提供同客户端 HTML 页面的接口。<br><img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/images/Cgi01.png"
@@ -490,7 +601,7 @@
   <entry>
     <title>python学习-6</title>
     <url>/2021/07/07/python%E5%AD%A6%E4%B9%A0-6/</url>
-    <content><![CDATA[<h2 id="Socket网络编程"><a href="#Socket网络编程" class="headerlink" title="Socket网络编程"></a>Socket网络编程</h2><h4 id="1-socket-函数"><a href="#1-socket-函数" class="headerlink" title="1. socket()函数"></a>1. socket()函数</h4><p>Python 中，我们用 socket（）函数来创建套接字，语法格式如下：<br><code>socket.socket([family[, type[, proto]]])</code><br>参数</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="Socket网络编程"><a href="#Socket网络编程" class="headerlink" title="Socket网络编程"></a>Socket网络编程</h2><h4 id="1-socket-函数"><a href="#1-socket-函数" class="headerlink" title="1. socket()函数"></a>1. socket()函数</h4><p>Python 中，我们用 socket（）函数来创建套接字，语法格式如下：<br><code>socket.socket([family[, type[, proto]]])</code><br>参数</p>
 <ul>
 <li>family: 套接字家族可以使 AF_UNIX 或者 AF_INET。</li>
 <li>type: 套接字类型可以根据是面向连接的还是非连接分为 SOCK_STREAM 或 SOCK_DGRAM。</li>
@@ -604,7 +715,7 @@
   <entry>
     <title>tensor基础</title>
     <url>/2021/07/24/tensor%E5%9F%BA%E7%A1%80/</url>
-    <content><![CDATA[<h2 id="张量的创建与常用方法"><a href="#张量的创建与常用方法" class="headerlink" title="张量的创建与常用方法"></a>张量的创建与常用方法</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch</span><br></pre></td></tr></table></figure>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="张量的创建与常用方法"><a href="#张量的创建与常用方法" class="headerlink" title="张量的创建与常用方法"></a>张量的创建与常用方法</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch</span><br></pre></td></tr></table></figure>
 
 
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a1=np.array([[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>],[<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>]])</span><br><span class="line">a1</span><br></pre></td></tr></table></figure>
@@ -1446,7 +1557,7 @@ tensor([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10])
   <entry>
     <title>图像分类-识别花朵</title>
     <url>/2021/07/05/%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB-%E8%AF%86%E5%88%AB%E8%8A%B1%E6%9C%B5/</url>
-    <content><![CDATA[<h2 id="图像分类-花朵识别"><a href="#图像分类-花朵识别" class="headerlink" title="图像分类-花朵识别"></a>图像分类-花朵识别</h2><p>使用TensorFlow官网的image classification 实例</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="图像分类-花朵识别"><a href="#图像分类-花朵识别" class="headerlink" title="图像分类-花朵识别"></a>图像分类-花朵识别</h2><p>使用TensorFlow官网的image classification 实例</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> PIL</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> tensorflow <span class="keyword">import</span> keras</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras <span class="keyword">import</span> layers</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.models <span class="keyword">import</span> Sequential</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> pathlib</span><br><span class="line">dataset_url = <span class="string">&quot;https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz&quot;</span></span><br><span class="line">data_dir = tf.keras.utils.get_file(<span class="string">&#x27;flower_photos&#x27;</span>, origin=dataset_url, untar=<span class="literal">True</span>)</span><br><span class="line">data_dir = pathlib.Path(data_dir)</span><br><span class="line"></span><br><span class="line">image_count = <span class="built_in">len</span>(<span class="built_in">list</span>(data_dir.glob(<span class="string">&#x27;*/*.jpg&#x27;</span>)))</span><br><span class="line"><span class="built_in">print</span>(image_count)</span><br><span class="line"></span><br><span class="line">roses = <span class="built_in">list</span>(data_dir.glob(<span class="string">&#x27;roses/*&#x27;</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a dataset</span></span><br><span class="line">batch_size = <span class="number">32</span></span><br><span class="line">img_height = <span class="number">180</span></span><br><span class="line">img_width = <span class="number">180</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># It&#x27;s good practice to use a validation split when developing your model. Let&#x27;s use 80% of the images for training, and 20% for validation.</span></span><br><span class="line">train_ds = tf.keras.preprocessing.image_dataset_from_directory(</span><br><span class="line">  data_dir,</span><br><span class="line">  validation_split=<span class="number">0.2</span>,</span><br><span class="line">  subset=<span class="string">&quot;training&quot;</span>,</span><br><span class="line">  seed=<span class="number">123</span>,</span><br><span class="line">  image_size=(img_height, img_width),</span><br><span class="line">  batch_size=batch_size)</span><br><span class="line"></span><br><span class="line">val_ds = tf.keras.preprocessing.image_dataset_from_directory(</span><br><span class="line">  data_dir,</span><br><span class="line">  validation_split=<span class="number">0.2</span>,</span><br><span class="line">  subset=<span class="string">&quot;validation&quot;</span>,</span><br><span class="line">  seed=<span class="number">123</span>,</span><br><span class="line">  image_size=(img_height, img_width),</span><br><span class="line">  batch_size=batch_size)</span><br><span class="line"></span><br><span class="line"><span class="comment"># You can find the class names in the class_names attribute on these datasets. These correspond to the directory names in alphabetical order.</span></span><br><span class="line">class_names = train_ds.class_names</span><br><span class="line"><span class="built_in">print</span>(class_names)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Visualize the data</span></span><br><span class="line">plt.figure(figsize=(<span class="number">10</span>, <span class="number">10</span>))</span><br><span class="line"><span class="keyword">for</span> images, labels <span class="keyword">in</span> train_ds.take(<span class="number">1</span>):</span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">9</span>):</span><br><span class="line">    ax = plt.subplot(<span class="number">3</span>, <span class="number">3</span>, i + <span class="number">1</span>)</span><br><span class="line">    plt.imshow(images[i].numpy().astype(<span class="string">&quot;uint8&quot;</span>))</span><br><span class="line">    plt.title(class_names[labels[i]])</span><br><span class="line">    plt.axis(<span class="string">&quot;off&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> image_batch, labels_batch <span class="keyword">in</span> train_ds:</span><br><span class="line">  <span class="built_in">print</span>(image_batch.shape)</span><br><span class="line">  <span class="built_in">print</span>(labels_batch.shape)</span><br><span class="line">  <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">AUTOTUNE = tf.data.AUTOTUNE</span><br><span class="line"></span><br><span class="line">train_ds = train_ds.cache().shuffle(<span class="number">1000</span>).prefetch(buffer_size=AUTOTUNE)</span><br><span class="line">val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)</span><br><span class="line"></span><br><span class="line">normalization_layer = layers.experimental.preprocessing.Rescaling(<span class="number">1.</span>/<span class="number">255</span>)</span><br><span class="line"></span><br><span class="line">normalized_ds = train_ds.<span class="built_in">map</span>(<span class="keyword">lambda</span> x, y: (normalization_layer(x), y))</span><br><span class="line">image_batch, labels_batch = <span class="built_in">next</span>(<span class="built_in">iter</span>(normalized_ds))</span><br><span class="line">first_image = image_batch[<span class="number">0</span>]</span><br><span class="line"><span class="comment"># Notice the pixels values are now in `[0,1]`.</span></span><br><span class="line"><span class="built_in">print</span>(np.<span class="built_in">min</span>(first_image), np.<span class="built_in">max</span>(first_image))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Create the model</span></span><br><span class="line"></span><br><span class="line">num_classes = <span class="number">5</span></span><br><span class="line"></span><br><span class="line">model = Sequential([</span><br><span class="line">  layers.experimental.preprocessing.Rescaling(<span class="number">1.</span>/<span class="number">255</span>, input_shape=(img_height, img_width, <span class="number">3</span>)),</span><br><span class="line">  layers.Conv2D(<span class="number">16</span>, <span class="number">3</span>, padding=<span class="string">&#x27;same&#x27;</span>, activation=<span class="string">&#x27;relu&#x27;</span>),</span><br><span class="line">  layers.MaxPooling2D(),</span><br><span class="line">  layers.Conv2D(<span class="number">32</span>, <span class="number">3</span>, padding=<span class="string">&#x27;same&#x27;</span>, activation=<span class="string">&#x27;relu&#x27;</span>),</span><br><span class="line">  layers.MaxPooling2D(),</span><br><span class="line">  layers.Conv2D(<span class="number">64</span>, <span class="number">3</span>, padding=<span class="string">&#x27;same&#x27;</span>, activation=<span class="string">&#x27;relu&#x27;</span>),</span><br><span class="line">  layers.MaxPooling2D(),</span><br><span class="line">  layers.Flatten(),</span><br><span class="line">  layers.Dense(<span class="number">128</span>, activation=<span class="string">&#x27;relu&#x27;</span>),</span><br><span class="line">  layers.Dense(num_classes)</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line"><span class="comment"># compile the model</span></span><br><span class="line">model.<span class="built_in">compile</span>(optimizer=<span class="string">&#x27;adam&#x27;</span>,</span><br><span class="line">              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=<span class="literal">True</span>),</span><br><span class="line">              metrics=[<span class="string">&#x27;accuracy&#x27;</span>])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Model summary</span></span><br><span class="line">model.summary()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">epochs=<span class="number">10</span></span><br><span class="line">history = model.fit(</span><br><span class="line">  train_ds,</span><br><span class="line">  validation_data=val_ds,</span><br><span class="line">  epochs=epochs</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Visualize training results</span></span><br><span class="line">acc = history.history[<span class="string">&#x27;accuracy&#x27;</span>]</span><br><span class="line">val_acc = history.history[<span class="string">&#x27;val_accuracy&#x27;</span>]</span><br><span class="line"></span><br><span class="line">loss = history.history[<span class="string">&#x27;loss&#x27;</span>]</span><br><span class="line">val_loss = history.history[<span class="string">&#x27;val_loss&#x27;</span>]</span><br><span class="line"></span><br><span class="line">epochs_range = <span class="built_in">range</span>(epochs)</span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">8</span>, <span class="number">8</span>))</span><br><span class="line">plt.subplot(<span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>)</span><br><span class="line">plt.plot(epochs_range, acc, label=<span class="string">&#x27;Training Accuracy&#x27;</span>)</span><br><span class="line">plt.plot(epochs_range, val_acc, label=<span class="string">&#x27;Validation Accuracy&#x27;</span>)</span><br><span class="line">plt.legend(loc=<span class="string">&#x27;lower right&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Training and Validation Accuracy&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line">plt.plot(epochs_range, loss, label=<span class="string">&#x27;Training Loss&#x27;</span>)</span><br><span class="line">plt.plot(epochs_range, val_loss, label=<span class="string">&#x27;Validation Loss&#x27;</span>)</span><br><span class="line">plt.legend(loc=<span class="string">&#x27;upper right&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Training and Validation Loss&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">data_augmentation = keras.Sequential(</span><br><span class="line">  [</span><br><span class="line">    layers.experimental.preprocessing.RandomFl(<span class="string">&quot;horizontal&quot;</span>, input_shape=(img_height, img_width,<span class="number">3</span>)),</span><br><span class="line">    layers.experimental.preprocessing.RandomRotation(<span class="number">0.1</span>),</span><br><span class="line">    layers.experimental.preprocessing.RandomZoom(<span class="number">0.1</span>),</span><br><span class="line">  ]</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">10</span>, <span class="number">10</span>))</span><br><span class="line"><span class="keyword">for</span> images, _ <span class="keyword">in</span> train_ds.take(<span class="number">1</span>):</span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">9</span>):</span><br><span class="line">    augmented_images = data_augmentation(images)</span><br><span class="line">    ax = plt.subplot(<span class="number">3</span>, <span class="number">3</span>, i + <span class="number">1</span>)</span><br><span class="line">    plt.imshow(augmented_images[<span class="number">0</span>].numpy().astype(<span class="string">&quot;uint8&quot;</span>))</span><br><span class="line">    plt.axis(<span class="string">&quot;off&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model = Sequential([</span><br><span class="line">  data_augmentation,</span><br><span class="line">  layers.experimental.preprocessing.Rescaling(<span class="number">1.</span>/<span class="number">255</span>),</span><br><span class="line">  layers.Conv2D(<span class="number">16</span>, <span class="number">3</span>, padding=<span class="string">&#x27;same&#x27;</span>, activation=<span class="string">&#x27;relu&#x27;</span>),</span><br><span class="line">  layers.MaxPooling2D(),</span><br><span class="line">  layers.Conv2D(<span class="number">32</span>, <span class="number">3</span>, padding=<span class="string">&#x27;same&#x27;</span>, activation=<span class="string">&#x27;relu&#x27;</span>),</span><br><span class="line">  layers.MaxPooling2D(),</span><br><span class="line">  layers.Conv2D(<span class="number">64</span>, <span class="number">3</span>, padding=<span class="string">&#x27;same&#x27;</span>, activation=<span class="string">&#x27;relu&#x27;</span>),</span><br><span class="line">  layers.MaxPooling2D(),</span><br><span class="line">  layers.Dropout(<span class="number">0.2</span>),</span><br><span class="line">  layers.Flatten(),</span><br><span class="line">  layers.Dense(<span class="number">128</span>, activation=<span class="string">&#x27;relu&#x27;</span>),</span><br><span class="line">  layers.Dense(num_classes)</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model.<span class="built_in">compile</span>(optimizer=<span class="string">&#x27;adam&#x27;</span>,</span><br><span class="line">              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=<span class="literal">True</span>),</span><br><span class="line">              metrics=[<span class="string">&#x27;accuracy&#x27;</span>])</span><br><span class="line"></span><br><span class="line">model.summary()</span><br><span class="line"></span><br><span class="line">epochs = <span class="number">15</span></span><br><span class="line">history = model.fit(</span><br><span class="line">  train_ds,</span><br><span class="line">  validation_data=val_ds,</span><br><span class="line">  epochs=epochs</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">acc = history.history[<span class="string">&#x27;accuracy&#x27;</span>]</span><br><span class="line">val_acc = history.history[<span class="string">&#x27;val_accuracy&#x27;</span>]</span><br><span class="line"></span><br><span class="line">loss = history.history[<span class="string">&#x27;loss&#x27;</span>]</span><br><span class="line">val_loss = history.history[<span class="string">&#x27;val_loss&#x27;</span>]</span><br><span class="line"></span><br><span class="line">epochs_range = <span class="built_in">range</span>(epochs)</span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">8</span>, <span class="number">8</span>))</span><br><span class="line">plt.subplot(<span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>)</span><br><span class="line">plt.plot(epochs_range, acc, label=<span class="string">&#x27;Training Accuracy&#x27;</span>)</span><br><span class="line">plt.plot(epochs_range, val_acc, label=<span class="string">&#x27;Validation Accuracy&#x27;</span>)</span><br><span class="line">plt.legend(loc=<span class="string">&#x27;lower right&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Training and Validation Accuracy&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line">plt.plot(epochs_range, loss, label=<span class="string">&#x27;Training Loss&#x27;</span>)</span><br><span class="line">plt.plot(epochs_range, val_loss, label=<span class="string">&#x27;Validation Loss&#x27;</span>)</span><br><span class="line">plt.legend(loc=<span class="string">&#x27;upper right&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Training and Validation Loss&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># sunflower_url = &quot;https://storage.googleapis.com/download.tensorflow.org/example_images/592px-Red_sunflower.jpg&quot;</span></span><br><span class="line"><span class="comment"># sunflower_path = tf.keras.utils.get_file(&#x27;Red_sunflower&#x27;, origin=sunflower_url)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># img = keras.preprocessing.image.load_img(</span></span><br><span class="line"><span class="comment">#     sunflower_path, target_size=(img_height, img_width)</span></span><br><span class="line"><span class="comment"># )</span></span><br><span class="line"><span class="comment"># img_array = keras.preprocessing.image.img_to_array(img)</span></span><br><span class="line"><span class="comment"># img_array = tf.expand_dims(img_array, 0) # Create a batch</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># predictions = model.predict(img_array)</span></span><br><span class="line"><span class="comment"># score = tf.nn.softmax(predictions[0])</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># print(</span></span><br><span class="line"><span class="comment">#     &quot;This image most likely belongs to &#123;&#125; with a &#123;:.2f&#125; percent confidence.&quot;</span></span><br><span class="line"><span class="comment">#     .format(class_names[np.argmax(score)], 100 * np.max(score))</span></span><br><span class="line"><span class="comment"># )</span></span><br></pre></td></tr></table></figure>
 
 
@@ -1488,7 +1599,7 @@ tensor([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10])
   <entry>
     <title>基本优化思想与最小二乘法</title>
     <url>/2021/08/08/%E5%9F%BA%E6%9C%AC%E4%BC%98%E5%8C%96%E6%80%9D%E6%83%B3%E4%B8%8E%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/</url>
-    <content><![CDATA[<h2 id="基本优化思想与最小二乘法"><a href="#基本优化思想与最小二乘法" class="headerlink" title="基本优化思想与最小二乘法"></a>基本优化思想与最小二乘法</h2><p>在pytorch中最核心的基础数学工具就是梯度计算工具，也就是自动微分模块。<br>所谓优化思想，指的是利用数学工具求解复杂问题的基本思想，我们往往会先给出待解决问题的数值评估指标，并在此基础之上构建方程，采用数学工具，不断优化评估指标结果，以达到最优结果。</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="基本优化思想与最小二乘法"><a href="#基本优化思想与最小二乘法" class="headerlink" title="基本优化思想与最小二乘法"></a>基本优化思想与最小二乘法</h2><p>在pytorch中最核心的基础数学工具就是梯度计算工具，也就是自动微分模块。<br>所谓优化思想，指的是利用数学工具求解复杂问题的基本思想，我们往往会先给出待解决问题的数值评估指标，并在此基础之上构建方程，采用数学工具，不断优化评估指标结果，以达到最优结果。</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch</span><br></pre></td></tr></table></figure>
 
 <h3 id="一、简单线性回归的机器学习建模思路"><a href="#一、简单线性回归的机器学习建模思路" class="headerlink" title="一、简单线性回归的机器学习建模思路"></a>一、简单线性回归的机器学习建模思路</h3><ol>
@@ -1634,709 +1745,9 @@ tensor([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10])
       </tags>
   </entry>
   <entry>
-    <title>张量的线性代数运算</title>
-    <url>/2021/07/31/%E5%BC%A0%E9%87%8F%E7%9A%84%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0%E8%BF%90%E7%AE%97/</url>
-    <content><![CDATA[<h2 id="张量的线性代数运算"><a href="#张量的线性代数运算" class="headerlink" title="张量的线性代数运算"></a>张量的线性代数运算</h2><ul>
-<li>pytorch中BLAS和LAPACK模块的相关运算</li>
-<li>pytorch中没有设置单独的矩阵对象类型，因此，在pytorch中二维张量就相当于矩阵对象，并且拥有一系列线性代数相关函数和方法</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br></pre></td></tr></table></figure>
-
-<h3 id="一、BLAS和LAPACK概览"><a href="#一、BLAS和LAPACK概览" class="headerlink" title="一、BLAS和LAPACK概览"></a>一、BLAS和LAPACK概览</h3><ul>
-<li>矩阵的新编及特殊矩阵的构造方法：包括矩阵的转置、对角矩阵的创建、单位矩阵的创建、上/下三角矩阵的创建等;</li>
-<li>矩阵的基本运算:矩阵乘法、向量內积、矩阵和向量的乘法等</li>
-<li>矩阵的线性代数运算:包括矩阵的迹、矩阵的秩、逆矩阵的求解、伴随矩阵和广义逆矩阵等</li>
-<li>矩阵分解运算:特征分解、奇异值分解和SVD分解等<h3 id="二、矩阵的形态及特殊矩阵构造方法"><a href="#二、矩阵的形态及特殊矩阵构造方法" class="headerlink" title="二、矩阵的形态及特殊矩阵构造方法"></a>二、矩阵的形态及特殊矩阵构造方法</h3></li>
-</ul>
-<table>
-<thead>
-<tr>
-<th align="left">函数</th>
-<th align="left">描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">torch.t(t)</td>
-<td align="left">t转置</td>
-</tr>
-<tr>
-<td align="left">torch.eye(n)</td>
-<td align="left">创建包含n个分量的单位矩阵</td>
-</tr>
-<tr>
-<td align="left">torch.diag(t1)</td>
-<td align="left">以t1中各元素创建对角矩阵</td>
-</tr>
-<tr>
-<td align="left">torch.triu(t)</td>
-<td align="left">去矩阵t中上三角矩阵</td>
-</tr>
-<tr>
-<td align="left">torch.tril(t)</td>
-<td align="left">去矩阵t中下三角矩阵</td>
-</tr>
-</tbody></table>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t1=torch.arange(<span class="number">1</span>,<span class="number">7</span>).reshape(<span class="number">2</span>,<span class="number">3</span>).<span class="built_in">float</span>()</span><br><span class="line">t1</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 2., 3.],
-        [4., 5., 6.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.t(t1)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 4.],
-        [2., 5.],
-        [3., 6.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t1.t()</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 4.],
-        [2., 5.],
-        [3., 6.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.eye(<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 0., 0.],
-        [0., 1., 0.],
-        [0., 0., 1.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t=torch.arange(<span class="number">5</span>)</span><br><span class="line">torch.diag(t)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[0, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0],
-        [0, 0, 2, 0, 0],
-        [0, 0, 0, 3, 0],
-        [0, 0, 0, 0, 4]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t1=torch.arange(<span class="number">9</span>).reshape(<span class="number">3</span>,<span class="number">3</span>)</span><br><span class="line">torch.triu(t1) <span class="comment"># 上三角矩阵</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[0, 1, 2],
-        [0, 4, 5],
-        [0, 0, 8]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.tril(t1) <span class="comment"># 下三角矩阵</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[0, 0, 0],
-        [3, 4, 0],
-        [6, 7, 8]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.triu(t1,-<span class="number">1</span>) <span class="comment"># 上三角矩阵向左下偏移一位</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[0, 1, 2],
-        [3, 4, 5],
-        [0, 7, 8]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.triu(t1,<span class="number">1</span>) <span class="comment"># 上三角矩阵向上偏移一位</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[0, 1, 2],
-        [0, 0, 5],
-        [0, 0, 0]])
-</code></pre>
-<h3 id="三、矩阵的基本运算"><a href="#三、矩阵的基本运算" class="headerlink" title="三、矩阵的基本运算"></a>三、矩阵的基本运算</h3><table>
-<thead>
-<tr>
-<th align="left">函数</th>
-<th align="left">描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">torch.dot(t1,t2)</td>
-<td align="left">计算t1、t2张量內积</td>
-</tr>
-<tr>
-<td align="left">torch.mm(t1,t2)</td>
-<td align="left">矩阵乘法</td>
-</tr>
-<tr>
-<td align="left">torch.mv(t1,t2)</td>
-<td align="left">矩阵乘向量</td>
-</tr>
-<tr>
-<td align="left">torch.bmm(t1,t2)</td>
-<td align="left">批量矩阵乘法</td>
-</tr>
-<tr>
-<td align="left">torch.addmm(t,t1,t2)</td>
-<td align="left">矩阵相乘后相加</td>
-</tr>
-<tr>
-<td align="left">torch.addbmm(t,t1,t2)</td>
-<td align="left">批量矩阵相乘后相加</td>
-</tr>
-</tbody></table>
-<ul>
-<li>dot\vdot:点积计算<br>在pytorch中，dot和vdot只能作用于一维张量，对于数值型对象，二者计算结果没有区别，在复数运算时有区别</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t=torch.arange(<span class="number">1</span>,<span class="number">4</span>)</span><br><span class="line">t</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([1, 2, 3])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.dot(t,t)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor(14)
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.vdot(t,t)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor(14)
-</code></pre>
-<ul>
-<li>mm:矩阵乘法</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t1=torch.arange(<span class="number">1</span>,<span class="number">7</span>).reshape(<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">t1</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1, 2, 3],
-        [4, 5, 6]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t2=torch.arange(<span class="number">1</span>,<span class="number">10</span>).reshape(<span class="number">3</span>,<span class="number">3</span>)</span><br><span class="line">t2</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 9]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t1*t1 <span class="comment"># 对应元素位置相乘</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[ 1,  4,  9],
-        [16, 25, 36]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm(t1,t2) <span class="comment"># 矩阵乘法 ab bc -&gt; ac</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[30, 36, 42],
-        [66, 81, 96]])
-</code></pre>
-<ul>
-<li>mv:矩阵和向量相乘<br>先将向量转为列向量然后再相乘</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">met=torch.arange(<span class="number">1</span>,<span class="number">7</span>).reshape(<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">met</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1, 2, 3],
-        [4, 5, 6]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">vec=torch.arange(<span class="number">1</span>,<span class="number">4</span>)</span><br><span class="line">vec</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([1, 2, 3])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mv(met,vec) <span class="comment"># 矩阵的列数和向量的元素个数相同</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([14, 32])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">vec.reshape(<span class="number">3</span>,<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1],
-        [2],
-        [3]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm(met,vec.reshape(<span class="number">3</span>,<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[14],
-        [32]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm(met,vec.reshape(<span class="number">3</span>,<span class="number">1</span>)).flatten()</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([14, 32])
-</code></pre>
-<p>mv函数本质上提供了一种二维张量和一维张量相乘的方法，再线性代数运算过程中，有很多矩阵乘向量的场景，典型的如线性回归的求解过程，通常情况下我们需要将向量转化位列向量然后进行计算，但pytorch中单独设置了一个矩阵和向量相乘的方法，从而简化了行/列向量的理解过程和将向量转为列向量的转化过程</p>
-<ul>
-<li>bmm:批量矩阵相乘<br>指三维张量的矩阵乘法，三维张量内各对应位置的矩阵相乘</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t3=torch.arange(<span class="number">1</span>,<span class="number">13</span>).reshape(<span class="number">3</span>,<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">t3</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[[ 1,  2],
-         [ 3,  4]],
-
-        [[ 5,  6],
-         [ 7,  8]],
-
-        [[ 9, 10],
-         [11, 12]]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t4=torch.arange(<span class="number">1</span>,<span class="number">19</span>).reshape(<span class="number">3</span>,<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">t4</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[[ 1,  2,  3],
-         [ 4,  5,  6]],
-
-        [[ 7,  8,  9],
-         [10, 11, 12]],
-
-        [[13, 14, 15],
-         [16, 17, 18]]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.bmm(t3,t4)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[[  9,  12,  15],
-         [ 19,  26,  33]],
-
-        [[ 95, 106, 117],
-         [129, 144, 159]],
-
-        [[277, 296, 315],
-         [335, 358, 381]]])
-</code></pre>
-<p>point:</p>
-<ol>
-<li>三维张量包含的矩阵个数需要相同</li>
-<li>每个内部矩阵，需要满足矩阵乘法的条件，ab bc -&gt; ac</li>
-</ol>
-<ul>
-<li>addmm:矩阵相乘后相加<br>addmm函数结构：addmm(input,mat1,mat2,beta=1,alpha=1)<br>输出结果：beta*input+alpha*(mat1*mat2)</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t1</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1, 2, 3],
-        [4, 5, 6]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t2</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 9]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t=torch.arange(<span class="number">3</span>)</span><br><span class="line">t</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([0, 1, 2])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm(t1,t2)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[30, 36, 42],
-        [66, 81, 96]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.addmm(t,t1,t2) <span class="comment"># t1*t2 + t</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[30, 37, 44],
-        [66, 82, 98]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.addmm(t,t1,t2,beta=<span class="number">0</span>,alpha=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[300, 360, 420],
-        [660, 810, 960]])
-</code></pre>
-<h3 id="四、矩阵的线性代数运算"><a href="#四、矩阵的线性代数运算" class="headerlink" title="四、矩阵的线性代数运算"></a>四、矩阵的线性代数运算</h3><table>
-<thead>
-<tr>
-<th align="left">函数</th>
-<th align="left">描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">torch.trace(A)</td>
-<td align="left">矩阵的迹</td>
-</tr>
-<tr>
-<td align="left">matrix_rank(A)</td>
-<td align="left">矩阵的秩</td>
-</tr>
-<tr>
-<td align="left">torch.det(A)</td>
-<td align="left">计算矩阵A的行列式</td>
-</tr>
-<tr>
-<td align="left">torch.inverse(A)</td>
-<td align="left">矩阵求逆</td>
-</tr>
-<tr>
-<td align="left">torch.lstsq(A,B)</td>
-<td align="left">最小二乘法</td>
-</tr>
-</tbody></table>
-<ol>
-<li>矩阵的迹（trace）<br>矩阵的迹就是计算矩阵对角线元素之和</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.tensor([<span class="number">1</span>,<span class="number">2</span>,<span class="number">4</span>,<span class="number">5</span>]).reshape(<span class="number">2</span>,<span class="number">2</span>).<span class="built_in">float</span>()</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 2.],
-        [4., 5.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.trace(A)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor(6.)
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">B=torch.arange(<span class="number">1</span>,<span class="number">7</span>).reshape(<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">B</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1, 2, 3],
-        [4, 5, 6]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.trace(B) <span class="comment"># 对于矩阵的迹来说，计算过程不需要是方阵</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor(6)
-</code></pre>
-<ol start="2">
-<li>矩阵的秩（rank）<br>矩阵的秩是指矩阵中行或列的极大线性无关组个数，矩阵的秩唯一</li>
-</ol>
-<ul>
-<li>matrix_rank计算矩阵的秩</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.arange(<span class="number">1</span>,<span class="number">5</span>).reshape(<span class="number">2</span>,<span class="number">2</span>).<span class="built_in">float</span>()</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 2.],
-        [3., 4.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.matrix_rank(A)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor(2)
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">B=torch.tensor([[<span class="number">1</span>,<span class="number">2</span>],[<span class="number">2</span>,<span class="number">4</span>]]).<span class="built_in">float</span>()</span><br><span class="line">B</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 2.],
-        [2., 4.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.matrix_rank(B)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor(1)
-</code></pre>
-<ol start="3">
-<li>矩阵的行列式（det)</li>
-</ol>
-<p>行列式作为一个基本数学工具，实际上就是进行线性变换的伸缩因子<br>对于任何一个n维方阵，行列式的计算过程如下：</p>
-<p>$$D=\begin{vmatrix}a_{11} &amp; a_{12} &amp; \cdots &amp; a_{1n} \ a_{21} &amp; a_{22} &amp; \cdots &amp; a_{2n}\ \cdots &amp; \cdots &amp; \cdots &amp; \cdots\ a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nn}\end{vmatrix}$$</p>
-<p>$$D=\sum (-1)^ka_{1k_1}a_{2k_2}\cdots a_{nk_n}$$</p>
-<p>对于一个2*2的矩阵，行列式的计算就是主对角线元素之积减去另外两个元素之积</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.tensor([[<span class="number">1</span>,<span class="number">2</span>],[<span class="number">4</span>,<span class="number">5</span>]]).<span class="built_in">float</span>()</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 2.],
-        [4., 5.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.det(A)   <span class="comment"># ad-bc</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor(-3.)
-</code></pre>
-<ol start="4">
-<li>线性方程组的矩阵表达形式</li>
-</ol>
-<p>矩阵-》由向量组组成的矩阵</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.arange(<span class="number">1</span>,<span class="number">5</span>).reshape(<span class="number">2</span>,<span class="number">2</span>).<span class="built_in">float</span>()</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 2.],
-        [3., 4.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib <span class="keyword">as</span> mpl</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.plot(A[:,<span class="number">0</span>],A[:,<span class="number">1</span>],<span class="string">&#x27;o&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>[&lt;matplotlib.lines.Line2D at 0x22856f5ae80&gt;]
-</code></pre>
-<p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/output_55_1.png"
-                      alt="png"
-                ></p>
-<p>如果更进一步，我们希望在二维空间中找到一条直线，来拟合这两个点，也就是构建一个线性回归模型，我们可以设置线性回归方程如下：</p>
-<p>$$y=ax+b$$</p>
-<p>带入(1,2)和(3,4)两个点后，我们还可以进一步将表达式改写成矩阵表示形式。<br>A*x=B</p>
-<p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/Snipaste_2021-08-01_20-03-43.png"
-                      alt="&quot;矩阵表示形式&quot;"
-                ></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.tensor([[<span class="number">1.0</span>,<span class="number">1</span>],[<span class="number">3</span>,<span class="number">1</span>]])</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 1.],
-        [3., 1.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">B=torch.tensor([<span class="number">2.0</span>,<span class="number">4</span>])</span><br><span class="line">B</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([2., 4.])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.inverse(A) <span class="comment"># 求逆矩阵</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[-0.5000,  0.5000],
-        [ 1.5000, -0.5000]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm(torch.inverse(A),A)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[ 1.0000e+00, -5.9605e-08],
-        [-1.1921e-07,  1.0000e+00]])
-</code></pre>
-<p>$$x=A^{-1}*B$$</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mv(torch.inverse(A),B)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([1.0000, 1.0000])
-</code></pre>
-<p>a=1,b=1<br>最终得到线性方程为$y=x+1$</p>
-<h3 id="五、矩阵的分解"><a href="#五、矩阵的分解" class="headerlink" title="五、矩阵的分解"></a>五、矩阵的分解</h3><p>矩阵的分解也是矩阵运算中常规计算，矩阵分解有很多种类，常见的例如QR分解、LU分解、特征分解和SVD分解，虽然大多数情况下，矩阵分解都是在形式上将矩阵拆分成几种特殊矩阵的乘积。分解之后的等式如下：</p>
-<p>$$A=V \cup D$$</p>
-<ol>
-<li>特征分解<br>特征分解中，矩阵分解形式为：</li>
-</ol>
-<p>$$A = Q \Lambda Q^{-1}$$</p>
-<p>其中Q和$Q^{-1}$互为逆矩阵，Q的列就是A的特征值对应的特征向量，$\Lambda$就是特征值组成的对角矩阵</p>
-<ul>
-<li>torch.eig函数: 特征分解</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.arange(<span class="number">1</span>,<span class="number">10</span>).reshape(<span class="number">3</span>,<span class="number">3</span>).<span class="built_in">float</span>()</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 2., 3.],
-        [4., 5., 6.],
-        [7., 8., 9.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.eig(A,eigenvectors=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>torch.return_types.eig(
-eigenvalues=tensor([[ 1.6117e+01,  0.0000e+00],
-        [-1.1168e+00,  0.0000e+00],
-        [ 2.9486e-07,  0.0000e+00]]),
-eigenvectors=tensor([[-0.2320, -0.7858,  0.4082],
-        [-0.5253, -0.0868, -0.8165],
-        [-0.8187,  0.6123,  0.4082]]))
-</code></pre>
-<ol start="2">
-<li>奇异值分解(SVD)<br>奇异值分解是特征值分解在奇异矩阵上的推广形式，它将一个维度为mxn的奇异矩阵A分解为三个部分：</li>
-</ol>
-<p>$$A = U \sum V^{T}$$</p>
-<p>其中U、V是两个正交矩阵，其中的每一行(列)分别被称为左奇异向量和右奇异向量，他们和$\sum$中对角线上的奇异值相对应，通常情况下我们只保留前k和奇异向量和奇异值。其中U是mxk矩阵，V是nxk矩阵，$\sum$是kxk的方阵，从而减少存储空间的效果</p>
-<p>$$A_{m<em>n} = U_{m</em>n} \sum <em>{m*n} V</em>{n<em>n}^T \approx U_{m</em>k} \sum <em>{k*k}V</em>{k*n}^T$$</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">C=torch.tensor([[<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>],[<span class="number">2.</span>, <span class="number">4.</span>, <span class="number">6.</span>],[<span class="number">3.</span>, <span class="number">6.</span>, <span class="number">9.</span>]])</span><br><span class="line">C</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 2., 3.],
-        [2., 4., 6.],
-        [3., 6., 9.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.svd(C)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>torch.return_types.svd(
-U=tensor([[-2.6726e-01,  9.6362e-01, -3.7767e-08],
-        [-5.3452e-01, -1.4825e-01, -8.3205e-01],
-        [-8.0178e-01, -2.2237e-01,  5.5470e-01]]),
-S=tensor([1.4000e+01, 4.2751e-08, 1.6397e-15]),
-V=tensor([[-0.2673, -0.9636,  0.0000],
-        [-0.5345,  0.1482, -0.8321],
-        [-0.8018,  0.2224,  0.5547]]))
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">CU,CS,CV=torch.svd(C)</span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.diag(CS)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1.4000e+01, 0.0000e+00, 0.0000e+00],
-        [0.0000e+00, 4.2751e-08, 0.0000e+00],
-        [0.0000e+00, 0.0000e+00, 1.6397e-15]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm(torch.mm(CU,torch.diag(CS)),CV.t())</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1.0000, 2.0000, 3.0000],
-        [2.0000, 4.0000, 6.0000],
-        [3.0000, 6.0000, 9.0000]])
-</code></pre>
-<p>能够看出，上述输出完成还原了C矩阵，此时我们可根据svd输出结果对C进行降维，此时C可只保留第一列，即k=1</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">U1=CU[:,<span class="number">0</span>].reshape(<span class="number">3</span>,<span class="number">1</span>) <span class="comment"># U的第一列</span></span><br><span class="line">U1</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[-0.2673],
-        [-0.5345],
-        [-0.8018]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">C1=CS[<span class="number">0</span>] <span class="comment"># C的第一个值</span></span><br><span class="line">C1</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor(14.0000)
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">V1=CV[:,<span class="number">0</span>].reshape(<span class="number">1</span>,<span class="number">3</span>) <span class="comment"># V 的第一行</span></span><br><span class="line">V1</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[-0.2673, -0.5345, -0.8018]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm((U1*C1),V1)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1.0000, 2.0000, 3.0000],
-        [2.0000, 4.0000, 6.0000],
-        [3.0000, 6.0000, 9.0000]])
-</code></pre>
-<p>此时输出的Cd矩阵以及和原矩阵高度相似了，损失信息在R的计算中基本可以忽略不计，经过SVD分解，矩阵的信息能够被压缩至更小的空间内进行存储，从而为PCA（主成分分析）、LSI（潜在语义索引）等算法做好了数学工具层面的铺垫</p>
-]]></content>
-      <tags>
-        <tag>pytorch</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>自动求导</title>
-    <url>/2021/07/20/%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC/</url>
-    <content><![CDATA[<h2 id="自动求导"><a href="#自动求导" class="headerlink" title="自动求导"></a>自动求导</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span>  torch</span><br><span class="line"><span class="keyword">from</span>    torch <span class="keyword">import</span> autograd</span><br><span class="line"></span><br><span class="line">x = torch.tensor(<span class="number">1.</span>)</span><br><span class="line">a = torch.tensor(<span class="number">1.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">b = torch.tensor(<span class="number">2.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">c = torch.tensor(<span class="number">3.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">y = a**<span class="number">2</span> * x + b * x + c</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;before:&#x27;</span>, a.grad, b.grad, c.grad)</span><br><span class="line">grads = autograd.grad(y, [a, b, c])</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;after :&#x27;</span>, grads[<span class="number">0</span>], grads[<span class="number">1</span>], grads[<span class="number">2</span>])</span><br></pre></td></tr></table></figure>
-<p>1、TENSOR</p>
-<p>torch.Tensor 是包的核心类。如果将其属性 .requires_grad 设置为 True，则会开始跟踪针对 tensor 的所有操作。完成计算后，您可以调用 .backward() 来自动计算所有梯度。该张量的梯度将累积到 .grad 属性中。</p>
-<p>要停止 tensor 历史记录的跟踪，您可以调用 .detach()，它将其与计算历史记录分离，并防止将来的计算被跟踪。</p>
-<p>要停止跟踪历史记录（和使用内存），您还可以将代码块使用 with torch.no_grad(): 包装起来。在评估模型时，这是特别有用，因为模型在训练阶段具有 requires_grad = True 的可训练参数有利于调参，但在评估阶段我们不需要梯度。</p>
-<p>还有一个类对于 autograd 实现非常重要那就是 Function。Tensor 和 Function 互相连接并构建一个非循环图，它保存整个完整的计算过程的历史信息。每个张量都有一个 .grad_fn 属性保存着创建了张量的 Function 的引用，（如果用户自己创建张量，则g rad_fn 是 None ）。</p>
-<p>如果你想计算导数，你可以调用 Tensor.backward()。如果 Tensor 是标量（即它包含一个元素数据），则不需要指定任何参数backward()，但是如果它有更多元素，则需要指定一个gradient 参数来指定张量的形状。</p>
-]]></content>
-      <tags>
-        <tag>pytorch</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>张量的广播和科学计算</title>
     <url>/2021/07/27/%E5%BC%A0%E9%87%8F%E7%9A%84%E5%B9%BF%E6%92%AD%E5%92%8C%E7%A7%91%E5%AD%A6%E8%AE%A1%E7%AE%97/</url>
-    <content><![CDATA[<h2 id="张量的广播和科学运算"><a href="#张量的广播和科学运算" class="headerlink" title="张量的广播和科学运算"></a>张量的广播和科学运算</h2><p>作为pytorch中执行深度学习的基本数据类型，张量也拥有非常多的数学与运算函数和方法，以及对应的一系列计算规则。在pytorch中，能够作用于tensor的运算被统一称作为算子</p>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="张量的广播和科学运算"><a href="#张量的广播和科学运算" class="headerlink" title="张量的广播和科学运算"></a>张量的广播和科学运算</h2><p>作为pytorch中执行深度学习的基本数据类型，张量也拥有非常多的数学与运算函数和方法，以及对应的一系列计算规则。在pytorch中，能够作用于tensor的运算被统一称作为算子</p>
 <ul>
 <li>数学运算的分类</li>
 </ul>
@@ -3298,14 +2709,714 @@ indices=tensor([[3, 2, 1, 0],
       </tags>
   </entry>
   <entry>
+    <title>张量的线性代数运算</title>
+    <url>/2021/07/31/%E5%BC%A0%E9%87%8F%E7%9A%84%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0%E8%BF%90%E7%AE%97/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="张量的线性代数运算"><a href="#张量的线性代数运算" class="headerlink" title="张量的线性代数运算"></a>张量的线性代数运算</h2><ul>
+<li>pytorch中BLAS和LAPACK模块的相关运算</li>
+<li>pytorch中没有设置单独的矩阵对象类型，因此，在pytorch中二维张量就相当于矩阵对象，并且拥有一系列线性代数相关函数和方法</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br></pre></td></tr></table></figure>
+
+<h3 id="一、BLAS和LAPACK概览"><a href="#一、BLAS和LAPACK概览" class="headerlink" title="一、BLAS和LAPACK概览"></a>一、BLAS和LAPACK概览</h3><ul>
+<li>矩阵的新编及特殊矩阵的构造方法：包括矩阵的转置、对角矩阵的创建、单位矩阵的创建、上/下三角矩阵的创建等;</li>
+<li>矩阵的基本运算:矩阵乘法、向量內积、矩阵和向量的乘法等</li>
+<li>矩阵的线性代数运算:包括矩阵的迹、矩阵的秩、逆矩阵的求解、伴随矩阵和广义逆矩阵等</li>
+<li>矩阵分解运算:特征分解、奇异值分解和SVD分解等<h3 id="二、矩阵的形态及特殊矩阵构造方法"><a href="#二、矩阵的形态及特殊矩阵构造方法" class="headerlink" title="二、矩阵的形态及特殊矩阵构造方法"></a>二、矩阵的形态及特殊矩阵构造方法</h3></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="left">函数</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">torch.t(t)</td>
+<td align="left">t转置</td>
+</tr>
+<tr>
+<td align="left">torch.eye(n)</td>
+<td align="left">创建包含n个分量的单位矩阵</td>
+</tr>
+<tr>
+<td align="left">torch.diag(t1)</td>
+<td align="left">以t1中各元素创建对角矩阵</td>
+</tr>
+<tr>
+<td align="left">torch.triu(t)</td>
+<td align="left">去矩阵t中上三角矩阵</td>
+</tr>
+<tr>
+<td align="left">torch.tril(t)</td>
+<td align="left">去矩阵t中下三角矩阵</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t1=torch.arange(<span class="number">1</span>,<span class="number">7</span>).reshape(<span class="number">2</span>,<span class="number">3</span>).<span class="built_in">float</span>()</span><br><span class="line">t1</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 2., 3.],
+        [4., 5., 6.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.t(t1)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 4.],
+        [2., 5.],
+        [3., 6.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t1.t()</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 4.],
+        [2., 5.],
+        [3., 6.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.eye(<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 0., 0.],
+        [0., 1., 0.],
+        [0., 0., 1.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t=torch.arange(<span class="number">5</span>)</span><br><span class="line">torch.diag(t)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 0, 2, 0, 0],
+        [0, 0, 0, 3, 0],
+        [0, 0, 0, 0, 4]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t1=torch.arange(<span class="number">9</span>).reshape(<span class="number">3</span>,<span class="number">3</span>)</span><br><span class="line">torch.triu(t1) <span class="comment"># 上三角矩阵</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[0, 1, 2],
+        [0, 4, 5],
+        [0, 0, 8]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.tril(t1) <span class="comment"># 下三角矩阵</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[0, 0, 0],
+        [3, 4, 0],
+        [6, 7, 8]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.triu(t1,-<span class="number">1</span>) <span class="comment"># 上三角矩阵向左下偏移一位</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[0, 1, 2],
+        [3, 4, 5],
+        [0, 7, 8]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.triu(t1,<span class="number">1</span>) <span class="comment"># 上三角矩阵向上偏移一位</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[0, 1, 2],
+        [0, 0, 5],
+        [0, 0, 0]])
+</code></pre>
+<h3 id="三、矩阵的基本运算"><a href="#三、矩阵的基本运算" class="headerlink" title="三、矩阵的基本运算"></a>三、矩阵的基本运算</h3><table>
+<thead>
+<tr>
+<th align="left">函数</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">torch.dot(t1,t2)</td>
+<td align="left">计算t1、t2张量內积</td>
+</tr>
+<tr>
+<td align="left">torch.mm(t1,t2)</td>
+<td align="left">矩阵乘法</td>
+</tr>
+<tr>
+<td align="left">torch.mv(t1,t2)</td>
+<td align="left">矩阵乘向量</td>
+</tr>
+<tr>
+<td align="left">torch.bmm(t1,t2)</td>
+<td align="left">批量矩阵乘法</td>
+</tr>
+<tr>
+<td align="left">torch.addmm(t,t1,t2)</td>
+<td align="left">矩阵相乘后相加</td>
+</tr>
+<tr>
+<td align="left">torch.addbmm(t,t1,t2)</td>
+<td align="left">批量矩阵相乘后相加</td>
+</tr>
+</tbody></table>
+<ul>
+<li>dot\vdot:点积计算<br>在pytorch中，dot和vdot只能作用于一维张量，对于数值型对象，二者计算结果没有区别，在复数运算时有区别</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t=torch.arange(<span class="number">1</span>,<span class="number">4</span>)</span><br><span class="line">t</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([1, 2, 3])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.dot(t,t)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor(14)
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.vdot(t,t)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor(14)
+</code></pre>
+<ul>
+<li>mm:矩阵乘法</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t1=torch.arange(<span class="number">1</span>,<span class="number">7</span>).reshape(<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">t1</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1, 2, 3],
+        [4, 5, 6]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t2=torch.arange(<span class="number">1</span>,<span class="number">10</span>).reshape(<span class="number">3</span>,<span class="number">3</span>)</span><br><span class="line">t2</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t1*t1 <span class="comment"># 对应元素位置相乘</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[ 1,  4,  9],
+        [16, 25, 36]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm(t1,t2) <span class="comment"># 矩阵乘法 ab bc -&gt; ac</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[30, 36, 42],
+        [66, 81, 96]])
+</code></pre>
+<ul>
+<li>mv:矩阵和向量相乘<br>先将向量转为列向量然后再相乘</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">met=torch.arange(<span class="number">1</span>,<span class="number">7</span>).reshape(<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">met</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1, 2, 3],
+        [4, 5, 6]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">vec=torch.arange(<span class="number">1</span>,<span class="number">4</span>)</span><br><span class="line">vec</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([1, 2, 3])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mv(met,vec) <span class="comment"># 矩阵的列数和向量的元素个数相同</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([14, 32])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">vec.reshape(<span class="number">3</span>,<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1],
+        [2],
+        [3]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm(met,vec.reshape(<span class="number">3</span>,<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[14],
+        [32]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm(met,vec.reshape(<span class="number">3</span>,<span class="number">1</span>)).flatten()</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([14, 32])
+</code></pre>
+<p>mv函数本质上提供了一种二维张量和一维张量相乘的方法，再线性代数运算过程中，有很多矩阵乘向量的场景，典型的如线性回归的求解过程，通常情况下我们需要将向量转化位列向量然后进行计算，但pytorch中单独设置了一个矩阵和向量相乘的方法，从而简化了行/列向量的理解过程和将向量转为列向量的转化过程</p>
+<ul>
+<li>bmm:批量矩阵相乘<br>指三维张量的矩阵乘法，三维张量内各对应位置的矩阵相乘</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t3=torch.arange(<span class="number">1</span>,<span class="number">13</span>).reshape(<span class="number">3</span>,<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">t3</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[[ 1,  2],
+         [ 3,  4]],
+
+        [[ 5,  6],
+         [ 7,  8]],
+
+        [[ 9, 10],
+         [11, 12]]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t4=torch.arange(<span class="number">1</span>,<span class="number">19</span>).reshape(<span class="number">3</span>,<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">t4</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[[ 1,  2,  3],
+         [ 4,  5,  6]],
+
+        [[ 7,  8,  9],
+         [10, 11, 12]],
+
+        [[13, 14, 15],
+         [16, 17, 18]]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.bmm(t3,t4)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[[  9,  12,  15],
+         [ 19,  26,  33]],
+
+        [[ 95, 106, 117],
+         [129, 144, 159]],
+
+        [[277, 296, 315],
+         [335, 358, 381]]])
+</code></pre>
+<p>point:</p>
+<ol>
+<li>三维张量包含的矩阵个数需要相同</li>
+<li>每个内部矩阵，需要满足矩阵乘法的条件，ab bc -&gt; ac</li>
+</ol>
+<ul>
+<li>addmm:矩阵相乘后相加<br>addmm函数结构：addmm(input,mat1,mat2,beta=1,alpha=1)<br>输出结果：beta*input+alpha*(mat1*mat2)</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t1</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1, 2, 3],
+        [4, 5, 6]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t2</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">t=torch.arange(<span class="number">3</span>)</span><br><span class="line">t</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([0, 1, 2])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm(t1,t2)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[30, 36, 42],
+        [66, 81, 96]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.addmm(t,t1,t2) <span class="comment"># t1*t2 + t</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[30, 37, 44],
+        [66, 82, 98]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.addmm(t,t1,t2,beta=<span class="number">0</span>,alpha=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[300, 360, 420],
+        [660, 810, 960]])
+</code></pre>
+<h3 id="四、矩阵的线性代数运算"><a href="#四、矩阵的线性代数运算" class="headerlink" title="四、矩阵的线性代数运算"></a>四、矩阵的线性代数运算</h3><table>
+<thead>
+<tr>
+<th align="left">函数</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">torch.trace(A)</td>
+<td align="left">矩阵的迹</td>
+</tr>
+<tr>
+<td align="left">matrix_rank(A)</td>
+<td align="left">矩阵的秩</td>
+</tr>
+<tr>
+<td align="left">torch.det(A)</td>
+<td align="left">计算矩阵A的行列式</td>
+</tr>
+<tr>
+<td align="left">torch.inverse(A)</td>
+<td align="left">矩阵求逆</td>
+</tr>
+<tr>
+<td align="left">torch.lstsq(A,B)</td>
+<td align="left">最小二乘法</td>
+</tr>
+</tbody></table>
+<ol>
+<li>矩阵的迹（trace）<br>矩阵的迹就是计算矩阵对角线元素之和</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.tensor([<span class="number">1</span>,<span class="number">2</span>,<span class="number">4</span>,<span class="number">5</span>]).reshape(<span class="number">2</span>,<span class="number">2</span>).<span class="built_in">float</span>()</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 2.],
+        [4., 5.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.trace(A)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor(6.)
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">B=torch.arange(<span class="number">1</span>,<span class="number">7</span>).reshape(<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">B</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1, 2, 3],
+        [4, 5, 6]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.trace(B) <span class="comment"># 对于矩阵的迹来说，计算过程不需要是方阵</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor(6)
+</code></pre>
+<ol start="2">
+<li>矩阵的秩（rank）<br>矩阵的秩是指矩阵中行或列的极大线性无关组个数，矩阵的秩唯一</li>
+</ol>
+<ul>
+<li>matrix_rank计算矩阵的秩</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.arange(<span class="number">1</span>,<span class="number">5</span>).reshape(<span class="number">2</span>,<span class="number">2</span>).<span class="built_in">float</span>()</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 2.],
+        [3., 4.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.matrix_rank(A)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor(2)
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">B=torch.tensor([[<span class="number">1</span>,<span class="number">2</span>],[<span class="number">2</span>,<span class="number">4</span>]]).<span class="built_in">float</span>()</span><br><span class="line">B</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 2.],
+        [2., 4.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.matrix_rank(B)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor(1)
+</code></pre>
+<ol start="3">
+<li>矩阵的行列式（det)</li>
+</ol>
+<p>行列式作为一个基本数学工具，实际上就是进行线性变换的伸缩因子<br>对于任何一个n维方阵，行列式的计算过程如下：</p>
+<p>$$D=\begin{vmatrix}a_{11} &amp; a_{12} &amp; \cdots &amp; a_{1n} \ a_{21} &amp; a_{22} &amp; \cdots &amp; a_{2n}\ \cdots &amp; \cdots &amp; \cdots &amp; \cdots\ a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nn}\end{vmatrix}$$</p>
+<p>$$D=\sum (-1)^ka_{1k_1}a_{2k_2}\cdots a_{nk_n}$$</p>
+<p>对于一个2*2的矩阵，行列式的计算就是主对角线元素之积减去另外两个元素之积</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.tensor([[<span class="number">1</span>,<span class="number">2</span>],[<span class="number">4</span>,<span class="number">5</span>]]).<span class="built_in">float</span>()</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 2.],
+        [4., 5.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.det(A)   <span class="comment"># ad-bc</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor(-3.)
+</code></pre>
+<ol start="4">
+<li>线性方程组的矩阵表达形式</li>
+</ol>
+<p>矩阵-》由向量组组成的矩阵</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.arange(<span class="number">1</span>,<span class="number">5</span>).reshape(<span class="number">2</span>,<span class="number">2</span>).<span class="built_in">float</span>()</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 2.],
+        [3., 4.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib <span class="keyword">as</span> mpl</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.plot(A[:,<span class="number">0</span>],A[:,<span class="number">1</span>],<span class="string">&#x27;o&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>[&lt;matplotlib.lines.Line2D at 0x22856f5ae80&gt;]
+</code></pre>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/output_55_1.png"
+                      alt="png"
+                ></p>
+<p>如果更进一步，我们希望在二维空间中找到一条直线，来拟合这两个点，也就是构建一个线性回归模型，我们可以设置线性回归方程如下：</p>
+<p>$$y=ax+b$$</p>
+<p>带入(1,2)和(3,4)两个点后，我们还可以进一步将表达式改写成矩阵表示形式。<br>A*x=B</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/Snipaste_2021-08-01_20-03-43.png"
+                      alt="&quot;矩阵表示形式&quot;"
+                ></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.tensor([[<span class="number">1.0</span>,<span class="number">1</span>],[<span class="number">3</span>,<span class="number">1</span>]])</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 1.],
+        [3., 1.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">B=torch.tensor([<span class="number">2.0</span>,<span class="number">4</span>])</span><br><span class="line">B</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([2., 4.])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.inverse(A) <span class="comment"># 求逆矩阵</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[-0.5000,  0.5000],
+        [ 1.5000, -0.5000]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm(torch.inverse(A),A)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[ 1.0000e+00, -5.9605e-08],
+        [-1.1921e-07,  1.0000e+00]])
+</code></pre>
+<p>$$x=A^{-1}*B$$</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mv(torch.inverse(A),B)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([1.0000, 1.0000])
+</code></pre>
+<p>a=1,b=1<br>最终得到线性方程为$y=x+1$</p>
+<h3 id="五、矩阵的分解"><a href="#五、矩阵的分解" class="headerlink" title="五、矩阵的分解"></a>五、矩阵的分解</h3><p>矩阵的分解也是矩阵运算中常规计算，矩阵分解有很多种类，常见的例如QR分解、LU分解、特征分解和SVD分解，虽然大多数情况下，矩阵分解都是在形式上将矩阵拆分成几种特殊矩阵的乘积。分解之后的等式如下：</p>
+<p>$$A=V \cup D$$</p>
+<ol>
+<li>特征分解<br>特征分解中，矩阵分解形式为：</li>
+</ol>
+<p>$$A = Q \Lambda Q^{-1}$$</p>
+<p>其中Q和$Q^{-1}$互为逆矩阵，Q的列就是A的特征值对应的特征向量，$\Lambda$就是特征值组成的对角矩阵</p>
+<ul>
+<li>torch.eig函数: 特征分解</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.arange(<span class="number">1</span>,<span class="number">10</span>).reshape(<span class="number">3</span>,<span class="number">3</span>).<span class="built_in">float</span>()</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 2., 3.],
+        [4., 5., 6.],
+        [7., 8., 9.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.eig(A,eigenvectors=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>torch.return_types.eig(
+eigenvalues=tensor([[ 1.6117e+01,  0.0000e+00],
+        [-1.1168e+00,  0.0000e+00],
+        [ 2.9486e-07,  0.0000e+00]]),
+eigenvectors=tensor([[-0.2320, -0.7858,  0.4082],
+        [-0.5253, -0.0868, -0.8165],
+        [-0.8187,  0.6123,  0.4082]]))
+</code></pre>
+<ol start="2">
+<li>奇异值分解(SVD)<br>奇异值分解是特征值分解在奇异矩阵上的推广形式，它将一个维度为mxn的奇异矩阵A分解为三个部分：</li>
+</ol>
+<p>$$A = U \sum V^{T}$$</p>
+<p>其中U、V是两个正交矩阵，其中的每一行(列)分别被称为左奇异向量和右奇异向量，他们和$\sum$中对角线上的奇异值相对应，通常情况下我们只保留前k和奇异向量和奇异值。其中U是mxk矩阵，V是nxk矩阵，$\sum$是kxk的方阵，从而减少存储空间的效果</p>
+<p>$$A_{m<em>n} = U_{m</em>n} \sum <em>{m*n} V</em>{n<em>n}^T \approx U_{m</em>k} \sum <em>{k*k}V</em>{k*n}^T$$</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">C=torch.tensor([[<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>],[<span class="number">2.</span>, <span class="number">4.</span>, <span class="number">6.</span>],[<span class="number">3.</span>, <span class="number">6.</span>, <span class="number">9.</span>]])</span><br><span class="line">C</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 2., 3.],
+        [2., 4., 6.],
+        [3., 6., 9.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.svd(C)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>torch.return_types.svd(
+U=tensor([[-2.6726e-01,  9.6362e-01, -3.7767e-08],
+        [-5.3452e-01, -1.4825e-01, -8.3205e-01],
+        [-8.0178e-01, -2.2237e-01,  5.5470e-01]]),
+S=tensor([1.4000e+01, 4.2751e-08, 1.6397e-15]),
+V=tensor([[-0.2673, -0.9636,  0.0000],
+        [-0.5345,  0.1482, -0.8321],
+        [-0.8018,  0.2224,  0.5547]]))
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">CU,CS,CV=torch.svd(C)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.diag(CS)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1.4000e+01, 0.0000e+00, 0.0000e+00],
+        [0.0000e+00, 4.2751e-08, 0.0000e+00],
+        [0.0000e+00, 0.0000e+00, 1.6397e-15]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm(torch.mm(CU,torch.diag(CS)),CV.t())</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1.0000, 2.0000, 3.0000],
+        [2.0000, 4.0000, 6.0000],
+        [3.0000, 6.0000, 9.0000]])
+</code></pre>
+<p>能够看出，上述输出完成还原了C矩阵，此时我们可根据svd输出结果对C进行降维，此时C可只保留第一列，即k=1</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">U1=CU[:,<span class="number">0</span>].reshape(<span class="number">3</span>,<span class="number">1</span>) <span class="comment"># U的第一列</span></span><br><span class="line">U1</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[-0.2673],
+        [-0.5345],
+        [-0.8018]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">C1=CS[<span class="number">0</span>] <span class="comment"># C的第一个值</span></span><br><span class="line">C1</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor(14.0000)
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">V1=CV[:,<span class="number">0</span>].reshape(<span class="number">1</span>,<span class="number">3</span>) <span class="comment"># V 的第一行</span></span><br><span class="line">V1</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[-0.2673, -0.5345, -0.8018]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">torch.mm((U1*C1),V1)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1.0000, 2.0000, 3.0000],
+        [2.0000, 4.0000, 6.0000],
+        [3.0000, 6.0000, 9.0000]])
+</code></pre>
+<p>此时输出的Cd矩阵以及和原矩阵高度相似了，损失信息在R的计算中基本可以忽略不计，经过SVD分解，矩阵的信息能够被压缩至更小的空间内进行存储，从而为PCA（主成分分析）、LSI（潜在语义索引）等算法做好了数学工具层面的铺垫</p>
+]]></content>
+      <tags>
+        <tag>pytorch</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自动求导</title>
+    <url>/2021/07/20/%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="自动求导"><a href="#自动求导" class="headerlink" title="自动求导"></a>自动求导</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span>  torch</span><br><span class="line"><span class="keyword">from</span>    torch <span class="keyword">import</span> autograd</span><br><span class="line"></span><br><span class="line">x = torch.tensor(<span class="number">1.</span>)</span><br><span class="line">a = torch.tensor(<span class="number">1.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">b = torch.tensor(<span class="number">2.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">c = torch.tensor(<span class="number">3.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">y = a**<span class="number">2</span> * x + b * x + c</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;before:&#x27;</span>, a.grad, b.grad, c.grad)</span><br><span class="line">grads = autograd.grad(y, [a, b, c])</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;after :&#x27;</span>, grads[<span class="number">0</span>], grads[<span class="number">1</span>], grads[<span class="number">2</span>])</span><br></pre></td></tr></table></figure>
+<p>1、TENSOR</p>
+<p>torch.Tensor 是包的核心类。如果将其属性 .requires_grad 设置为 True，则会开始跟踪针对 tensor 的所有操作。完成计算后，您可以调用 .backward() 来自动计算所有梯度。该张量的梯度将累积到 .grad 属性中。</p>
+<p>要停止 tensor 历史记录的跟踪，您可以调用 .detach()，它将其与计算历史记录分离，并防止将来的计算被跟踪。</p>
+<p>要停止跟踪历史记录（和使用内存），您还可以将代码块使用 with torch.no_grad(): 包装起来。在评估模型时，这是特别有用，因为模型在训练阶段具有 requires_grad = True 的可训练参数有利于调参，但在评估阶段我们不需要梯度。</p>
+<p>还有一个类对于 autograd 实现非常重要那就是 Function。Tensor 和 Function 互相连接并构建一个非循环图，它保存整个完整的计算过程的历史信息。每个张量都有一个 .grad_fn 属性保存着创建了张量的 Function 的引用，（如果用户自己创建张量，则g rad_fn 是 None ）。</p>
+<p>如果你想计算导数，你可以调用 Tensor.backward()。如果 Tensor 是标量（即它包含一个元素数据），则不需要指定任何参数backward()，但是如果它有更多元素，则需要指定一个gradient 参数来指定张量的形状。</p>
+]]></content>
+      <tags>
+        <tag>pytorch</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>钢铁雄心4 No Step Back</title>
     <url>/2021/12/26/%E9%92%A2%E9%93%81%E9%9B%84%E5%BF%834-No-Step-Back/</url>
-    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h3 id="钢铁雄心4-No-Step-Back-dlc备份"><a href="#钢铁雄心4-No-Step-Back-dlc备份" class="headerlink" title="钢铁雄心4 No Step Back dlc备份"></a>钢铁雄心4 No Step Back dlc备份</h3><p>图片，音乐：Paradox Interactive</p>
-<div id="mplayer881"></div>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h3 id="钢铁雄心4-No-Step-Back-dlc备份"><a href="#钢铁雄心4-No-Step-Back-dlc备份" class="headerlink" title="钢铁雄心4 No Step Back dlc备份"></a>钢铁雄心4 No Step Back dlc备份</h3><p>图片，音乐：Paradox Interactive</p>
+<div id="mplayer6562"></div>
 <script src="https://cdn.jsdelivr.net/gh/MoePlayer/cPlayer/dist/cplayer.js"></script>
 <script>
     new cplayer({
-      element: document.getElementById('mplayer881'),
+      element: document.getElementById('mplayer6562'),
       
 playlist: [
     {
