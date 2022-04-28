@@ -23,6 +23,30 @@
       </tags>
   </entry>
   <entry>
+    <title>ESP8266(nodemcu)引脚和I2C的坑</title>
+    <url>/2022/02/26/ESP8266-nodemcu-%E5%BC%95%E8%84%9A%E5%92%8CI2C%E7%9A%84%E5%9D%91/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.13wi9svcinkw.webp"
+                      alt="image"
+                ></p>
+<p>esp8266的I2C是可以定义引脚的，默认的是SDA为4，SCL为5号引脚，比如这里写的</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.8skt27kaqdo.webp"
+                      alt="image"
+                ></p>
+<p>他不是nodemcu上标注的D4和D5，而是GOIO04和GPIO05，就是上面丝印的D1和D2。然后GPIO02这个引脚是不能当SDA的，因为他链接到了ESP-12上的LED，应该是有限流电阻所以是不能用的，GPIO00也是不能的，因为烧写需要用。</p>
+<p><a class="link"   href="https://www.jianshu.com/p/c1d316ef6e8f" >参考链接<i class="fas fa-external-link-alt"></i></a></p>
+]]></content>
+      <tags>
+        <tag>esp8266</tag>
+        <tag>arduino</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Python学习-1</title>
     <url>/2021/07/03/Python%E5%AD%A6%E4%B9%A0-1/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><ol>
@@ -128,6 +152,275 @@
 ]]></content>
       <tags>
         <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>RANSAC简介</title>
+    <url>/2022/03/20/RANSAC%E7%AE%80%E4%BB%8B/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="一、RANSAC理论介绍"><a href="#一、RANSAC理论介绍" class="headerlink" title="一、RANSAC理论介绍"></a>一、RANSAC理论介绍</h2><p><a class="link"   href="https://www.cnblogs.com/xingshansi/p/6763668.html" >参考链接<i class="fas fa-external-link-alt"></i></a></p>
+<p>普通最小二乘是保守派：在现有数据下，如何实现最优。是从一个整体误差最小的角度去考虑，尽量谁也不得罪。</p>
+<p>RANSAC是改革派：首先假设数据具有某种特性（目的），为了达到目的，适当割舍一些现有的数据。</p>
+<p>给出最小二乘拟合（红线）、RANSAC（绿线）对于一阶直线、二阶曲线的拟合对比：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.5luydudggb80.png"
+                      alt="image"
+                ></p>
+<p>可以看到RANSAC可以很好的拟合。RANSAC可以理解为一种采样的方式，所以对于多项式拟合、混合高斯模型（GMM）等理论上都是适用的。</p>
+<p>RANSAC的算法大致可以表述为（来自wikipedia）：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Given:</span><br><span class="line">    data – a set of observed data points</span><br><span class="line">    model – a model that can be fitted to data points</span><br><span class="line">    n – the minimum number of data values required to fit the model</span><br><span class="line">    k – the maximum number of iterations allowed in the algorithm</span><br><span class="line">    t – a threshold value for determining when a data point fits a model</span><br><span class="line">    d – the number of close data values required to assert that a model fits well to data</span><br><span class="line"></span><br><span class="line">Return:</span><br><span class="line">    bestfit – model parameters which best fit the data (or nul if no good model is found)</span><br><span class="line"></span><br><span class="line">iterations = 0</span><br><span class="line">bestfit = nul</span><br><span class="line">besterr = something really large</span><br><span class="line">while iterations &lt; k &#123;</span><br><span class="line">    maybeinliers = n randomly selected values from data</span><br><span class="line">    maybemodel = model parameters fitted to maybeinliers</span><br><span class="line">    alsoinliers = empty set</span><br><span class="line">    for every point in data not in maybeinliers &#123;</span><br><span class="line">        if point fits maybemodel with an error smaller than t</span><br><span class="line">             add point to alsoinliers</span><br><span class="line">    &#125;</span><br><span class="line">    if the number of elements in alsoinliers is &gt; d &#123;</span><br><span class="line">        % this implies that we may have found a good model</span><br><span class="line">        % now test how good it is</span><br><span class="line">        bettermodel = model parameters fitted to all points in maybeinliers and alsoinliers</span><br><span class="line">        thiserr = a measure of how well model fits these points</span><br><span class="line">        if thiserr &lt; besterr &#123;</span><br><span class="line">            bestfit = bettermodel</span><br><span class="line">            besterr = thiserr</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    increment iterations</span><br><span class="line">&#125;</span><br><span class="line">return bestfit</span><br></pre></td></tr></table></figure>
+
+<p>RANSAC简化版的思路就是：</p>
+<p>第一步：假定模型（如直线方程），并随机抽取Nums个（以2个为例）样本点，对模型进行拟合：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.3lhhyuj4cb80.png"
+                      alt="image"
+                ></p>
+<p>第二步：由于不是严格线性，数据点都有一定波动，假设容差范围为：sigma，找出距离拟合曲线容差范围内的点，并统计点的个数：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.2ihlkqruur60.png"
+                      alt="image"
+                ></p>
+<p>第三步：重新随机选取Nums个点，重复第一步~第二步的操作，直到结束迭代：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.68l3bxf0duo0.png"
+                      alt="image"
+                ></p>
+<p>第四步：每一次拟合后，容差范围内都有对应的数据点数，找出数据点个数最多的情况，就是最终的拟合结果：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.170novhp9mu8.png"
+                      alt="image"
+                ></p>
+<p>至此：完成了RANSAC的简化版求解。</p>
+<ul>
+<li>每一次随机样本数Nums的选取：如二次曲线最少需要3个点确定，一般来说，Nums少一些易得出较优结果；</li>
+<li>抽样迭代次数Iter的选取：即重复多少次抽取，就认为是符合要求从而停止运算？太多计算量大，太少性能可能不够理想；</li>
+<li>容差Sigma的选取：sigma取大取小，对最终结果影响较大；</li>
+</ul>
+<p>算法的求解过程如下：</p>
+<ul>
+<li>首先从数据集中随机选出一组局内点（其数目要保证能够求解出模型的所有参数），计算出一套模型参数。</li>
+<li>用得到的模型去测试其他所有的数据点，如果某点的误差在设定的误差阈值之内，就判定其为局内点，否则为局外点，只保留目前为止局内点数目最多的模型，将其记录为最佳模型。</li>
+<li>重复执行1,2步足够的次数（即达到预设的迭代次数）后，使用最佳模型对应的局内点来最终求解模型参数，该步可以使用最小二乘法等优化算法。</li>
+<li>最后可以通过估计局内点与模型的错误率来评估模型。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span>(<span class="number">0</span>,<span class="string">&#x27;defaultfigurecolor&#x27;</span>,<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">%Generate data</span><br><span class="line">param = [<span class="number">3</span> <span class="number">2</span>]</span><br><span class="line">npa = length(param)</span><br><span class="line">x = -<span class="number">20</span>:<span class="number">20</span></span><br><span class="line">y = param*[x; ones(<span class="number">1</span>,length(x))]+<span class="number">3</span>*randn(<span class="number">1</span>,length(x))</span><br><span class="line">data = [x randi(<span class="number">20</span>,<span class="number">1</span>,<span class="number">30</span>);...</span><br><span class="line">    y randi(<span class="number">20</span>,<span class="number">1</span>,<span class="number">30</span>)]</span><br><span class="line">%figure</span><br><span class="line">figure</span><br><span class="line">subplot <span class="number">221</span></span><br><span class="line">plot(data(<span class="number">1</span>,:),data(<span class="number">2</span>,:),<span class="string">&#x27;k*&#x27;</span>);hold on</span><br><span class="line">%Ordinary least square mean</span><br><span class="line">p = polyfit(data(<span class="number">1</span>,:),data(<span class="number">2</span>,:),npa-<span class="number">1</span>)</span><br><span class="line"><span class="comment"># polyfit</span></span><br><span class="line"><span class="comment"># numpy.polyfit(x, y, deg, rcond=None, full=False, w=None, cov=False)</span></span><br><span class="line"><span class="comment"># Fit a polynomial p(x) = p[0] * x**deg + ... + p[deg] of degree deg to points (x, y). Returns a vector of coefficients p that minimises the squared error in the order deg, deg-1, … 0.</span></span><br><span class="line"></span><br><span class="line">flms = polyval(p,x)</span><br><span class="line">plot(x,flms,<span class="string">&#x27;r&#x27;</span>,<span class="string">&#x27;linewidth&#x27;</span>,<span class="number">2</span>);hold on</span><br><span class="line">title(<span class="string">&#x27;最小二乘拟合&#x27;</span>)</span><br><span class="line"></span><br><span class="line">%Ransac</span><br><span class="line">Iter = <span class="number">100</span></span><br><span class="line">sigma = <span class="number">1</span></span><br><span class="line">Nums = <span class="number">2</span></span><br><span class="line">%number select</span><br><span class="line">res = zeros(Iter,npa+<span class="number">1</span>)</span><br><span class="line"><span class="keyword">for</span> i = <span class="number">1</span>:Iter</span><br><span class="line">idx = randperm(size(data,<span class="number">2</span>),Nums)</span><br><span class="line"><span class="keyword">if</span> diff(idx) ==<span class="number">0</span></span><br><span class="line">   <span class="keyword">continue</span></span><br><span class="line">end</span><br><span class="line">sample = data(:,idx);</span><br><span class="line">pest = polyfit(sample(<span class="number">1</span>,:),sample(<span class="number">2</span>,:),npa-<span class="number">1</span>);%parameter estimate</span><br><span class="line">res(i,<span class="number">1</span>:npa) = pest</span><br><span class="line">res(i,npa+<span class="number">1</span>) = numel(find(<span class="built_in">abs</span>(polyval(pest,data(<span class="number">1</span>,:))-data(<span class="number">2</span>,:))&lt;sigma));</span><br><span class="line">end</span><br><span class="line">[~,pos] = <span class="built_in">max</span>(res(:,npa+<span class="number">1</span>))</span><br><span class="line">pest = res(pos,<span class="number">1</span>:npa)</span><br><span class="line">fransac = polyval(pest,x)</span><br><span class="line">%figure</span><br><span class="line">subplot <span class="number">222</span></span><br><span class="line">plot(data(<span class="number">1</span>,:),data(<span class="number">2</span>,:),<span class="string">&#x27;k*&#x27;</span>)</span><br><span class="line">plot(x,flms,<span class="string">&#x27;r&#x27;</span>,<span class="string">&#x27;linewidth&#x27;</span>,<span class="number">2</span>)</span><br><span class="line">plot(x,fransac,<span class="string">&#x27;g&#x27;</span>,<span class="string">&#x27;linewidth&#x27;</span>,<span class="number">2</span>)</span><br><span class="line">title(<span class="string">&#x27;RANSAC&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="二、RANSAC应用简介"><a href="#二、RANSAC应用简介" class="headerlink" title="二、RANSAC应用简介"></a>二、RANSAC应用简介</h2><p>RANSAC其实就是一种采样方式，例如在图像拼接（Image stitching）技术中：</p>
+<p>第一步：预处理后（据说桶形变换，没有去了解过）提取图像特征（如SIFT）</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.75ko0aiajj00.png"
+                      alt="image"
+                ></p>
+<p>第二步：特征点进行匹配，可利用归一化互相关(Normalized Cross Correlation method, NCC)等方法。</p>
+<p>但这个时候会有很多匹配错误的点：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.5ufxnzd13kk0.png"
+                      alt="image"
+                ></p>
+<p>这就好比拟合曲线，有很多的误差点，这个时候就想到了RANSAC算法：我不要再兼顾所有了，每次选取Nums个点匹配 → 计算匹配后容差范围内的点数 → 重复实验，迭代结束后，找出点数最多的情况，就是最优的匹配。 </p>
+<p>利用RANSAC匹配：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.jnz08yzmank.png"
+                      alt="image"
+                ></p>
+<p>第三步：图像拼接，这个就涉及拼接技术了，直接给出结果：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.1dn8ibtpada8.png"
+                      alt="image"
+                ></p>
+]]></content>
+      <tags>
+        <tag>RANSAC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SLAM十四讲记录</title>
+    <url>/2022/02/26/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="1-经典视觉SLAM框架"><a href="#1-经典视觉SLAM框架" class="headerlink" title="1.经典视觉SLAM框架"></a>1.经典视觉SLAM框架</h2><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.5ndelsfvkdo0.webp"
+                      alt="image"
+                ></p>
+<p>视觉SLAM流程包括以下步骤:</p>
+<ul>
+<li><p><strong>传感器信息读取</strong>: 在视觉SLAM中主要为相机图像信息的读取和预处理.如果是在机器人中,还可能有码盘、惯性传感器等信息的读取和同步.</p>
+</li>
+<li><p><strong>视觉里程计</strong>(Visual Odometry,VO): 视觉里程计的任务是估算相邻图像间相机的运动,以及局部地图的样子.VO又称为前端(Front End).</p>
+<p>  视觉里程计不可避免地会出现累积漂移(Accumulating Drift)问题.</p>
+</li>
+<li><p><strong>后端优化</strong> (Optimization): 后端接受不同时刻视觉里程计测量的相机位姿,以及回环检测的信息,对它们进行优化,得到全局一致的轨迹和地图.由于接在VO之后,又称为后端(Back End).</p>
+<p>  在视觉 SLAM中,前端和计算机视觉研究领域更为相关,比如图像的特征提取与匹配等,后端则主要是滤波与非线性优化算法.</p>
+</li>
+<li><p><strong>回环检测</strong> (Loop Closing): 回环检测判断机器人是否到达过先前的位置.如果检测到回环,它会把信息提供给后端进行处理.</p>
+</li>
+<li><p><strong>建图</strong> (Mapping): 它根据估计的轨迹,建立与任务要求对应的地图.</p>
+<p>  地图的形式包括度量地图(精确表示地图物体的位置关系)与拓扑地图(更强调地图元素之间的关<br>系)两种.</p>
+</li>
+</ul>
+<h2 id="2-SLAM中的数学"><a href="#2-SLAM中的数学" class="headerlink" title="2.SLAM中的数学"></a>2.SLAM中的数学</h2><p>本段<a class="link"   href="https://zhuanlan.zhihu.com/p/93563218" >参考链接<i class="fas fa-external-link-alt"></i></a></p>
+<ol>
+<li><p><strong>旋转矩阵</strong><br> <img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.e4acgq5rjzk.webp"
+                      alt="image"
+                ><br> 旋转矩阵的各分量是两个坐标系基的内积(各基向量夹角的余弦值)，是行列式为1的正交矩阵</p>
+</li>
+<li><p><strong>旋转向量</strong></p>
+</li>
+</ol>
+<ul>
+<li>任意的旋转都可以用一个旋转轴和绕轴的旋转角来描述，简称“轴角”（Axis-Angle）；</li>
+<li>旋转向量，是一个三维向量，其方向与旋转轴一致，长度等于旋转角</li>
+<li>旋转向量与旋转矩阵可以通过罗德里格斯（Rodrigues）变换进行转换</li>
+</ul>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.4tliyetyoj20.webp"
+                      alt="image"
+                ></p>
+<p>其中， n 为旋转轴单位向量， $ \theta $ 为旋转角度， ^ 为向量到反对称矩阵的运算符。</p>
+<p>旋转矩阵到旋转向量的转换过程如下：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.7frqnx7u3fo0.webp"
+                      alt="image"
+                ></p>
+<p>可得转角</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.6yznwkas5pk0.webp"
+                      alt="image"
+                ></p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Eigen/Core&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Eigen/Geometry&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;opencv2/opencv.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. Eigen 实现</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 旋转向量转旋转矩阵</span></span><br><span class="line">    <span class="function">Eigen::Vector3d <span class="title">rvec</span> <span class="params">(r_x, r_y, r_z)</span></span>;     </span><br><span class="line">    <span class="keyword">double</span> n_norm = rvec.<span class="built_in">norm</span>();</span><br><span class="line">    <span class="function">Eigen::AngleAxisd <span class="title">rotation_vector</span> <span class="params">(n_norm, rvec/n_norm)</span></span>;</span><br><span class="line">    Eigen::Matrix3d rotm;</span><br><span class="line">    rotm = rotation_vector.<span class="built_in">toRotationMatrix</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 旋转矩阵转旋转向量</span></span><br><span class="line">    Eigen::Matrix3d rotation_matrix;</span><br><span class="line">    rotation_matrix &lt;&lt; x_00,x_01,x_02,x_10,x_11,x_12,x_20,x_21,x_22;</span><br><span class="line">    Eigen::AngleAxisd rotation_vector;</span><br><span class="line">    rotation_vector.<span class="built_in">fromRotationMatrix</span>(rotation_matrix);</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 2. OpenCV 实现</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 旋转向量转旋转矩阵</span></span><br><span class="line">    cv::Mat rvec = (cv::Mat_&lt;<span class="keyword">double</span>&gt;(<span class="number">3</span>,<span class="number">1</span>) &lt;&lt; r_x, r_y, r_z);</span><br><span class="line">    cv::Mat rotm;</span><br><span class="line">    cv::<span class="built_in">Rodrigues</span>(rvec, rotm);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 旋转矩阵转旋转向量</span></span><br><span class="line">    cv::Mat rvec;</span><br><span class="line">    cv::Mat rotm = (cv::Mat_&lt;<span class="keyword">double</span>&gt;(<span class="number">3</span>,<span class="number">3</span>) &lt;&lt; x_00,x_01,x_02,x_10,x_11,x_12,x_20,x_21,x_22);</span><br><span class="line">    cv::<span class="built_in">Rodrigues</span>(rotm, rvec);</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><strong>欧拉角</strong></li>
+</ol>
+<p>旋转矩阵和旋转向量描述旋转时非常不直观，而欧拉角提供了一种比较直观的表示法：将旋转分解成3次绕不同轴的旋转。由于分解方式有多种，欧拉角也存在不同的定义方法，大致可分为两类：</p>
+<ul>
+<li>绕固定轴旋转</li>
+<li>绕旋转之后的轴旋转</li>
+</ul>
+<p>比较常用的一种欧拉角为 RPY（“偏航 - 俯仰 - 翻转”/ Yaw - Pitch - Roll），等价于 ZYX 轴的旋转：</p>
+<ul>
+<li>绕物体的 Z 轴旋转，得到偏航角 Yaw；</li>
+<li>绕旋转后的 Y 轴旋转，得到俯仰角 Pitch；</li>
+<li>绕旋转后的 X 轴旋转，得到翻转角 Roll。</li>
+</ul>
+<p>欧拉角虽然比较直观，但存在万向节死锁（Gimbal Lock）问题：在俯仰角为正负90° 时，第一次旋转和第三次旋转将使用一个轴，使得系统丢失一个自由度，会发生奇异。因此，欧拉角不适于插值和迭代。</p>
+<ol start="4">
+<li><strong>四元数</strong></li>
+</ol>
+<p>四元数（Quaternion）既是紧凑的，又没有奇异性，缺点是不够直观，运算比较复杂。</p>
+<p>四元数 q 有一个实部和三个虚部，如下所示：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.3umv03j3su00.webp"
+                      alt="image"
+                ></p>
+<p>三个虚部 i,j,k 满足以下关系式：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.2r5j74zydji0.webp"
+                      alt="image"
+                ></p>
+<h3 id="四元数的运算"><a href="#四元数的运算" class="headerlink" title="四元数的运算"></a>四元数的运算</h3><ul>
+<li><p>乘法，合并两个四元数的偏移量，得到总的角位移 四元数的乘法有很多种，其中最常用的一种是格拉丝曼积，与数学多项式乘法相同（与复数乘法概念相同） 乘法满足结合律：abc = (ab)c = a(bc) 但不符合交换律：ab != ba $$ \begin{align} \vec Q_1 \vec Q_2 &amp;= w_1w_2 - \vec u_1 \cdot \vec u_2 + w_1 \vec u_2 + w_2 \vec u_1 + \vec u_1 \times \vec u_2\ &amp;= ((w_1 \vec u_2 + w_2 \vec u_1 + \vec u_1 \times \vec u_2), (w_1w_2 - \vec u_1 \cdot \vec u_2)) \end{align} $$</p>
+</li>
+<li><p>四元数与标量相乘、点积、加法、叉乘、单位化，均与四维向量的点积相同，以点积为例 $$ \begin{align} \vec Q_1 \cdot \vec Q_2 &amp;= (w_1, x_1, y_1, z_1)(w_2, x_2, y_2, z_2) \ &amp;= w_1w_2 + x_1 x_2 + y_1y_2 + z_1z_2 \end{align} $$</p>
+</li>
+<li><p>求模：代表一个四维的长度，与向量的求模方法一致 $$ ||\vec Q|| = \sqrt{w^2 + \vec u \cdot \vec u} = \sqrt{w^2 + x^2 + y^2 + z^2} $$</p>
+</li>
+<li><p>共轭：实部相同，虚部相反（与复数共轭概念相同） $$ \vec Q^* \vec Q = (-\vec u, w) (\vec u,w) = ||\vec Q||^2 = \vec Q \cdot \vec Q $$</p>
+</li>
+<li><p>求逆：为了计算四元数的 “差”，例 给定方位 A 和 B，求 A 旋转到 B 的角位移 d，即：Ad = B，$d = A^{-1}B$ $$ \begin{align} \vec Q\vec Q^{-1} &amp;= 1\ \vec Q^* \vec Q\vec Q^{-1} &amp;= \vec Q^\ ||\vec Q||^2 \cdot \vec Q^{-1} &amp;= \vec Q^\ \vec Q^{-1} &amp;= {\vec Q^* \over ||\vec Q||^2}\ \end{align} $$</p>
+</li>
+<li><p>单位四元数：任意四元数乘以单位四元数后保持不变，$(\vec 0, \pm 1)$，模为 1 单位四元数的 逆 = 共轭，由于共轭比逆好求出，一般用四元数的共轭代替逆使用 几何上存在两个单位四元数 -u 和 u，因为他们几何意义相同都表示没有位移，但数学上只有 u $$ Q_{单位} = {Q \over ||Q||}\ Q_{单位}Q_1 = Q_1Q_{单位} = Q_1\ ((w_1 \vec u + w \vec u_1 + \vec u_1 \times \vec u), (w_1w - \vec u_1 \cdot \vec u)) = (\vec u_1, w_1) $$</p>
+</li>
+</ul>
+<h2 id="3-李群与李代数"><a href="#3-李群与李代数" class="headerlink" title="3.李群与李代数"></a>3.李群与李代数</h2><p>三维旋转矩阵构成了特殊正交群 SO(3)，而变换矩阵构成了特殊欧氏群 SE(3)<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.4gpreest9020.webp"
+                      alt="image"
+                ></p>
+<p>1）群（Group）是一种集合加上一种运算的代数结构。我们把集合记作 A，运算记作 ·，那么群可以记作 G = (A, ·)。群要求这个运算满足以下几个条件：</p>
+<ol>
+<li>封闭性： ∀a1, a2 ∈ A, a1 · a2 ∈ A.</li>
+<li>结合律： ∀a1, a2, a3 ∈ A, (a1 · a2) · a3 = a1 · (a2 · a3).</li>
+<li>幺元： ∃a0 ∈ A, s.t. ∀a ∈ A, a0 · a = a · a0 = a.</li>
+<li>逆： ∀a ∈ A, ∃a 1 ∈ A, s.t. a · a 1 = a0.</li>
+</ol>
+<p>李群是指具有连续（光滑）性质的群</p>
+<h2 id="4-相机与图像"><a href="#4-相机与图像" class="headerlink" title="4.相机与图像"></a>4.相机与图像</h2><h3 id="4个坐标系变换总结"><a href="#4个坐标系变换总结" class="headerlink" title="4个坐标系变换总结"></a>4个坐标系变换总结</h3><p>在视觉 SLAM 中，我们引入了 4 个坐标系，通过不同坐标系观测到同一个点会得到不同的坐标位置，并且存在一定的关系。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.png"
+                      alt="image"
+                ></p>
+<p>世界坐标系到相机坐标系</p>
+<p>世界坐标系与相机坐标系之间仅相差一个旋转和一个平移，我们将图像中的坐标系旋转到与世界坐标系相同的方向，再将两个原点通过平移重合到一起即可完成变换。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.19g6xlfswscg.png"
+                      alt="image"
+                ></p>
+<p>相机坐标系到图像坐标系</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.6k3tmimavhs0.png"
+                      alt="image"
+                ></p>
+<p>在相机坐标系中是三维坐标，投影到成像平面变为二维坐标，丢失的一个维度为焦距。其变换关系为：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.1zgs5q6rblz4.png"
+                      alt="image"
+                ></p>
+<p>图像坐标系到像素坐标系</p>
+<p>像素坐标系与图像坐标系的原点相差一个平移，但是两个坐标系的单位不同，还需要一个比例缩放。变换关系为：</p>
+<p>$ u=\alpha x+c_x $</p>
+<p>​$ v=\beta y+c_y $</p>
+<p>然后我们就可以将这三个变换联立</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="https://cdn.jsdelivr.net/gh/xmcchv/imagebase@main/image.4fhjtt7d9180.png"
+                      alt="image"
+                ></p>
+]]></content>
+      <tags>
+        <tag>SLAM</tag>
       </tags>
   </entry>
   <entry>
@@ -3412,11 +3705,11 @@ V=tensor([[-0.2673, -0.9636,  0.0000],
     <title>钢铁雄心4 No Step Back</title>
     <url>/2021/12/26/%E9%92%A2%E9%93%81%E9%9B%84%E5%BF%834-No-Step-Back/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h3 id="钢铁雄心4-No-Step-Back-dlc备份"><a href="#钢铁雄心4-No-Step-Back-dlc备份" class="headerlink" title="钢铁雄心4 No Step Back dlc备份"></a>钢铁雄心4 No Step Back dlc备份</h3><p>图片，音乐：Paradox Interactive</p>
-<div id="mplayer6562"></div>
+<div id="mplayer4141"></div>
 <script src="https://cdn.jsdelivr.net/gh/MoePlayer/cPlayer/dist/cplayer.js"></script>
 <script>
     new cplayer({
-      element: document.getElementById('mplayer6562'),
+      element: document.getElementById('mplayer4141'),
       
 playlist: [
     {
@@ -3465,6 +3758,102 @@ size:'20px'
 ]]></content>
       <tags>
         <tag>game</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>direct_stereo_slam开源算法记录</title>
+    <url>/2022/04/28/direct-stereo-slam%E5%BC%80%E6%BA%90%E7%AE%97%E6%B3%95%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="/assets/css/APlayer.min.css"><script src="/assets/js/APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="Direct-stereo-slam开源算法记录"><a href="#Direct-stereo-slam开源算法记录" class="headerlink" title="Direct_stereo_slam开源算法记录"></a>Direct_stereo_slam开源算法记录</h2><p>Fast Direct Stereo Visual SLAM</p>
+<p>明尼苏达大学，快速准确立体视觉SLAM，不依赖于特征探测与匹配。作者从单目DSO扩展到双目系统，通过3D点最小光度误差优化双目配置尺度。</p>
+<ul>
+<li>论文地址：<a class="link"   href="https://arxiv.org/pdf/2112.01890.pdf" >https://arxiv.org/pdf/2112.01890.pdf<i class="fas fa-external-link-alt"></i></a></li>
+<li>源码地址：<a class="link"   href="https://github.com/IRVLab/direct_stereo_slam" >https://github.com/IRVLab/direct_stereo_slam<i class="fas fa-external-link-alt"></i></a></li>
+<li>相关工作：Direct Sparse Odometry，A Photometrically Calibrated Benchmark For Monocular Visual Odometry，<a class="link"   href="https://github.com/JakobEngel/dso" >https://github.com/JakobEngel/dso<i class="fas fa-external-link-alt"></i></a></li>
+</ul>
+<h3 id="1-安装DSO"><a href="#1-安装DSO" class="headerlink" title="1.安装DSO"></a>1.安装DSO</h3><p>使用作者给的库来安装 <a class="link"   href="https://github.com/JakobEngel/dso" >https://github.com/JakobEngel/dso<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo apt install libsuitesparse-dev libeigen3-dev libboost-all-dev libopencv-dev</span><br><span class="line">cd dso</span><br><span class="line">mkdir build &amp;&amp; cd build</span><br><span class="line">cmake ..</span><br><span class="line">make -j4</span><br></pre></td></tr></table></figure>
+<p>安装完成后可以使用DSO来测试数据集，如图</p>
+<p>Run on a dataset from <a class="link"   href="https://vision.in.tum.de/mono-dataset" >https://vision.in.tum.de/mono-dataset<i class="fas fa-external-link-alt"></i></a> using</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">bin/dso_dataset \</span><br><span class="line">	files=XXXXX/sequence_XX/images.zip \</span><br><span class="line">	calib=XXXXX/sequence_XX/camera.txt \</span><br><span class="line">	gamma=XXXXX/sequence_XX/pcalib.txt \</span><br><span class="line">	vignette=XXXXX/sequence_XX/vignette.png \</span><br><span class="line">	preset=0 \</span><br><span class="line">	mode=0</span><br></pre></td></tr></table></figure>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/DSO%E6%B5%8B%E8%AF%95.png"
+                      alt="DSO测试"
+                ></p>
+<p>还需要配置DSO_PATH,在cmakelists.txt中修改默认DSO路径即可</p>
+<h3 id="2-kitti-launch配置"><a href="#2-kitti-launch配置" class="headerlink" title="2.kitti.launch配置"></a>2.kitti.launch配置</h3><ol>
+<li><p>首先下载kitti vo数据集，拆分后使用该链接的python文件将image转成rosbag<br><a class="link"   href="https://github.com/JotellyBarros/image2rosbag_KITTIodometry" >https://github.com/JotellyBarros/image2rosbag_KITTIodometry<i class="fas fa-external-link-alt"></i></a></p>
+</li>
+<li><p>使用rosbageditor修改rosbag info<br>链接 <a class="link"   href="https://github.com/facontidavide/rosbag_editor" >https://github.com/facontidavide/rosbag_editor<i class="fas fa-external-link-alt"></i></a></p>
+</li>
+<li><p>在kitti.launch中修改bag路径</p>
+</li>
+<li><p>使用roslaunch direct_stereo_slam kitti.launch 测试kitti数据集<br> 如果出现以下错误，还需要修改对应的camera0和camera1.txt中图像的大小</p>
+<p> <img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/1650966116(1).jpg"
+                      alt="错误"
+                ></p>
+</li>
+</ol>
+<h3 id="3-修改源码使输出的真值格式为tum格式"><a href="#3-修改源码使输出的真值格式为tum格式" class="headerlink" title="3.修改源码使输出的真值格式为tum格式"></a>3.修改源码使输出的真值格式为tum格式</h3><p>tum格式为:timestamp,tx,ty,tz,qx,qy,qz,qw</p>
+<p>在代码的src/loop_closure的LoopHandler.cpp中将dslam_file的输出结构改为</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// lf-&gt;tfm_w_c是g2o::SE3Quat 使用tovector输出tx,ty,tz,qx,qy,qz,qw</span></span><br><span class="line"><span class="keyword">auto</span> r_wc = lf-&gt;tfm_w_c.<span class="built_in">toVector</span>();</span><br><span class="line">    dslam_file &lt;&lt; lf-&gt;incoming_id &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">    dslam_file &lt;&lt; r_wc[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">1</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">2</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">3</span>] &lt;&lt; <span class="string">&quot; &quot;</span></span><br><span class="line">    &lt;&lt; r_wc[<span class="number">4</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">5</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">6</span>] &lt;&lt; std::endl;</span><br></pre></td></tr></table></figure>
+<p>incoming_id对应真值时间戳的序号<br>使用python修改下dslam.txt即可</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os,sys</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">id2times</span>(<span class="params">args</span>):</span></span><br><span class="line">    <span class="comment"># print(args[0],args[1])</span></span><br><span class="line">    tumfile = <span class="built_in">open</span>(args[<span class="number">0</span>],<span class="string">&quot;r&quot;</span>)</span><br><span class="line">    timesfile = <span class="built_in">open</span>(args[<span class="number">1</span>],<span class="string">&quot;r&quot;</span>)</span><br><span class="line">    result = <span class="built_in">open</span>(<span class="string">&quot;id2times_result.txt&quot;</span>,<span class="string">&quot;w&quot;</span>)</span><br><span class="line">    timeslist = []</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> timesfile.readlines():</span><br><span class="line">        line = line.strip()</span><br><span class="line">        timeslist.append(line)</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> tumfile.readlines():</span><br><span class="line">        vector = line.split(<span class="string">&quot; &quot;</span>)</span><br><span class="line">        <span class="comment"># print(vector[0])</span></span><br><span class="line">        vector[<span class="number">0</span>] = timeslist[<span class="built_in">int</span>(vector[<span class="number">0</span>])]</span><br><span class="line">        <span class="comment"># str=vector[0].append(&quot; &quot;)</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">7</span>):</span><br><span class="line">            vector[i] = <span class="string">&#x27;&#x27;</span>.join([vector[i],<span class="string">&#x27; &#x27;</span>])</span><br><span class="line">        result.writelines(vector)</span><br><span class="line">    tumfile.close()</span><br><span class="line">    timesfile.close()</span><br><span class="line">    result.close()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>( sys.argv ) == <span class="number">3</span>:</span><br><span class="line">        id2times(sys.argv[<span class="number">1</span>:])</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>( <span class="string">&quot;Usage: python id2times.py tumfilename timesfilename&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-使用evo工具测评"><a href="#4-使用evo工具测评" class="headerlink" title="4.使用evo工具测评"></a>4.使用evo工具测评</h3><p>下载：pip install evo –upgrade –no-binary evo</p>
+<ol>
+<li>显示轨迹<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">evo_traj tum id2times_result.txt --ref=kitti_00_gt_tum.txt -p --plot_mode=xz -a</span><br></pre></td></tr></table></figure>
+<img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/evo_traj_DSVSLAM_gt_xyz.png"
+                      alt="evo_traj_DSVSLAM_gt_xyz"
+                ></li>
+</ol>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/evo_traj_DSVSLAM_gt_xz.png"
+                      alt="evo_traj_DSVSLAM_gt_xz"
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/image.png"
+                      alt="xyz_viewer"
+                ></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/image1.png"
+                     
+                ></p>
+<ol start="2">
+<li>绝对位姿误差</li>
+</ol>
+<pre><code>evo_ape tum id2times_result.txt kitti_00_gt_tum.txt -r full -va -p
+</code></pre>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/%E7%BB%9D%E5%AF%B9%E4%BD%8D%E5%A7%BF%E8%AF%AF%E5%B7%AE.png"
+                      alt="绝对位姿误差"
+                ></p>
+<h3 id="5-使用ORB-SLAM2测试数据集"><a href="#5-使用ORB-SLAM2测试数据集" class="headerlink" title="5.使用ORB_SLAM2测试数据集"></a>5.使用ORB_SLAM2测试数据集</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/orbslam2_test.png"
+                      alt="orb-slam2_text"
+                ></p>
+]]></content>
+      <tags>
+        <tag>SLAM</tag>
+        <tag>ROS</tag>
+        <tag>DSO</tag>
       </tags>
   </entry>
 </search>

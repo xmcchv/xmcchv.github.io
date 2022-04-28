@@ -192,6 +192,195 @@
                 
 
                 <h3 class="home-article-title">
+                    <a href="/2022/04/28/direct-stereo-slam%E5%BC%80%E6%BA%90%E7%AE%97%E6%B3%95%E8%AE%B0%E5%BD%95/">
+                        direct_stereo_slam开源算法记录
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
+                    
+                        Direct_stereo_slam开源算法记录Fast Direct Stereo Visual SLAM
+明尼苏达大学，快速准确立体视觉SLAM，不依赖于特征探测与匹配。作者从单目DSO扩展到双目系统，通过3D点最小光度误差优化双目配置尺度。
+
+...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Thu Apr 28 2022 19:34:09 GMT+0800">2022-04-28</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/SLAM/">SLAM</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/ROS/">ROS</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/DSO/">DSO</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2022/04/28/direct-stereo-slam%E5%BC%80%E6%BA%90%E7%AE%97%E6%B3%95%E8%AE%B0%E5%BD%95/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
+</div>
+
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                <h3 class="home-article-title">
+                    <a href="/2022/03/20/RANSAC%E7%AE%80%E4%BB%8B/">
+                        RANSAC简介
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
+                    
+                        一、RANSAC理论介绍参考链接
+普通最小二乘是保守派：在现有数据下，如何实现最优。是从一个整体误差最小的角度去考虑，尽量谁也不得罪。
+RANSAC是改革派：首先假设数据具有某种特性（目的），为了达到目的，适当割舍一些现有的数据。
+给出最小二乘拟合（...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Sun Mar 20 2022 09:42:25 GMT+0800">2022-03-20</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/RANSAC/">RANSAC</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2022/03/20/RANSAC%E7%AE%80%E4%BB%8B/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
+</div>
+
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                <h3 class="home-article-title">
+                    <a href="/2022/02/26/ESP8266-nodemcu-%E5%BC%95%E8%84%9A%E5%92%8CI2C%E7%9A%84%E5%9D%91/">
+                        ESP8266(nodemcu)引脚和I2C的坑
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
+                    
+                        
+esp8266的I2C是可以定义引脚的，默认的是SDA为4，SCL为5号引脚，比如这里写的
+
+他不是nodemcu上标注的D4和D5，而是GOIO04和GPIO05，就是上面丝印的D1和D2。然后GPIO02这个引脚是不能当SDA的，因为他链接到了...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Sat Feb 26 2022 20:06:30 GMT+0800">2022-02-26</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/esp8266/">esp8266</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/arduino/">arduino</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2022/02/26/ESP8266-nodemcu-%E5%BC%95%E8%84%9A%E5%92%8CI2C%E7%9A%84%E5%9D%91/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
+</div>
+
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                <h3 class="home-article-title">
+                    <a href="/2022/02/26/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2%E8%AE%B0%E5%BD%95/">
+                        SLAM十四讲记录
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
+                    
+                        1.经典视觉SLAM框架
+视觉SLAM流程包括以下步骤:
+
+传感器信息读取: 在视觉SLAM中主要为相机图像信息的读取和预处理.如果是在机器人中,还可能有码盘、惯性传感器等信息的读取和同步.
+
+视觉里程计(Visual Odometry,VO): 视...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Sat Feb 26 2022 16:54:15 GMT+0800">2022-02-26</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/SLAM/">SLAM</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2022/02/26/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2%E8%AE%B0%E5%BD%95/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
+</div>
+
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                <h3 class="home-article-title">
                     <a href="/2022/02/21/Ubuntu20-04-noetic-ORB-SLAM2%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/">
                         Ubuntu20.04+noetic+ORB_SLAM2安装记录
                     </a>
@@ -295,7 +484,7 @@
 
 
     new cplayer({
-      element: document.getElementById('mplayer656...
+      element: document.getElementById('mplayer414...
                     
                 </div>
 
@@ -448,181 +637,6 @@ pytorch中没有设置单独的矩阵对象类型，因此，在pytorch中二维
     </div>
 
     <a href="/2021/07/27/%E5%BC%A0%E9%87%8F%E7%9A%84%E5%B9%BF%E6%92%AD%E5%92%8C%E7%A7%91%E5%AD%A6%E8%AE%A1%E7%AE%97/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
-</div>
-
-            </li>
-        
-            <li class="home-article-item">
-
-                
-
-                <h3 class="home-article-title">
-                    <a href="/2021/07/24/tensor%E5%9F%BA%E7%A1%80/">
-                        tensor基础
-                    </a>
-                </h3>
-
-                <div class="home-article-content markdown-body">
-                    
-                        张量的创建与常用方法12import numpy as npimport torch
-
-
-12a1=np.array([[1,2,3],[4,5,6]])a1
-
-
-
-
-array([[1, 2, 3],
-       [4, 5, 6]])
-
-12t...
-                    
-                </div>
-
-                <div class="home-article-meta-info-container">
-    <div class="home-article-meta-info">
-        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Sat Jul 24 2021 17:39:29 GMT+0800">2021-07-24</span></span>
-        
-        
-            <span class="home-article-tag">
-                <i class="fas fa-tags"></i>&nbsp;
-                <ul>
-                    
-                        <li>
-                            
-                            <a href="/tags/pytorch/">pytorch</a>&nbsp;
-                        </li>
-                    
-                </ul>
-            </span>
-        
-    </div>
-
-    <a href="/2021/07/24/tensor%E5%9F%BA%E7%A1%80/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
-</div>
-
-            </li>
-        
-            <li class="home-article-item">
-
-                
-
-                <h3 class="home-article-title">
-                    <a href="/2021/07/20/%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC/">
-                        自动求导
-                    </a>
-                </h3>
-
-                <div class="home-article-content markdown-body">
-                    
-                        自动求导12345678910111213import  torchfrom    torch import autogradx = torch.tensor(1.)a = torch.tensor(1., requires_grad=True)b ...
-                    
-                </div>
-
-                <div class="home-article-meta-info-container">
-    <div class="home-article-meta-info">
-        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Tue Jul 20 2021 22:52:19 GMT+0800">2021-07-20</span></span>
-        
-        
-            <span class="home-article-tag">
-                <i class="fas fa-tags"></i>&nbsp;
-                <ul>
-                    
-                        <li>
-                            
-                            <a href="/tags/pytorch/">pytorch</a>&nbsp;
-                        </li>
-                    
-                </ul>
-            </span>
-        
-    </div>
-
-    <a href="/2021/07/20/%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
-</div>
-
-            </li>
-        
-            <li class="home-article-item">
-
-                
-
-                <h3 class="home-article-title">
-                    <a href="/2021/07/07/python%E5%AD%A6%E4%B9%A0-6/">
-                        python学习-6
-                    </a>
-                </h3>
-
-                <div class="home-article-content markdown-body">
-                    
-                        Socket网络编程1. socket()函数Python 中，我们用 socket（）函数来创建套接字，语法格式如下：socket.socket([family[, type[, proto]]])参数
-
-family: 套接字家族可以使 AF_U...
-                    
-                </div>
-
-                <div class="home-article-meta-info-container">
-    <div class="home-article-meta-info">
-        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Wed Jul 07 2021 22:23:45 GMT+0800">2021-07-07</span></span>
-        
-        
-            <span class="home-article-tag">
-                <i class="fas fa-tags"></i>&nbsp;
-                <ul>
-                    
-                        <li>
-                            
-                            <a href="/tags/python/">python</a>&nbsp;
-                        </li>
-                    
-                </ul>
-            </span>
-        
-    </div>
-
-    <a href="/2021/07/07/python%E5%AD%A6%E4%B9%A0-6/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
-</div>
-
-            </li>
-        
-            <li class="home-article-item">
-
-                
-
-                <h3 class="home-article-title">
-                    <a href="/2021/07/07/python%E5%AD%A6%E4%B9%A0-5/">
-                        python学习-5
-                    </a>
-                </h3>
-
-                <div class="home-article-content markdown-body">
-                    
-                        CGI编程CGI(Common Gateway Interface)，通用网关接口，它是一段程序，运行在服务器上如：HTTP 服务器，提供同客户端 HTML 页面的接口。
-操作数据库1. pymysql
-若出现问题pymysql连接数据库报错Type...
-                    
-                </div>
-
-                <div class="home-article-meta-info-container">
-    <div class="home-article-meta-info">
-        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Wed Jul 07 2021 19:01:38 GMT+0800">2021-07-07</span></span>
-        
-        
-            <span class="home-article-tag">
-                <i class="fas fa-tags"></i>&nbsp;
-                <ul>
-                    
-                        <li>
-                            
-                            <a href="/tags/python/">python</a>&nbsp;
-                        </li>
-                    
-                </ul>
-            </span>
-        
-    </div>
-
-    <a href="/2021/07/07/python%E5%AD%A6%E4%B9%A0-5/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
 </div>
 
             </li>
