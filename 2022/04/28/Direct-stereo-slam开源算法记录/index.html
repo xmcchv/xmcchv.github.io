@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="云间之龙">
+    
+    <title>
+        
+            Direct-stereo-slam开源算法记录 |
+        
+        云间小栈
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <link rel="shortcut icon" href="/images/avatar.jpg">
+    
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+
+    <script id="hexo-configurations">
+    let KEEP = window.KEEP || {};
+    KEEP.hexo_config = {"hostname":"xmcchv.github.io","root":"/","language":"zh-CN","path":"search.xml"};
+    KEEP.theme_config = {"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true},"style":{"primary_color":"#0066CC","avatar":"/images/avatar.jpg","favicon":"/images/avatar.jpg","article_img_align":"left","left_side_width":"260px","content_max_width":"920px","hover":{"shadow":true,"scale":false},"first_screen":{"enable":true,"background_img":"/images/bg.svg","description":"凡心所向，素履所往；生如逆旅，一苇以航"},"scroll":{"progress_bar":{"enable":true},"percent":{"enable":true}}},"local_search":{"enable":true,"preload":true},"code_copy":{"enable":true,"style":"default"},"pjax":{"enable":false},"lazyload":{"enable":true},"version":"3.4.5"};
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+  </script>
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+</div>
+
+
+<main class="page-container">
+
+    
+
+    <div class="page-main-content">
+
+        <div class="page-main-content-top">
+            <header class="header-wrapper">
+
+    <div class="header-content">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                云间小栈
+            </a>
+        </div>
+
+        <div class="right">
+            <div class="pc">
+                <ul class="menu-list">
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/"
+                            >
+                                首页
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/archives"
+                            >
+                                归档
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/tags"
+                            >
+                                标签
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="xmcchv.club:2345"
+                            >
+                                下载站
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/about"
+                            >
+                                关于
+                            </a>
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="fas fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list">
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/">首页</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/archives">归档</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/tags">标签</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="xmcchv.club:2345">下载站</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/about">关于</a>
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle">
+
+            <div class="main-content">
+
+                
+                    <div class="fade-in-down-animation">
+    <div class="article-content-container">
+
+        <div class="article-title">
+            <span class="title-hover-animation">Direct-stereo-slam开源算法记录</span>
+        </div>
+
+        
+            <div class="article-header">
+                <div class="avatar">
+                    <img src="/images/avatar.jpg">
+                </div>
+                <div class="info">
+                    <div class="author">
+                        <span class="name">云间之龙</span>
+                        
+                    </div>
+                    <div class="meta-info">
+                        <div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fas fa-edit"></i>&nbsp;
+        <span class="pc">2022-04-28 19:34:09</span>
+        <span class="mobile">2022-04-28 19:34</span>
+    </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fas fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/ROS/">ROS</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/DSO/">DSO</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/SLAM/">SLAM</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+    
+    
+</div>
+
+                    </div>
+                </div>
+            </div>
+        
+
+        <div class="article-content markdown-body">
+            <h1 id="Direct-stereo-slam开源算法记录"><a href="#Direct-stereo-slam开源算法记录" class="headerlink" title="Direct-stereo-slam开源算法记录"></a>Direct-stereo-slam开源算法记录</h1><p>Fast Direct Stereo Visual SLAM</p>
+<p>明尼苏达大学，快速准确立体视觉SLAM，不依赖于特征探测与匹配。作者从单目DSO扩展到双目系统，通过3D点最小光度误差优化双目配置尺度。</p>
+<ul>
+<li>论文地址：<a class="link"   target="_blank" rel="noopener" href="https://arxiv.org/pdf/2112.01890.pdf" >https://arxiv.org/pdf/2112.01890.pdf<i class="fas fa-external-link-alt"></i></a></li>
+<li>源码地址：<a class="link"   target="_blank" rel="noopener" href="https://github.com/IRVLab/direct_stereo_slam" >https://github.com/IRVLab/direct_stereo_slam<i class="fas fa-external-link-alt"></i></a></li>
+<li>相关工作：Direct Sparse Odometry，A Photometrically Calibrated Benchmark For Monocular Visual Odometry，<a class="link"   target="_blank" rel="noopener" href="https://github.com/JakobEngel/dso" >https://github.com/JakobEngel/dso<i class="fas fa-external-link-alt"></i></a></li>
+</ul>
+<h2 id="1-安装DSO"><a href="#1-安装DSO" class="headerlink" title="1.安装DSO"></a>1.安装DSO</h2><p>使用作者给的库来安装 <a class="link"   target="_blank" rel="noopener" href="https://github.com/JakobEngel/dso" >https://github.com/JakobEngel/dso<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install libsuitesparse-dev libeigen3-dev libboost-all-dev libopencv-dev</span><br><span class="line"><span class="built_in">cd</span> dso</span><br><span class="line"><span class="built_in">mkdir</span> build &amp;&amp; <span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">make -j4</span><br></pre></td></tr></table></figure>
+<p>安装完成后可以使用DSO来测试数据集，如图</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Run on a dataset from https://vision.in.tum.de/mono-dataset using</span><br><span class="line"></span><br><span class="line">bin/dso_dataset \</span><br><span class="line">	files=XXXXX/sequence_XX/images.zip \</span><br><span class="line">	calib=XXXXX/sequence_XX/camera.txt \</span><br><span class="line">	gamma=XXXXX/sequence_XX/pcalib.txt \</span><br><span class="line">	vignette=XXXXX/sequence_XX/vignette.png \</span><br><span class="line">	preset=0 \</span><br><span class="line">	mode=0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/DSO%E6%B5%8B%E8%AF%95.png"
+                     
+                ></p>
+<p>还需要配置DSO_PATH,在cmakelists.txt中修改默认DSO路径即可</p>
+<h2 id="2-kitti-launch配置"><a href="#2-kitti-launch配置" class="headerlink" title="2.kitti.launch配置"></a>2.kitti.launch配置</h2><p>1.首先下载kitti vo数据集，拆分后使用该链接的python文件将image转成rosbag<br><a class="link"   target="_blank" rel="noopener" href="https://github.com/JotellyBarros/image2rosbag_KITTIodometry" >https://github.com/JotellyBarros/image2rosbag_KITTIodometry<i class="fas fa-external-link-alt"></i></a></p>
+<p>2.使用rosbageditor修改rosbag info<br>链接 <a class="link"   target="_blank" rel="noopener" href="https://github.com/facontidavide/rosbag_editor" >https://github.com/facontidavide/rosbag_editor<i class="fas fa-external-link-alt"></i></a></p>
+<p>3.在kitti.launch中修改bag路径</p>
+<p>使用roslaunch direct_stereo_slam kitti.launch 测试kitti数据集<br>如果出现以下错误，还需要修改对应的camera0和camera1.txt中图像的大小</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/1650966116(1).jpg"
+                     
+                ></p>
+<h2 id="3-修改源码使输出的真值格式为tum格式"><a href="#3-修改源码使输出的真值格式为tum格式" class="headerlink" title="3.修改源码使输出的真值格式为tum格式"></a>3.修改源码使输出的真值格式为tum格式</h2><p>tum格式为:timestamp,tx,ty,tz,qx,qy,qz,qw</p>
+<p>在代码的src&#x2F;loop_closure的LoopHandler.cpp中将dslam_file的输出结构改为</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// lf-&gt;tfm_w_c是g2o::SE3Quat 使用tovector输出tx,ty,tz,qx,qy,qz,qw</span></span><br><span class="line"><span class="keyword">auto</span> r_wc = lf-&gt;tfm_w_c.<span class="built_in">toVector</span>();</span><br><span class="line">    dslam_file &lt;&lt; lf-&gt;incoming_id &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">    dslam_file &lt;&lt; r_wc[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">1</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">2</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">3</span>] &lt;&lt; <span class="string">&quot; &quot;</span></span><br><span class="line">    &lt;&lt; r_wc[<span class="number">4</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">5</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">6</span>] &lt;&lt; std::endl;</span><br></pre></td></tr></table></figure>
+<p>incoming_id对应真值时间戳的序号<br>使用python修改下dslam.txt即可</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os,sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">id2times</span>(<span class="params">args</span>):</span><br><span class="line">    <span class="comment"># print(args[0],args[1])</span></span><br><span class="line">    tumfile = <span class="built_in">open</span>(args[<span class="number">0</span>],<span class="string">&quot;r&quot;</span>)</span><br><span class="line">    timesfile = <span class="built_in">open</span>(args[<span class="number">1</span>],<span class="string">&quot;r&quot;</span>)</span><br><span class="line">    result = <span class="built_in">open</span>(<span class="string">&quot;id2times_result.txt&quot;</span>,<span class="string">&quot;w&quot;</span>)</span><br><span class="line">    timeslist = []</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> timesfile.readlines():</span><br><span class="line">        line = line.strip()</span><br><span class="line">        timeslist.append(line)</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> tumfile.readlines():</span><br><span class="line">        vector = line.split(<span class="string">&quot; &quot;</span>)</span><br><span class="line">        <span class="comment"># print(vector[0])</span></span><br><span class="line">        vector[<span class="number">0</span>] = timeslist[<span class="built_in">int</span>(vector[<span class="number">0</span>])]</span><br><span class="line">        <span class="comment"># str=vector[0].append(&quot; &quot;)</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">7</span>):</span><br><span class="line">            vector[i] = <span class="string">&#x27;&#x27;</span>.join([vector[i],<span class="string">&#x27; &#x27;</span>])</span><br><span class="line">        result.writelines(vector)</span><br><span class="line">    tumfile.close()</span><br><span class="line">    timesfile.close()</span><br><span class="line">    result.close()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>( sys.argv ) == <span class="number">3</span>:</span><br><span class="line">        id2times(sys.argv[<span class="number">1</span>:])</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>( <span class="string">&quot;Usage: python id2times.py tumfilename timesfilename&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="4-使用evo工具测评"><a href="#4-使用evo工具测评" class="headerlink" title="4.使用evo工具测评"></a>4.使用evo工具测评</h2><p>下载：pip install evo –upgrade –no-binary evo</p>
+<p>1.显示轨迹</p>
+<p>evo_traj tum id2times_result.txt –ref&#x3D;kitti_00_gt_tum.txt -p –plot_mode&#x3D;xz -a<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/evo_traj_DSVSLAM_gt_xyz.png"
+                     
+                ><br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/evo_traj_DSVSLAM_gt_xz.png"
+                     
+                ><br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/image.png"
+                     
+                ><br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/image1.png"
+                     
+                ></p>
+<p>2.绝对位姿误差</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">evo_ape tum id2times_result.txt kitti_00_gt_tum.txt -r full -va -p</span><br></pre></td></tr></table></figure>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/%E7%BB%9D%E5%AF%B9%E4%BD%8D%E5%A7%BF%E8%AF%AF%E5%B7%AE.png"
+                     
+                ></p>
+<p>5.使用ORB_SLAM2测试数据集<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/orbslam2_test.png"
+                     
+                ></p>
+
+        </div>
+
+        
+
+        
+            <ul class="post-tags-box">
+                
+                    <li class="tag-item">
+                        <a href="/tags/ROS/">#ROS</a>&nbsp;
+                    </li>
+                
+                    <li class="tag-item">
+                        <a href="/tags/DSO/">#DSO</a>&nbsp;
+                    </li>
+                
+                    <li class="tag-item">
+                        <a href="/tags/SLAM/">#SLAM</a>&nbsp;
+                    </li>
+                
+            </ul>
+        
+
+        
+            <div class="article-nav">
+                
+                
+                    <div class="article-next">
+                        <a class="next"
+                           rel="next"
+                           href="/2022/02/21/Ubuntu20-04-noetic-ORB-SLAM2%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/"
+                        >
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">Ubuntu20.04+noetic+ORB_SLAM2安装记录</span>
+                                <span class="post-nav-item">下一篇</span>
+                            </span>
+                            <span class="right arrow-icon flex-center">
+                              <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </a>
+                    </div>
+                
+            </div>
+        
+
+        
+    </div>
+</div>
+
+
+                
+            </div>
+
+        </div>
+
+        <div class="page-main-content-bottom">
+            <footer class="footer">
+    <div class="info-container">
+        <div class="copyright-info info-item">
+            &copy;
+            
+              <span>2021</span>
+              -
+            
+            2022&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">云间之龙</a>
+        </div>
+        
+        <div class="theme-info info-item">
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.5</a>
+        </div>
+        
+        
+    </div>
+</footer>
+
+        </div>
+    </div>
+
+    
+        <div class="post-tools">
+            <div class="post-tools-container">
+    <ul class="tools-list">
+        <!-- TOC aside toggle -->
+        
+            <li class="tools-item page-aside-toggle">
+                <i class="fas fa-outdent"></i>
+            </li>
+        
+
+        <!-- go comment -->
+        
+    </ul>
+</div>
+
+        </div>
+    
+
+    <div class="right-bottom-side-tools">
+        <div class="side-tools-container">
+    <ul class="side-tools-list">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <li class="tools-item tool-expand-width flex-center">
+            <i class="fas fa-arrows-alt-h"></i>
+        </li>
+
+        <li class="tools-item tool-dark-light-toggle flex-center">
+            <i class="fas fa-moon"></i>
+        </li>
+
+        <!-- rss -->
+        
+
+        
+
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list">
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+        
+            <li class="tools-item tool-scroll-to-top flex-center">
+                <i class="arrow-up fas fa-arrow-up"></i>
+                <span class="percent"></span>
+            </li>
+        
+    </ul>
+</div>
+
+    </div>
+
+    
+        <aside class="page-aside">
+            <div class="post-toc-wrap">
+    <div class="post-toc">
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Direct-stereo-slam%E5%BC%80%E6%BA%90%E7%AE%97%E6%B3%95%E8%AE%B0%E5%BD%95"><span class="nav-text">Direct-stereo-slam开源算法记录</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%AE%89%E8%A3%85DSO"><span class="nav-text">1.安装DSO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-kitti-launch%E9%85%8D%E7%BD%AE"><span class="nav-text">2.kitti.launch配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E4%BF%AE%E6%94%B9%E6%BA%90%E7%A0%81%E4%BD%BF%E8%BE%93%E5%87%BA%E7%9A%84%E7%9C%9F%E5%80%BC%E6%A0%BC%E5%BC%8F%E4%B8%BAtum%E6%A0%BC%E5%BC%8F"><span class="nav-text">3.修改源码使输出的真值格式为tum格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E4%BD%BF%E7%94%A8evo%E5%B7%A5%E5%85%B7%E6%B5%8B%E8%AF%84"><span class="nav-text">4.使用evo工具测评</span></a></li></ol></li></ol>
+    </div>
+</div>
+        </aside>
+    
+
+    <div class="image-viewer-container">
+    <img src="">
+</div>
+
+
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="popup-btn-close">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+</main>
+
+
+
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/dark-light-toggle.js"></script>
+
+
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+
+    
+<script src="/js/code-copy.js"></script>
+
+
+
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="post-scripts">
+    
+        
+<script src="/js/left-side-toggle.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+<script src="/js/toc.js"></script>
+
+    
+</div>
+
+
+
+</body>
+</html>
