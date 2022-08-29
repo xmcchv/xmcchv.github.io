@@ -23,6 +23,87 @@
       </tags>
   </entry>
   <entry>
+    <title>Direct-stereo-slam开源算法记录</title>
+    <url>/2022/04/28/Direct-stereo-slam%E5%BC%80%E6%BA%90%E7%AE%97%E6%B3%95%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<h1 id="Direct-stereo-slam开源算法记录"><a href="#Direct-stereo-slam开源算法记录" class="headerlink" title="Direct-stereo-slam开源算法记录"></a>Direct-stereo-slam开源算法记录</h1><p>Fast Direct Stereo Visual SLAM</p>
+<p>明尼苏达大学，快速准确立体视觉SLAM，不依赖于特征探测与匹配。作者从单目DSO扩展到双目系统，通过3D点最小光度误差优化双目配置尺度。</p>
+<ul>
+<li>论文地址：<a class="link"   href="https://arxiv.org/pdf/2112.01890.pdf" >https://arxiv.org/pdf/2112.01890.pdf<i class="fas fa-external-link-alt"></i></a></li>
+<li>源码地址：<a class="link"   href="https://github.com/IRVLab/direct_stereo_slam" >https://github.com/IRVLab/direct_stereo_slam<i class="fas fa-external-link-alt"></i></a></li>
+<li>相关工作：Direct Sparse Odometry，A Photometrically Calibrated Benchmark For Monocular Visual Odometry，<a class="link"   href="https://github.com/JakobEngel/dso" >https://github.com/JakobEngel/dso<i class="fas fa-external-link-alt"></i></a></li>
+</ul>
+<h2 id="1-安装DSO"><a href="#1-安装DSO" class="headerlink" title="1.安装DSO"></a>1.安装DSO</h2><p>使用作者给的库来安装 <a class="link"   href="https://github.com/JakobEngel/dso" >https://github.com/JakobEngel/dso<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt install libsuitesparse-dev libeigen3-dev libboost-all-dev libopencv-dev</span><br><span class="line"><span class="built_in">cd</span> dso</span><br><span class="line"><span class="built_in">mkdir</span> build &amp;&amp; <span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">make -j4</span><br></pre></td></tr></table></figure>
+<p>安装完成后可以使用DSO来测试数据集，如图</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Run on a dataset from https://vision.in.tum.de/mono-dataset using</span><br><span class="line"></span><br><span class="line">bin/dso_dataset \</span><br><span class="line">	files=XXXXX/sequence_XX/images.zip \</span><br><span class="line">	calib=XXXXX/sequence_XX/camera.txt \</span><br><span class="line">	gamma=XXXXX/sequence_XX/pcalib.txt \</span><br><span class="line">	vignette=XXXXX/sequence_XX/vignette.png \</span><br><span class="line">	preset=0 \</span><br><span class="line">	mode=0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/DSO%E6%B5%8B%E8%AF%95.png"
+                     
+                ></p>
+<p>还需要配置DSO_PATH,在cmakelists.txt中修改默认DSO路径即可</p>
+<h2 id="2-kitti-launch配置"><a href="#2-kitti-launch配置" class="headerlink" title="2.kitti.launch配置"></a>2.kitti.launch配置</h2><p>1.首先下载kitti vo数据集，拆分后使用该链接的python文件将image转成rosbag<br><a class="link"   href="https://github.com/JotellyBarros/image2rosbag_KITTIodometry" >https://github.com/JotellyBarros/image2rosbag_KITTIodometry<i class="fas fa-external-link-alt"></i></a></p>
+<p>2.使用rosbageditor修改rosbag info<br>链接 <a class="link"   href="https://github.com/facontidavide/rosbag_editor" >https://github.com/facontidavide/rosbag_editor<i class="fas fa-external-link-alt"></i></a></p>
+<p>3.在kitti.launch中修改bag路径</p>
+<p>使用roslaunch direct_stereo_slam kitti.launch 测试kitti数据集<br>如果出现以下错误，还需要修改对应的camera0和camera1.txt中图像的大小</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/1650966116(1).jpg"
+                     
+                ></p>
+<h2 id="3-修改源码使输出的真值格式为tum格式"><a href="#3-修改源码使输出的真值格式为tum格式" class="headerlink" title="3.修改源码使输出的真值格式为tum格式"></a>3.修改源码使输出的真值格式为tum格式</h2><p>tum格式为:timestamp,tx,ty,tz,qx,qy,qz,qw</p>
+<p>在代码的src&#x2F;loop_closure的LoopHandler.cpp中将dslam_file的输出结构改为</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// lf-&gt;tfm_w_c是g2o::SE3Quat 使用tovector输出tx,ty,tz,qx,qy,qz,qw</span></span><br><span class="line"><span class="keyword">auto</span> r_wc = lf-&gt;tfm_w_c.<span class="built_in">toVector</span>();</span><br><span class="line">    dslam_file &lt;&lt; lf-&gt;incoming_id &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">    dslam_file &lt;&lt; r_wc[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">1</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">2</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">3</span>] &lt;&lt; <span class="string">&quot; &quot;</span></span><br><span class="line">    &lt;&lt; r_wc[<span class="number">4</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">5</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">6</span>] &lt;&lt; std::endl;</span><br></pre></td></tr></table></figure>
+<p>incoming_id对应真值时间戳的序号<br>使用python修改下dslam.txt即可</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os,sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">id2times</span>(<span class="params">args</span>):</span><br><span class="line">    <span class="comment"># print(args[0],args[1])</span></span><br><span class="line">    tumfile = <span class="built_in">open</span>(args[<span class="number">0</span>],<span class="string">&quot;r&quot;</span>)</span><br><span class="line">    timesfile = <span class="built_in">open</span>(args[<span class="number">1</span>],<span class="string">&quot;r&quot;</span>)</span><br><span class="line">    result = <span class="built_in">open</span>(<span class="string">&quot;id2times_result.txt&quot;</span>,<span class="string">&quot;w&quot;</span>)</span><br><span class="line">    timeslist = []</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> timesfile.readlines():</span><br><span class="line">        line = line.strip()</span><br><span class="line">        timeslist.append(line)</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> tumfile.readlines():</span><br><span class="line">        vector = line.split(<span class="string">&quot; &quot;</span>)</span><br><span class="line">        <span class="comment"># print(vector[0])</span></span><br><span class="line">        vector[<span class="number">0</span>] = timeslist[<span class="built_in">int</span>(vector[<span class="number">0</span>])]</span><br><span class="line">        <span class="comment"># str=vector[0].append(&quot; &quot;)</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">7</span>):</span><br><span class="line">            vector[i] = <span class="string">&#x27;&#x27;</span>.join([vector[i],<span class="string">&#x27; &#x27;</span>])</span><br><span class="line">        result.writelines(vector)</span><br><span class="line">    tumfile.close()</span><br><span class="line">    timesfile.close()</span><br><span class="line">    result.close()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>( sys.argv ) == <span class="number">3</span>:</span><br><span class="line">        id2times(sys.argv[<span class="number">1</span>:])</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>( <span class="string">&quot;Usage: python id2times.py tumfilename timesfilename&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="4-使用evo工具测评"><a href="#4-使用evo工具测评" class="headerlink" title="4.使用evo工具测评"></a>4.使用evo工具测评</h2><p>下载：pip install evo –upgrade –no-binary evo</p>
+<p>1.显示轨迹</p>
+<p>evo_traj tum id2times_result.txt –ref&#x3D;kitti_00_gt_tum.txt -p –plot_mode&#x3D;xz -a<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/evo_traj_DSVSLAM_gt_xyz.png"
+                     
+                ><br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/evo_traj_DSVSLAM_gt_xz.png"
+                     
+                ><br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/image.png"
+                     
+                ><br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/image1.png"
+                     
+                ></p>
+<p>2.绝对位姿误差</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">evo_ape tum id2times_result.txt kitti_00_gt_tum.txt -r full -va -p</span><br></pre></td></tr></table></figure>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/%E7%BB%9D%E5%AF%B9%E4%BD%8D%E5%A7%BF%E8%AF%AF%E5%B7%AE.png"
+                     
+                ></p>
+<p>5.使用ORB_SLAM2测试数据集<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/orbslam2_test.png"
+                     
+                ></p>
+]]></content>
+      <tags>
+        <tag>DSO</tag>
+        <tag>SLAM</tag>
+        <tag>ROS</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Python学习-1</title>
     <url>/2021/07/03/Python%E5%AD%A6%E4%B9%A0-1/</url>
     <content><![CDATA[<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><ol>
@@ -3568,14 +3649,29 @@ V=tensor([[-0.2673, -0.9636,  0.0000],
       </tags>
   </entry>
   <entry>
+    <title>自动求导</title>
+    <url>/2021/07/20/%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC/</url>
+    <content><![CDATA[<h2 id="自动求导"><a href="#自动求导" class="headerlink" title="自动求导"></a>自动求导</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span>  torch</span><br><span class="line"><span class="keyword">from</span>    torch <span class="keyword">import</span> autograd</span><br><span class="line"></span><br><span class="line">x = torch.tensor(<span class="number">1.</span>)</span><br><span class="line">a = torch.tensor(<span class="number">1.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">b = torch.tensor(<span class="number">2.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">c = torch.tensor(<span class="number">3.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">y = a**<span class="number">2</span> * x + b * x + c</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;before:&#x27;</span>, a.grad, b.grad, c.grad)</span><br><span class="line">grads = autograd.grad(y, [a, b, c])</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;after :&#x27;</span>, grads[<span class="number">0</span>], grads[<span class="number">1</span>], grads[<span class="number">2</span>])</span><br></pre></td></tr></table></figure>
+<p>1、TENSOR</p>
+<p>torch.Tensor 是包的核心类。如果将其属性 .requires_grad 设置为 True，则会开始跟踪针对 tensor 的所有操作。完成计算后，您可以调用 .backward() 来自动计算所有梯度。该张量的梯度将累积到 .grad 属性中。</p>
+<p>要停止 tensor 历史记录的跟踪，您可以调用 .detach()，它将其与计算历史记录分离，并防止将来的计算被跟踪。</p>
+<p>要停止跟踪历史记录（和使用内存），您还可以将代码块使用 with torch.no_grad(): 包装起来。在评估模型时，这是特别有用，因为模型在训练阶段具有 requires_grad &#x3D; True 的可训练参数有利于调参，但在评估阶段我们不需要梯度。</p>
+<p>还有一个类对于 autograd 实现非常重要那就是 Function。Tensor 和 Function 互相连接并构建一个非循环图，它保存整个完整的计算过程的历史信息。每个张量都有一个 .grad_fn 属性保存着创建了张量的 Function 的引用，（如果用户自己创建张量，则g rad_fn 是 None ）。</p>
+<p>如果你想计算导数，你可以调用 Tensor.backward()。如果 Tensor 是标量（即它包含一个元素数据），则不需要指定任何参数backward()，但是如果它有更多元素，则需要指定一个gradient 参数来指定张量的形状。</p>
+]]></content>
+      <tags>
+        <tag>pytorch</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>钢铁雄心4 No Step Back</title>
     <url>/2021/12/26/%E9%92%A2%E9%93%81%E9%9B%84%E5%BF%834-No-Step-Back/</url>
     <content><![CDATA[<h3 id="钢铁雄心4-No-Step-Back-dlc备份"><a href="#钢铁雄心4-No-Step-Back-dlc备份" class="headerlink" title="钢铁雄心4 No Step Back dlc备份"></a>钢铁雄心4 No Step Back dlc备份</h3><p>图片，音乐：Paradox Interactive</p>
-<div id="mplayer3284"></div>
+<div id="mplayer1984"></div>
 <script src="https://cdn.jsdelivr.net/gh/MoePlayer/cPlayer/dist/cplayer.js"></script>
 <script>
     new cplayer({
-      element: document.getElementById('mplayer3284'),
+      element: document.getElementById('mplayer1984'),
       
 playlist: [
     {
@@ -3624,102 +3720,6 @@ size:'20px'
 ]]></content>
       <tags>
         <tag>game</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>自动求导</title>
-    <url>/2021/07/20/%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC/</url>
-    <content><![CDATA[<h2 id="自动求导"><a href="#自动求导" class="headerlink" title="自动求导"></a>自动求导</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span>  torch</span><br><span class="line"><span class="keyword">from</span>    torch <span class="keyword">import</span> autograd</span><br><span class="line"></span><br><span class="line">x = torch.tensor(<span class="number">1.</span>)</span><br><span class="line">a = torch.tensor(<span class="number">1.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">b = torch.tensor(<span class="number">2.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">c = torch.tensor(<span class="number">3.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">y = a**<span class="number">2</span> * x + b * x + c</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;before:&#x27;</span>, a.grad, b.grad, c.grad)</span><br><span class="line">grads = autograd.grad(y, [a, b, c])</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;after :&#x27;</span>, grads[<span class="number">0</span>], grads[<span class="number">1</span>], grads[<span class="number">2</span>])</span><br></pre></td></tr></table></figure>
-<p>1、TENSOR</p>
-<p>torch.Tensor 是包的核心类。如果将其属性 .requires_grad 设置为 True，则会开始跟踪针对 tensor 的所有操作。完成计算后，您可以调用 .backward() 来自动计算所有梯度。该张量的梯度将累积到 .grad 属性中。</p>
-<p>要停止 tensor 历史记录的跟踪，您可以调用 .detach()，它将其与计算历史记录分离，并防止将来的计算被跟踪。</p>
-<p>要停止跟踪历史记录（和使用内存），您还可以将代码块使用 with torch.no_grad(): 包装起来。在评估模型时，这是特别有用，因为模型在训练阶段具有 requires_grad &#x3D; True 的可训练参数有利于调参，但在评估阶段我们不需要梯度。</p>
-<p>还有一个类对于 autograd 实现非常重要那就是 Function。Tensor 和 Function 互相连接并构建一个非循环图，它保存整个完整的计算过程的历史信息。每个张量都有一个 .grad_fn 属性保存着创建了张量的 Function 的引用，（如果用户自己创建张量，则g rad_fn 是 None ）。</p>
-<p>如果你想计算导数，你可以调用 Tensor.backward()。如果 Tensor 是标量（即它包含一个元素数据），则不需要指定任何参数backward()，但是如果它有更多元素，则需要指定一个gradient 参数来指定张量的形状。</p>
-]]></content>
-      <tags>
-        <tag>pytorch</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Direct-stereo-slam开源算法记录</title>
-    <url>/2022/04/28/Direct-stereo-slam%E5%BC%80%E6%BA%90%E7%AE%97%E6%B3%95%E8%AE%B0%E5%BD%95/</url>
-    <content><![CDATA[<h1 id="Direct-stereo-slam开源算法记录"><a href="#Direct-stereo-slam开源算法记录" class="headerlink" title="Direct-stereo-slam开源算法记录"></a>Direct-stereo-slam开源算法记录</h1><p>Fast Direct Stereo Visual SLAM</p>
-<p>明尼苏达大学，快速准确立体视觉SLAM，不依赖于特征探测与匹配。作者从单目DSO扩展到双目系统，通过3D点最小光度误差优化双目配置尺度。</p>
-<ul>
-<li>论文地址：<a class="link"   href="https://arxiv.org/pdf/2112.01890.pdf" >https://arxiv.org/pdf/2112.01890.pdf<i class="fas fa-external-link-alt"></i></a></li>
-<li>源码地址：<a class="link"   href="https://github.com/IRVLab/direct_stereo_slam" >https://github.com/IRVLab/direct_stereo_slam<i class="fas fa-external-link-alt"></i></a></li>
-<li>相关工作：Direct Sparse Odometry，A Photometrically Calibrated Benchmark For Monocular Visual Odometry，<a class="link"   href="https://github.com/JakobEngel/dso" >https://github.com/JakobEngel/dso<i class="fas fa-external-link-alt"></i></a></li>
-</ul>
-<h2 id="1-安装DSO"><a href="#1-安装DSO" class="headerlink" title="1.安装DSO"></a>1.安装DSO</h2><p>使用作者给的库来安装 <a class="link"   href="https://github.com/JakobEngel/dso" >https://github.com/JakobEngel/dso<i class="fas fa-external-link-alt"></i></a></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt install libsuitesparse-dev libeigen3-dev libboost-all-dev libopencv-dev</span><br><span class="line"><span class="built_in">cd</span> dso</span><br><span class="line"><span class="built_in">mkdir</span> build &amp;&amp; <span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">make -j4</span><br></pre></td></tr></table></figure>
-<p>安装完成后可以使用DSO来测试数据集，如图</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Run on a dataset from https://vision.in.tum.de/mono-dataset using</span><br><span class="line"></span><br><span class="line">bin/dso_dataset \</span><br><span class="line">	files=XXXXX/sequence_XX/images.zip \</span><br><span class="line">	calib=XXXXX/sequence_XX/camera.txt \</span><br><span class="line">	gamma=XXXXX/sequence_XX/pcalib.txt \</span><br><span class="line">	vignette=XXXXX/sequence_XX/vignette.png \</span><br><span class="line">	preset=0 \</span><br><span class="line">	mode=0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/DSO%E6%B5%8B%E8%AF%95.png"
-                     
-                ></p>
-<p>还需要配置DSO_PATH,在cmakelists.txt中修改默认DSO路径即可</p>
-<h2 id="2-kitti-launch配置"><a href="#2-kitti-launch配置" class="headerlink" title="2.kitti.launch配置"></a>2.kitti.launch配置</h2><p>1.首先下载kitti vo数据集，拆分后使用该链接的python文件将image转成rosbag<br><a class="link"   href="https://github.com/JotellyBarros/image2rosbag_KITTIodometry" >https://github.com/JotellyBarros/image2rosbag_KITTIodometry<i class="fas fa-external-link-alt"></i></a></p>
-<p>2.使用rosbageditor修改rosbag info<br>链接 <a class="link"   href="https://github.com/facontidavide/rosbag_editor" >https://github.com/facontidavide/rosbag_editor<i class="fas fa-external-link-alt"></i></a></p>
-<p>3.在kitti.launch中修改bag路径</p>
-<p>使用roslaunch direct_stereo_slam kitti.launch 测试kitti数据集<br>如果出现以下错误，还需要修改对应的camera0和camera1.txt中图像的大小</p>
-<p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/1650966116(1).jpg"
-                     
-                ></p>
-<h2 id="3-修改源码使输出的真值格式为tum格式"><a href="#3-修改源码使输出的真值格式为tum格式" class="headerlink" title="3.修改源码使输出的真值格式为tum格式"></a>3.修改源码使输出的真值格式为tum格式</h2><p>tum格式为:timestamp,tx,ty,tz,qx,qy,qz,qw</p>
-<p>在代码的src&#x2F;loop_closure的LoopHandler.cpp中将dslam_file的输出结构改为</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// lf-&gt;tfm_w_c是g2o::SE3Quat 使用tovector输出tx,ty,tz,qx,qy,qz,qw</span></span><br><span class="line"><span class="keyword">auto</span> r_wc = lf-&gt;tfm_w_c.<span class="built_in">toVector</span>();</span><br><span class="line">    dslam_file &lt;&lt; lf-&gt;incoming_id &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">    dslam_file &lt;&lt; r_wc[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">1</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">2</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">3</span>] &lt;&lt; <span class="string">&quot; &quot;</span></span><br><span class="line">    &lt;&lt; r_wc[<span class="number">4</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">5</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; r_wc[<span class="number">6</span>] &lt;&lt; std::endl;</span><br></pre></td></tr></table></figure>
-<p>incoming_id对应真值时间戳的序号<br>使用python修改下dslam.txt即可</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os,sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">id2times</span>(<span class="params">args</span>):</span><br><span class="line">    <span class="comment"># print(args[0],args[1])</span></span><br><span class="line">    tumfile = <span class="built_in">open</span>(args[<span class="number">0</span>],<span class="string">&quot;r&quot;</span>)</span><br><span class="line">    timesfile = <span class="built_in">open</span>(args[<span class="number">1</span>],<span class="string">&quot;r&quot;</span>)</span><br><span class="line">    result = <span class="built_in">open</span>(<span class="string">&quot;id2times_result.txt&quot;</span>,<span class="string">&quot;w&quot;</span>)</span><br><span class="line">    timeslist = []</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> timesfile.readlines():</span><br><span class="line">        line = line.strip()</span><br><span class="line">        timeslist.append(line)</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> tumfile.readlines():</span><br><span class="line">        vector = line.split(<span class="string">&quot; &quot;</span>)</span><br><span class="line">        <span class="comment"># print(vector[0])</span></span><br><span class="line">        vector[<span class="number">0</span>] = timeslist[<span class="built_in">int</span>(vector[<span class="number">0</span>])]</span><br><span class="line">        <span class="comment"># str=vector[0].append(&quot; &quot;)</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">7</span>):</span><br><span class="line">            vector[i] = <span class="string">&#x27;&#x27;</span>.join([vector[i],<span class="string">&#x27; &#x27;</span>])</span><br><span class="line">        result.writelines(vector)</span><br><span class="line">    tumfile.close()</span><br><span class="line">    timesfile.close()</span><br><span class="line">    result.close()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>( sys.argv ) == <span class="number">3</span>:</span><br><span class="line">        id2times(sys.argv[<span class="number">1</span>:])</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>( <span class="string">&quot;Usage: python id2times.py tumfilename timesfilename&quot;</span>)</span><br></pre></td></tr></table></figure>
-<h2 id="4-使用evo工具测评"><a href="#4-使用evo工具测评" class="headerlink" title="4.使用evo工具测评"></a>4.使用evo工具测评</h2><p>下载：pip install evo –upgrade –no-binary evo</p>
-<p>1.显示轨迹</p>
-<p>evo_traj tum id2times_result.txt –ref&#x3D;kitti_00_gt_tum.txt -p –plot_mode&#x3D;xz -a<br><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/evo_traj_DSVSLAM_gt_xyz.png"
-                     
-                ><br><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/evo_traj_DSVSLAM_gt_xz.png"
-                     
-                ><br><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/image.png"
-                     
-                ><br><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/image1.png"
-                     
-                ></p>
-<p>2.绝对位姿误差</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">evo_ape tum id2times_result.txt kitti_00_gt_tum.txt -r full -va -p</span><br></pre></td></tr></table></figure>
-<p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/%E7%BB%9D%E5%AF%B9%E4%BD%8D%E5%A7%BF%E8%AF%AF%E5%B7%AE.png"
-                     
-                ></p>
-<p>5.使用ORB_SLAM2测试数据集<br><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/orbslam2_test.png"
-                     
-                ></p>
-]]></content>
-      <tags>
-        <tag>ROS</tag>
-        <tag>DSO</tag>
-        <tag>SLAM</tag>
       </tags>
   </entry>
 </search>
