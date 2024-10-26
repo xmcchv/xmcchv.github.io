@@ -24,7 +24,7 @@
     "hexo-renderer-stylus": "^2.1.0",
     "hexo-server": "^3.0.0",
     "hexo-tag-mplayer": "^1.0.1",
-    "hexo-theme-keep": "^3.4.5",
+    "hexo-theme-keep": "^3.8.6",
     "hexo-theme-landscape": "^0.0.3"
   }
 }
