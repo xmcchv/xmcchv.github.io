@@ -2,7 +2,8 @@
 title: cmake编译
 date: 2022-02-17 12:06:24
 author: xmcchv
-tags: -cmake
+tags: 
+- cmake
 ---
 
 
