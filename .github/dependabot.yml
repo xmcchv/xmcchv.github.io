@@ -2,7 +2,7 @@ name: DoubleAm's Blog CI/CD
 
 on:
   push:
-    branches: [master] 
+    branches: master
     paths: 
       - '*.json'
       - '**.yml'
