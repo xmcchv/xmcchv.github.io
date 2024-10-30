@@ -11,7 +11,8 @@ branches:
   only:
     - master                      # 只有 main 分支检出更改才触发 CI
 # 执行脚本 
-script:                         
+script:
+  - hexo clean                         
   - hexo generate               # 生成静态文件
 deploy:
   on:
