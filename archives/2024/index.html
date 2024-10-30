@@ -5,40 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="keywords" content="Hexo Theme Keep">
     <meta name="description" content="Hexo Theme Keep">
-    <meta name="author" content="Keep Team">
+    <meta name="author" content="云间之龙">
     
     <title>
         
             归档: 2024 |
         
-        Keep Theme
+        云间小栈
     </title>
     
 <link rel="stylesheet" href="/css/style.css">
 
+    <link rel="shortcut icon" href="/images/avatar.jpg">
     
-        <link rel="shortcut icon" href="/images/logo.svg">
-    
-    
-<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+<link rel="stylesheet" href="/css/font-awesome.min.css">
 
-    
-<link rel="stylesheet" href="/font/css/regular.min.css">
-
-    
-<link rel="stylesheet" href="/font/css/solid.min.css">
-
-    
-<link rel="stylesheet" href="/font/css/brands.min.css">
-
-    
-    <script class="keep-theme-configurations">
-    const KEEP = window.KEEP || {}
-    KEEP.hexo_config = {"hostname":"xmcchv.github.io","root":"/","language":"zh-CN","path":"search.xml"}
-    KEEP.theme_config = {"toc":{"enable":false,"number":false,"expand_all":false,"init_open":true,"layout":"right"},"style":{"primary_color":"#0066cc","logo":"/images/logo.svg","favicon":"/images/logo.svg","avatar":"/images/avatar.svg","first_screen":{"enable":false,"background_img":"/images/bg.svg","description":"Keep writing and Keep loving.","hitokoto":false},"scroll":{"progress_bar":false,"percent":false}},"local_search":{"enable":false,"preload":false},"code_block":{"tools":{"enable":false,"style":"default"},"highlight_theme":"default"},"pjax":{"enable":false},"lazyload":{"enable":false},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.21"},"waline":{"server_url":null,"reaction":false,"version":2},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false}},"post":{"author_label":{"enable":true,"auto":true,"custom_label_list":["Trainee","Engineer","Architect"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":false,"share":false,"reward":{"enable":false,"img_link":null,"text":null}},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":false,"page_pv":false}},"version":"3.8.6"}
-    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
-    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
-    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+    <script id="hexo-configurations">
+    let KEEP = window.KEEP || {};
+    KEEP.hexo_config = {"hostname":"xmcchv.github.io","root":"/","language":"zh-CN","path":"search.xml"};
+    KEEP.theme_config = {"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true},"style":{"primary_color":"#0066CC","avatar":"/images/avatar.jpg","favicon":"/images/avatar.jpg","article_img_align":"left","left_side_width":"260px","content_max_width":"920px","hover":{"shadow":true,"scale":false},"first_screen":{"enable":true,"background_img":"/images/bg.svg","description":"凡心所向，素履所往；生如逆旅，一苇以航"},"scroll":{"progress_bar":{"enable":true},"percent":{"enable":true}}},"local_search":{"enable":true,"preload":true},"code_copy":{"enable":true,"style":"default"},"pjax":{"enable":false},"lazyload":{"enable":true},"version":"3.4.5"};
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
   </script>
 <meta name="generator" content="Hexo 6.2.0"></head>
 
@@ -46,35 +32,31 @@
 <body>
 <div class="progress-bar-container">
     
+        <span class="scroll-progress-bar"></span>
+    
 
     
 </div>
 
 
-<main class="page-container border-box">
+<main class="page-container">
 
-    <!-- home first screen  -->
     
 
-    <!-- page content -->
-    <div class="page-main-content border-box">
-        <div class="page-main-content-top">
-            
-<header class="header-wrapper">
+    <div class="page-main-content">
 
-    <div class="border-box header-content">
-        <div class="left border-box">
+        <div class="page-main-content-top">
+            <header class="header-wrapper">
+
+    <div class="header-content">
+        <div class="left">
             
-                <a class="logo-image border-box" href="/">
-                    <img src="/images/logo.svg">
-                </a>
-            
-            <a class="site-name border-box" href="/">
-               Keep Theme
+            <a class="logo-title" href="/">
+                云间小栈
             </a>
         </div>
 
-        <div class="right border-box">
+        <div class="right">
             <div class="pc">
                 <ul class="menu-list">
                     
@@ -94,10 +76,40 @@
                             </a>
                         </li>
                     
+                        <li class="menu-item">
+                            <a class=""
+                               href="/tags"
+                            >
+                                标签
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               target="_blank" rel="noopener" href="https://xmcchv.vercel.app/zh-CN/"
+                            >
+                                下载站
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/about"
+                            >
+                                关于
+                            </a>
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="fas fa-search"></i>
+                        </li>
                     
                 </ul>
             </div>
             <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
                 
                 <div class="icon-item menu-bar">
                     <div class="menu-bar-middle"></div>
@@ -119,6 +131,21 @@
                        href="/archives">归档</a>
                 </li>
             
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/tags">标签</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       target="_blank" rel="noopener" href="https://xmcchv.vercel.app/zh-CN/">下载站</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/about">关于</a>
+                </li>
+            
         </ul>
     </div>
 
@@ -129,92 +156,181 @@
 
         </div>
 
-        <div class="page-main-content-middle border-box">
+        <div class="page-main-content-middle">
 
-            <div class="main-content border-box">
+            <div class="main-content">
 
                 
-
                     <div class="fade-in-down-animation">
-    <div class="archives-container">
-        <div class="archives-timeline border-box">
-            
-<div class="archive-list-container border-box">
+    <div class="archive-container ">
+        
+<div class="archive-list-container">
     
-        <section class="archive-item border-box">
-            <div class="archive-item-header border-box">
+        <section class="archive-item">
+            <div class="archive-item-header">
                 <span class="archive-year">2024</span>
+                <span class="archive-year-post-count">[3]</span>
             </div>
-            <ul class="article-list border-box">
+            <ul class="article-list">
                 
-                    <li class="article-item border-box">
-                        <span class="article-date border-box">10-27</span>
-                        <a class="article-title border-box text-ellipsis"
-                           href="/2024/10/27/%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC/"
-                        ></a>
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2024/10/30/Linux%E4%B8%8B%E8%BD%AF%E4%BB%B6%E6%89%93%E5%8C%85/"
+                        >矩阵变换</a>
+                        <span class="article-date">10-30</span>
                     </li>
                 
-                    <li class="article-item border-box">
-                        <span class="article-date border-box">10-27</span>
-                        <a class="article-title border-box text-ellipsis"
-                           href="/2024/10/27/tensor%E5%9F%BA%E7%A1%80/"
-                        ></a>
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2024/10/29/%E7%9F%A9%E9%98%B5%E5%8F%98%E6%8D%A2/"
+                        >矩阵变换</a>
+                        <span class="article-date">10-29</span>
                     </li>
                 
-                    <li class="article-item border-box">
-                        <span class="article-date border-box">10-27</span>
-                        <a class="article-title border-box text-ellipsis"
-                           href="/2024/10/27/%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB-%E8%AF%86%E5%88%AB%E8%8A%B1%E6%9C%B5/"
-                        ></a>
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2024/10/25/webviz/"
+                        >Webviz安装记录</a>
+                        <span class="article-date">10-25</span>
                     </li>
                 
-                    <li class="article-item border-box">
-                        <span class="article-date border-box">10-27</span>
-                        <a class="article-title border-box text-ellipsis"
-                           href="/2024/10/27/%E5%9F%BA%E6%9C%AC%E4%BC%98%E5%8C%96%E6%80%9D%E6%83%B3%E4%B8%8E%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/"
-                        ></a>
+            </ul>
+        </section>
+    
+        <section class="archive-item">
+            <div class="archive-item-header">
+                <span class="archive-year">2022</span>
+                <span class="archive-year-post-count">[2]</span>
+            </div>
+            <ul class="article-list">
+                
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2022/02/21/Ubuntu20-04-noetic-ORB-SLAM2%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/"
+                        >Ubuntu20.04+noetic+ORB_SLAM2安装记录</a>
+                        <span class="article-date">02-21</span>
                     </li>
                 
-                    <li class="article-item border-box">
-                        <span class="article-date border-box">10-27</span>
-                        <a class="article-title border-box text-ellipsis"
-                           href="/2024/10/27/%E5%BC%A0%E9%87%8F%E7%9A%84%E5%B9%BF%E6%92%AD%E5%92%8C%E7%A7%91%E5%AD%A6%E8%AE%A1%E7%AE%97/"
-                        ></a>
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2022/02/17/cmake%E7%BC%96%E8%AF%91/"
+                        >cmake编译</a>
+                        <span class="article-date">02-17</span>
                     </li>
                 
-                    <li class="article-item border-box">
-                        <span class="article-date border-box">10-27</span>
-                        <a class="article-title border-box text-ellipsis"
-                           href="/2024/10/27/%E5%BC%A0%E9%87%8F%E7%9A%84%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0%E8%BF%90%E7%AE%97/"
-                        ></a>
+            </ul>
+        </section>
+    
+        <section class="archive-item">
+            <div class="archive-item-header">
+                <span class="archive-year">2021</span>
+                <span class="archive-year-post-count">[15]</span>
+            </div>
+            <ul class="article-list">
+                
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/12/26/%E9%92%A2%E9%93%81%E9%9B%84%E5%BF%834-No-Step-Back/"
+                        >钢铁雄心4 No Step Back</a>
+                        <span class="article-date">12-26</span>
                     </li>
                 
-                    <li class="article-item border-box">
-                        <span class="article-date border-box">10-27</span>
-                        <a class="article-title border-box text-ellipsis"
-                           href="/2024/10/27/imgidentity/"
-                        ></a>
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/08/08/%E5%9F%BA%E6%9C%AC%E4%BC%98%E5%8C%96%E6%80%9D%E6%83%B3%E4%B8%8E%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/"
+                        >基本优化思想与最小二乘法</a>
+                        <span class="article-date">08-08</span>
                     </li>
                 
-                    <li class="article-item border-box">
-                        <span class="article-date border-box">10-27</span>
-                        <a class="article-title border-box text-ellipsis"
-                           href="/2024/10/27/python%E5%AD%A6%E4%B9%A0-2/"
-                        ></a>
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/31/%E5%BC%A0%E9%87%8F%E7%9A%84%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0%E8%BF%90%E7%AE%97/"
+                        >张量的线性代数运算</a>
+                        <span class="article-date">07-31</span>
                     </li>
                 
-                    <li class="article-item border-box">
-                        <span class="article-date border-box">10-27</span>
-                        <a class="article-title border-box text-ellipsis"
-                           href="/2024/10/27/python%E5%AD%A6%E4%B9%A0-3/"
-                        ></a>
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/27/%E5%BC%A0%E9%87%8F%E7%9A%84%E5%B9%BF%E6%92%AD%E5%92%8C%E7%A7%91%E5%AD%A6%E8%AE%A1%E7%AE%97/"
+                        >张量的广播和科学计算</a>
+                        <span class="article-date">07-27</span>
                     </li>
                 
-                    <li class="article-item border-box">
-                        <span class="article-date border-box">10-27</span>
-                        <a class="article-title border-box text-ellipsis"
-                           href="/2024/10/27/python%E5%AD%A6%E4%B9%A0-4/"
-                        ></a>
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/24/tensor%E5%9F%BA%E7%A1%80/"
+                        >tensor基础</a>
+                        <span class="article-date">07-24</span>
+                    </li>
+                
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/20/%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC/"
+                        >自动求导</a>
+                        <span class="article-date">07-20</span>
+                    </li>
+                
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/07/python%E5%AD%A6%E4%B9%A0-6/"
+                        >python学习-6</a>
+                        <span class="article-date">07-07</span>
+                    </li>
+                
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/07/python%E5%AD%A6%E4%B9%A0-5/"
+                        >python学习-5</a>
+                        <span class="article-date">07-07</span>
+                    </li>
+                
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/06/python%E5%AD%A6%E4%B9%A0-4/"
+                        >python学习-4</a>
+                        <span class="article-date">07-06</span>
+                    </li>
+                
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/05/%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB-%E8%AF%86%E5%88%AB%E8%8A%B1%E6%9C%B5/"
+                        >图像分类-识别花朵</a>
+                        <span class="article-date">07-05</span>
+                    </li>
+                
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/05/python%E5%AD%A6%E4%B9%A0-3/"
+                        >python学习-3</a>
+                        <span class="article-date">07-05</span>
+                    </li>
+                
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/05/imgidentity/"
+                        >服装图像分类</a>
+                        <span class="article-date">07-05</span>
+                    </li>
+                
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/05/DCGANs/"
+                        >深度卷积生成对抗网络-手写数字识别</a>
+                        <span class="article-date">07-05</span>
+                    </li>
+                
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/03/python%E5%AD%A6%E4%B9%A0-2/"
+                        >python学习-2</a>
+                        <span class="article-date">07-03</span>
+                    </li>
+                
+                    <li class="article-item">
+                        <a class="article-title"
+                           href="/2021/07/03/Python%E5%AD%A6%E4%B9%A0-1/"
+                        >Python学习-1</a>
+                        <span class="article-date">07-03</span>
                     </li>
                 
             </ul>
@@ -222,92 +338,52 @@
     
 </div>
 
-        </div>
     </div>
-    
-    <div class="paginator border-box flex-center">
-        <div class="btn-wrap">
-            <a class="jump-btn"
-               href="/"
-            ><i class="fa-solid fa-chevron-left"></i></a>
-        </div>
-
-
-        <div class="page-number-box border-box flex-center">
-            <input class="page-number-input border-box base-color-size"
-                   type="number"
-                   value="1"
-                   min="1"
-                   max="2"
-            ><span class="delimiter base-color-size">/</span><span class="base-color-size">2</span>
-        </div>
-
-
-        <div class="btn-wrap allowed">
-            <a class="jump-btn"
-               href="/archives/2024/page/2/"
-            ><i class="fa-solid fa-chevron-right"></i></a>
-        </div>
-    </div>
-
-
-
-
 </div>
 
-
                 
             </div>
 
         </div>
 
-        <div class="page-main-content-bottom border-box">
+        <div class="page-main-content-bottom">
+            <footer class="footer">
+    <div class="info-container">
+        <div class="copyright-info info-item">
+            &copy;
             
-<footer class="footer border-box">
-    <div class="border-box website-info-box default">
-        
-            <div class="copyright-info info-item default">
-                &copy;&nbsp;<span>2020</span>&nbsp;-&nbsp;2024
-                
-                    &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">Keep Team</a>
-                
-            </div>
-
-            <div class="theme-info info-item default">
-                由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
-            </div>
-
+              <span>2021</span>
+              -
             
-
-            
-        
-
-        <div class="count-item info-item default">
-            
-
-            
-
-            
+            2024&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">云间之龙</a>
         </div>
+        
+        <div class="theme-info info-item">
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.5</a>
+        </div>
+        
+        
     </div>
 </footer>
 
         </div>
     </div>
 
-    <!-- post tools -->
     
 
-    <!-- side tools -->
-    <div class="side-tools">
-        <div class="side-tools-container border-box ">
-    <ul class="side-tools-list side-tools-show-handle border-box">
+    <div class="right-bottom-side-tools">
+        <div class="side-tools-container">
+    <ul class="side-tools-list">
         <li class="tools-item tool-font-adjust-plus flex-center">
             <i class="fas fa-search-plus"></i>
         </li>
 
         <li class="tools-item tool-font-adjust-minus flex-center">
             <i class="fas fa-search-minus"></i>
+        </li>
+
+        <li class="tools-item tool-expand-width flex-center">
+            <i class="fas fa-arrows-alt-h"></i>
         </li>
 
         <li class="tools-item tool-dark-light-toggle flex-center">
@@ -317,47 +393,74 @@
         <!-- rss -->
         
 
+        
+
         <li class="tools-item tool-scroll-to-bottom flex-center">
             <i class="fas fa-arrow-down"></i>
         </li>
     </ul>
 
-    <ul class="exposed-tools-list border-box">
-        
-
-        
-
+    <ul class="exposed-tools-list">
         <li class="tools-item tool-toggle-show flex-center">
             <i class="fas fa-cog fa-spin"></i>
         </li>
-
-        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
-            <i class="arrow fas fa-arrow-up"></i>
-            <span class="percent"></span>
-        </li>
+        
+            <li class="tools-item tool-scroll-to-top flex-center">
+                <i class="arrow-up fas fa-arrow-up"></i>
+                <span class="percent"></span>
+            </li>
+        
     </ul>
 </div>
 
     </div>
 
-    <!-- image mask -->
-    <div class="zoom-in-image-mask">
-    <img class="zoom-in-image">
+    
+
+    <div class="image-viewer-container">
+    <img src="">
 </div>
 
 
-    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="popup-btn-close">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
     
 
-    <!-- tablet toc -->
-    
 </main>
 
 
 
-<!-- common -->
 
 <script src="/js/utils.js"></script>
+
+<script src="/js/main.js"></script>
 
 <script src="/js/header-shrink.js"></script>
 
@@ -365,34 +468,28 @@
 
 <script src="/js/dark-light-toggle.js"></script>
 
-<script src="/js/main.js"></script>
-
-<script src="/js/libs/anime.min.js"></script>
 
 
-<!-- local-search -->
-
-
-<!-- code-block -->
-
-
-<!-- lazyload -->
-
-
-<div class="">
     
+<script src="/js/local-search.js"></script>
 
-    <!-- category-page -->
+
+
+
     
+<script src="/js/code-copy.js"></script>
 
-    <!-- links-page -->
+
+
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="post-scripts">
     
 </div>
-
-<!-- mermaid -->
-
-
-<!-- pjax -->
 
 
 

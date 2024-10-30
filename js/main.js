@@ -1,77 +1,65 @@
 /* global KEEP */
 
 window.addEventListener('DOMContentLoaded', () => {
-  const { version, local_search, code_block, lazyload } = KEEP.theme_config
 
   KEEP.themeInfo = {
-    theme: `Keep v${version}`,
+    theme: `Keep v${KEEP.theme_config.version}`,
     author: 'XPoet',
     repository: 'https://github.com/XPoet/hexo-theme-keep'
   }
 
-  KEEP.localStorageKey = 'KEEP-THEME-STATUS'
+  KEEP.localStorageKey = 'KEEP-THEME-STATUS';
 
   KEEP.styleStatus = {
+    isExpandPageWidth: false,
     isDark: false,
     fontSizeLevel: 0,
-    isShowToc: true
+    isOpenPageAside: true
   }
 
   // print theme base info
   KEEP.printThemeInfo = () => {
-    console.log(
-      `\n %c ${KEEP.themeInfo.theme} %c ${KEEP.themeInfo.repository} \n`,
-      `color: #fadfa3; background: #333; padding: 6px 0;`,
-      `padding: 6px 0;`
-    )
-  }
-  KEEP.printThemeInfo()
-
-  // set version number of footer
-  KEEP.setFooterVersion = () => {
-    const vd = document.querySelector('.footer .keep-version')
-    vd && (vd.innerHTML = KEEP.themeInfo.theme)
-    const vd2 = document.querySelector('.footer .shields-keep-version')
-    vd2 && (vd2.src = vd2.src.replace('Keep', KEEP.themeInfo.theme))
+    console.log(`\n %c ${KEEP.themeInfo.theme} %c ${KEEP.themeInfo.repository} \n`, `color: #fadfa3; background: #333; padding: 5px 0;`, `background: #fadfa3; padding: 5px 0;`);
   }
 
   // set styleStatus to localStorage
   KEEP.setStyleStatus = () => {
-    localStorage.setItem(KEEP.localStorageKey, JSON.stringify(KEEP.styleStatus))
+    localStorage.setItem(KEEP.localStorageKey, JSON.stringify(KEEP.styleStatus));
   }
 
   // get styleStatus from localStorage
   KEEP.getStyleStatus = () => {
-    let temp = localStorage.getItem(KEEP.localStorageKey)
+    let temp = localStorage.getItem(KEEP.localStorageKey);
     if (temp) {
-      temp = JSON.parse(temp)
+      temp = JSON.parse(temp);
       for (let key in KEEP.styleStatus) {
-        KEEP.styleStatus[key] = temp[key]
+        KEEP.styleStatus[key] = temp[key];
       }
-      return temp
+      return temp;
     } else {
-      return null
+      return null;
     }
   }
 
-  KEEP.initExecute = () => {
-    KEEP.initUtils()
-    KEEP.initHeaderShrink()
-    KEEP.initModeToggle()
-    KEEP.initBack2Top()
-    KEEP.setFooterVersion()
+  KEEP.refresh = () => {
+    KEEP.initUtils();
+    KEEP.initHeaderShrink();
+    KEEP.initModeToggle();
+    KEEP.initBack2Top();
 
-    if (local_search?.enable === true) {
-      KEEP.initLocalSearch()
+    if (KEEP.theme_config.local_search.enable === true) {
+      KEEP.initLocalSearch();
     }
 
-    if (code_block?.tools?.enable === true) {
-      KEEP.initCodeBlockTools()
+    if (KEEP.theme_config.code_copy.enable === true) {
+      KEEP.initCodeCopy();
     }
 
-    if (lazyload?.enable === true) {
-      KEEP.initLazyLoad()
+    if (KEEP.theme_config.lazyload.enable === true) {
+      KEEP.initLazyLoad();
     }
   }
-  KEEP.initExecute()
-})
+
+  KEEP.printThemeInfo();
+  KEEP.refresh();
+});

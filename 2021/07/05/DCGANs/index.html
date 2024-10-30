@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="云间之龙">
+    
+    <title>
+        
+            深度卷积生成对抗网络-手写数字识别 |
+        
+        云间小栈
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <link rel="shortcut icon" href="/images/avatar.jpg">
+    
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+
+    <script id="hexo-configurations">
+    let KEEP = window.KEEP || {};
+    KEEP.hexo_config = {"hostname":"xmcchv.github.io","root":"/","language":"zh-CN","path":"search.xml"};
+    KEEP.theme_config = {"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true},"style":{"primary_color":"#0066CC","avatar":"/images/avatar.jpg","favicon":"/images/avatar.jpg","article_img_align":"left","left_side_width":"260px","content_max_width":"920px","hover":{"shadow":true,"scale":false},"first_screen":{"enable":true,"background_img":"/images/bg.svg","description":"凡心所向，素履所往；生如逆旅，一苇以航"},"scroll":{"progress_bar":{"enable":true},"percent":{"enable":true}}},"local_search":{"enable":true,"preload":true},"code_copy":{"enable":true,"style":"default"},"pjax":{"enable":false},"lazyload":{"enable":true},"version":"3.4.5"};
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+  </script>
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+</div>
+
+
+<main class="page-container">
+
+    
+
+    <div class="page-main-content">
+
+        <div class="page-main-content-top">
+            <header class="header-wrapper">
+
+    <div class="header-content">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                云间小栈
+            </a>
+        </div>
+
+        <div class="right">
+            <div class="pc">
+                <ul class="menu-list">
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/"
+                            >
+                                首页
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/archives"
+                            >
+                                归档
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/tags"
+                            >
+                                标签
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               target="_blank" rel="noopener" href="https://xmcchv.vercel.app/zh-CN/"
+                            >
+                                下载站
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/about"
+                            >
+                                关于
+                            </a>
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="fas fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list">
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/">首页</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/archives">归档</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/tags">标签</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       target="_blank" rel="noopener" href="https://xmcchv.vercel.app/zh-CN/">下载站</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/about">关于</a>
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle">
+
+            <div class="main-content">
+
+                
+                    <div class="fade-in-down-animation">
+    <div class="article-content-container">
+
+        <div class="article-title">
+            <span class="title-hover-animation">深度卷积生成对抗网络-手写数字识别</span>
+        </div>
+
+        
+            <div class="article-header">
+                <div class="avatar">
+                    <img src="/images/avatar.jpg">
+                </div>
+                <div class="info">
+                    <div class="author">
+                        <span class="name">云间之龙</span>
+                        
+                    </div>
+                    <div class="meta-info">
+                        <div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fas fa-edit"></i>&nbsp;
+        <span class="pc">2021-07-05 13:52:57</span>
+        <span class="mobile">2021-07-05 13:52</span>
+    </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fas fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/Machine-Learning/">Machine Learning</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Tensorflow/">Tensorflow</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E7%94%9F%E6%88%90%E5%AF%B9%E6%8A%97%E7%BD%91%E7%BB%9C/">生成对抗网络</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/">手写数字识别</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+    
+    
+</div>
+
+                    </div>
+                </div>
+            </div>
+        
+
+        <div class="article-content markdown-body">
+            <h2 id="深度卷积生成对抗网络"><a href="#深度卷积生成对抗网络" class="headerlink" title="深度卷积生成对抗网络"></a>深度卷积生成对抗网络</h2><p>生成对抗网络（GANs）是当今计算机科学领域最有趣的想法之一。两个模型通过对抗过程同时训练。一个生成器（“艺术家”）学习创造看起来真实的图像，而判别器（“艺术评论家”）学习区分真假图像。</p>
+<p>本笔记在 MNIST 数据集上演示了该过程。下方动画展示了当训练了 50 个epoch （全部数据集迭代50次） 时生成器所生成的一系列图片。图片从随机噪声开始，随着时间的推移越来越像手写数字。</p>
+<h4 id="本例为TensorFlow官网的例子"><a href="#本例为TensorFlow官网的例子" class="headerlink" title="本例为TensorFlow官网的例子"></a>本例为TensorFlow官网的例子</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> glob</span><br><span class="line"><span class="keyword">import</span> imageio</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> PIL</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras <span class="keyword">import</span> layers</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> IPython <span class="keyword">import</span> display</span><br><span class="line"><span class="comment"># 使用GPU加速</span></span><br><span class="line">os.environ[<span class="string">&quot;CUDA_VISIBLE_DEVICES&quot;</span>] = <span class="string">&quot;0&quot;</span></span><br><span class="line">tf.config.experimental.list_physical_devices(<span class="string">&#x27;GPU&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">make_generator_model</span>():</span><br><span class="line">    model = tf.keras.Sequential()</span><br><span class="line">    model.add(layers.Dense(<span class="number">7</span>*<span class="number">7</span>*<span class="number">256</span>, use_bias=<span class="literal">False</span>, input_shape=(<span class="number">100</span>,)))</span><br><span class="line">    model.add(layers.BatchNormalization())</span><br><span class="line">    model.add(layers.LeakyReLU())</span><br><span class="line"></span><br><span class="line">    model.add(layers.Reshape((<span class="number">7</span>, <span class="number">7</span>, <span class="number">256</span>)))</span><br><span class="line">    <span class="keyword">assert</span> model.output_shape == (<span class="literal">None</span>, <span class="number">7</span>, <span class="number">7</span>, <span class="number">256</span>) <span class="comment"># 注意：batch size 没有限制</span></span><br><span class="line"></span><br><span class="line">    model.add(layers.Conv2DTranspose(<span class="number">128</span>, (<span class="number">5</span>, <span class="number">5</span>), strides=(<span class="number">1</span>, <span class="number">1</span>), padding=<span class="string">&#x27;same&#x27;</span>, use_bias=<span class="literal">False</span>))</span><br><span class="line">    <span class="keyword">assert</span> model.output_shape == (<span class="literal">None</span>, <span class="number">7</span>, <span class="number">7</span>, <span class="number">128</span>)</span><br><span class="line">    model.add(layers.BatchNormalization())</span><br><span class="line">    model.add(layers.LeakyReLU())</span><br><span class="line"></span><br><span class="line">    model.add(layers.Conv2DTranspose(<span class="number">64</span>, (<span class="number">5</span>, <span class="number">5</span>), strides=(<span class="number">2</span>, <span class="number">2</span>), padding=<span class="string">&#x27;same&#x27;</span>, use_bias=<span class="literal">False</span>))</span><br><span class="line">    <span class="keyword">assert</span> model.output_shape == (<span class="literal">None</span>, <span class="number">14</span>, <span class="number">14</span>, <span class="number">64</span>)</span><br><span class="line">    model.add(layers.BatchNormalization())</span><br><span class="line">    model.add(layers.LeakyReLU())</span><br><span class="line"></span><br><span class="line">    model.add(layers.Conv2DTranspose(<span class="number">1</span>, (<span class="number">5</span>, <span class="number">5</span>), strides=(<span class="number">2</span>, <span class="number">2</span>), padding=<span class="string">&#x27;same&#x27;</span>, use_bias=<span class="literal">False</span>, activation=<span class="string">&#x27;tanh&#x27;</span>))</span><br><span class="line">    <span class="keyword">assert</span> model.output_shape == (<span class="literal">None</span>, <span class="number">28</span>, <span class="number">28</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> model</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">make_discriminator_model</span>():</span><br><span class="line">    model = tf.keras.Sequential()</span><br><span class="line">    model.add(layers.Conv2D(<span class="number">64</span>, (<span class="number">5</span>, <span class="number">5</span>), strides=(<span class="number">2</span>, <span class="number">2</span>), padding=<span class="string">&#x27;same&#x27;</span>,input_shape=[<span class="number">28</span>, <span class="number">28</span>, <span class="number">1</span>]))</span><br><span class="line">    model.add(layers.LeakyReLU())</span><br><span class="line">    model.add(layers.Dropout(<span class="number">0.3</span>))</span><br><span class="line"></span><br><span class="line">    model.add(layers.Conv2D(<span class="number">128</span>, (<span class="number">5</span>, <span class="number">5</span>), strides=(<span class="number">2</span>, <span class="number">2</span>), padding=<span class="string">&#x27;same&#x27;</span>))</span><br><span class="line">    model.add(layers.LeakyReLU())</span><br><span class="line">    model.add(layers.Dropout(<span class="number">0.3</span>))</span><br><span class="line"></span><br><span class="line">    model.add(layers.Flatten())</span><br><span class="line">    model.add(layers.Dense(<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> model</span><br><span class="line"></span><br><span class="line">(train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()</span><br><span class="line"></span><br><span class="line">train_images = train_images.reshape(train_images.shape[<span class="number">0</span>], <span class="number">28</span>, <span class="number">28</span>, <span class="number">1</span>).astype(<span class="string">&#x27;float32&#x27;</span>)</span><br><span class="line">train_images = (train_images - <span class="number">127.5</span>) / <span class="number">127.5</span> <span class="comment"># 将图片标准化到 [-1, 1] 区间内</span></span><br><span class="line"></span><br><span class="line">BUFFER_SIZE = <span class="number">60000</span></span><br><span class="line">BATCH_SIZE = <span class="number">256</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 批量化和打乱数据</span></span><br><span class="line">train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用（尚未训练的）生成器创建一张图片。</span></span><br><span class="line">generator = make_generator_model()</span><br><span class="line"></span><br><span class="line">noise = tf.random.normal([<span class="number">1</span>, <span class="number">100</span>])</span><br><span class="line">generated_image = generator(noise, training=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">plt.imshow(generated_image[<span class="number">0</span>, :, :, <span class="number">0</span>], cmap=<span class="string">&#x27;gray&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用（尚未训练的）判别器来对图片的真伪进行判断。模型将被训练为为真实图片输出正值，为伪造图片输出负值。</span></span><br><span class="line">discriminator = make_discriminator_model()</span><br><span class="line">decision = discriminator(generated_image)</span><br><span class="line"><span class="built_in">print</span>(decision)</span><br><span class="line"><span class="comment"># 该方法量化判别器从判断真伪图片的能力。它将判别器对真实图片的预测值与值全为 1 的数组进行对比，将判别器对伪造（生成的）图片的预测值与值全为 0 的数组进行对比。</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">discriminator_loss</span>(<span class="params">real_output, fake_output</span>):</span><br><span class="line">    real_loss = cross_entropy(tf.ones_like(real_output), real_output)</span><br><span class="line">    fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)</span><br><span class="line">    total_loss = real_loss + fake_loss</span><br><span class="line">    <span class="keyword">return</span> total_loss</span><br><span class="line"><span class="comment"># 该方法返回计算交叉熵损失的辅助函数</span></span><br><span class="line">cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">generator_loss</span>(<span class="params">fake_output</span>):</span><br><span class="line">    <span class="keyword">return</span> cross_entropy(tf.ones_like(fake_output), fake_output)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 由于我们需要分别训练两个网络，判别器和生成器的优化器是不同的。</span></span><br><span class="line">generator_optimizer = tf.keras.optimizers.Adam(<span class="number">1e-4</span>)</span><br><span class="line">discriminator_optimizer = tf.keras.optimizers.Adam(<span class="number">1e-4</span>)</span><br><span class="line"></span><br><span class="line">checkpoint_dir = <span class="string">&#x27;./training_checkpoints&#x27;</span></span><br><span class="line">checkpoint_prefix = os.path.join(checkpoint_dir, <span class="string">&quot;ckpt&quot;</span>)</span><br><span class="line">checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,</span><br><span class="line">                                 discriminator_optimizer=discriminator_optimizer,</span><br><span class="line">                                 generator=generator,</span><br><span class="line">                                 discriminator=discriminator)</span><br><span class="line"></span><br><span class="line">EPOCHS = <span class="number">50</span></span><br><span class="line">noise_dim = <span class="number">100</span></span><br><span class="line">num_examples_to_generate = <span class="number">16</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 我们将重复使用该种子（因此在动画 GIF 中更容易可视化进度）</span></span><br><span class="line">seed = tf.random.normal([num_examples_to_generate, noise_dim])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 训练循环在生成器接收到一个随机种子作为输入时开始。该种子用于生产一张图片。判别器随后被用于区分真实图片（选自训练集）和伪造图片（由生成器生成）。针对这里的每一个模型都计算损失函数，并且计算梯度用于更新生成器与判别器。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 注意 `tf.function` 的使用</span></span><br><span class="line"><span class="comment"># 该注解使函数被“编译”</span></span><br><span class="line"><span class="meta">@tf.function</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">train_step</span>(<span class="params">images</span>):</span><br><span class="line">    noise = tf.random.normal([BATCH_SIZE, noise_dim])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> gen_tape, tf.GradientTape() <span class="keyword">as</span> disc_tape:</span><br><span class="line">      generated_images = generator(noise, training=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">      real_output = discriminator(images, training=<span class="literal">True</span>)</span><br><span class="line">      fake_output = discriminator(generated_images, training=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">      gen_loss = generator_loss(fake_output)</span><br><span class="line">      disc_loss = discriminator_loss(real_output, fake_output)</span><br><span class="line"></span><br><span class="line">    gradients_of_generator = gen_tape.gradient(gen_loss, generator.trainable_variables)</span><br><span class="line">    gradients_of_discriminator = disc_tape.gradient(disc_loss, discriminator.trainable_variables)</span><br><span class="line"></span><br><span class="line">    generator_optimizer.apply_gradients(<span class="built_in">zip</span>(gradients_of_generator, generator.trainable_variables))</span><br><span class="line">    discriminator_optimizer.apply_gradients(<span class="built_in">zip</span>(gradients_of_discriminator, discriminator.trainable_variables))</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">dataset, epochs</span>):</span><br><span class="line">  <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(epochs):</span><br><span class="line">    start = time.time()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> image_batch <span class="keyword">in</span> dataset:</span><br><span class="line">      train_step(image_batch)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 继续进行时为 GIF 生成图像</span></span><br><span class="line">    display.clear_output(wait=<span class="literal">True</span>)</span><br><span class="line">    generate_and_save_images(generator,epoch + <span class="number">1</span>,seed)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 每 15 个 epoch 保存一次模型</span></span><br><span class="line">    <span class="keyword">if</span> (epoch + <span class="number">1</span>) % <span class="number">15</span> == <span class="number">0</span>:</span><br><span class="line">      checkpoint.save(file_prefix = checkpoint_prefix)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span> (<span class="string">&#x27;Time for epoch &#123;&#125; is &#123;&#125; sec&#x27;</span>.<span class="built_in">format</span>(epoch + <span class="number">1</span>, time.time()-start))</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 最后一个 epoch 结束后生成图片</span></span><br><span class="line">  display.clear_output(wait=<span class="literal">True</span>)</span><br><span class="line">  generate_and_save_images(generator,epochs,seed)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">generate_and_save_images</span>(<span class="params">model, epoch, test_input</span>):</span><br><span class="line">  <span class="comment"># 注意 training` 设定为 False</span></span><br><span class="line">  <span class="comment"># 因此，所有层都在推理模式下运行（batchnorm）。</span></span><br><span class="line">  predictions = model(test_input, training=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">  fig = plt.figure(figsize=(<span class="number">4</span>,<span class="number">4</span>))</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(predictions.shape[<span class="number">0</span>]):</span><br><span class="line">      plt.subplot(<span class="number">4</span>, <span class="number">4</span>, i+<span class="number">1</span>)</span><br><span class="line">      plt.imshow(predictions[i, :, :, <span class="number">0</span>] * <span class="number">127.5</span> + <span class="number">127.5</span>, cmap=<span class="string">&#x27;gray&#x27;</span>)</span><br><span class="line">      plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line">  plt.savefig(<span class="string">&#x27;image_at_epoch_&#123;:04d&#125;.png&#x27;</span>.<span class="built_in">format</span>(epoch))</span><br><span class="line"></span><br><span class="line">train(train_dataset, EPOCHS)</span><br></pre></td></tr></table></figure>
+
+<p>本人的显卡为GF 940mx，实在太拉跨了，所以没全跑完，epoch到35就结束了。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/949a6c77-4bee-4ac6-a33a-ca61920beadd.gif"
+                      alt="手写数字识别" title="手写数字识别"
+                ></p>
+
+        </div>
+
+        
+
+        
+            <ul class="post-tags-box">
+                
+                    <li class="tag-item">
+                        <a href="/tags/Machine-Learning/">#Machine Learning</a>&nbsp;
+                    </li>
+                
+                    <li class="tag-item">
+                        <a href="/tags/Tensorflow/">#Tensorflow</a>&nbsp;
+                    </li>
+                
+                    <li class="tag-item">
+                        <a href="/tags/%E7%94%9F%E6%88%90%E5%AF%B9%E6%8A%97%E7%BD%91%E7%BB%9C/">#生成对抗网络</a>&nbsp;
+                    </li>
+                
+                    <li class="tag-item">
+                        <a href="/tags/%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/">#手写数字识别</a>&nbsp;
+                    </li>
+                
+            </ul>
+        
+
+        
+            <div class="article-nav">
+                
+                    <div class="article-prev">
+                        <a class="prev"
+                           rel="prev"
+                           href="/2021/07/05/imgidentity/"
+                        >
+                            <span class="left arrow-icon flex-center">
+                              <i class="fas fa-chevron-left"></i>
+                            </span>
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">服装图像分类</span>
+                                <span class="post-nav-item">上一篇</span>
+                            </span>
+                        </a>
+                    </div>
+                
+                
+                    <div class="article-next">
+                        <a class="next"
+                           rel="next"
+                           href="/2021/07/03/python%E5%AD%A6%E4%B9%A0-2/"
+                        >
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">python学习-2</span>
+                                <span class="post-nav-item">下一篇</span>
+                            </span>
+                            <span class="right arrow-icon flex-center">
+                              <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </a>
+                    </div>
+                
+            </div>
+        
+
+        
+    </div>
+</div>
+
+
+                
+            </div>
+
+        </div>
+
+        <div class="page-main-content-bottom">
+            <footer class="footer">
+    <div class="info-container">
+        <div class="copyright-info info-item">
+            &copy;
+            
+              <span>2021</span>
+              -
+            
+            2024&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">云间之龙</a>
+        </div>
+        
+        <div class="theme-info info-item">
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.5</a>
+        </div>
+        
+        
+    </div>
+</footer>
+
+        </div>
+    </div>
+
+    
+        <div class="post-tools">
+            <div class="post-tools-container">
+    <ul class="tools-list">
+        <!-- TOC aside toggle -->
+        
+            <li class="tools-item page-aside-toggle">
+                <i class="fas fa-outdent"></i>
+            </li>
+        
+
+        <!-- go comment -->
+        
+    </ul>
+</div>
+
+        </div>
+    
+
+    <div class="right-bottom-side-tools">
+        <div class="side-tools-container">
+    <ul class="side-tools-list">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <li class="tools-item tool-expand-width flex-center">
+            <i class="fas fa-arrows-alt-h"></i>
+        </li>
+
+        <li class="tools-item tool-dark-light-toggle flex-center">
+            <i class="fas fa-moon"></i>
+        </li>
+
+        <!-- rss -->
+        
+
+        
+
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list">
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+        
+            <li class="tools-item tool-scroll-to-top flex-center">
+                <i class="arrow-up fas fa-arrow-up"></i>
+                <span class="percent"></span>
+            </li>
+        
+    </ul>
+</div>
+
+    </div>
+
+    
+        <aside class="page-aside">
+            <div class="post-toc-wrap">
+    <div class="post-toc">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B1%E5%BA%A6%E5%8D%B7%E7%A7%AF%E7%94%9F%E6%88%90%E5%AF%B9%E6%8A%97%E7%BD%91%E7%BB%9C"><span class="nav-text">深度卷积生成对抗网络</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%AC%E4%BE%8B%E4%B8%BATensorFlow%E5%AE%98%E7%BD%91%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-text">本例为TensorFlow官网的例子</span></a></li></ol></li></ol></li></ol>
+    </div>
+</div>
+        </aside>
+    
+
+    <div class="image-viewer-container">
+    <img src="">
+</div>
+
+
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="popup-btn-close">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+</main>
+
+
+
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/dark-light-toggle.js"></script>
+
+
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+
+    
+<script src="/js/code-copy.js"></script>
+
+
+
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="post-scripts">
+    
+        
+<script src="/js/left-side-toggle.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+<script src="/js/toc.js"></script>
+
+    
+</div>
+
+
+
+</body>
+</html>

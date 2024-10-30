@@ -5,40 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="keywords" content="Hexo Theme Keep">
     <meta name="description" content="Hexo Theme Keep">
-    <meta name="author" content="Keep Team">
+    <meta name="author" content="云间之龙">
     
     <title>
         
             Ubuntu20.04+noetic+ORB_SLAM2安装记录 |
         
-        Keep Theme
+        云间小栈
     </title>
     
 <link rel="stylesheet" href="/css/style.css">
 
+    <link rel="shortcut icon" href="/images/avatar.jpg">
     
-        <link rel="shortcut icon" href="/images/logo.svg">
-    
-    
-<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+<link rel="stylesheet" href="/css/font-awesome.min.css">
 
-    
-<link rel="stylesheet" href="/font/css/regular.min.css">
-
-    
-<link rel="stylesheet" href="/font/css/solid.min.css">
-
-    
-<link rel="stylesheet" href="/font/css/brands.min.css">
-
-    
-    <script class="keep-theme-configurations">
-    const KEEP = window.KEEP || {}
-    KEEP.hexo_config = {"hostname":"xmcchv.github.io","root":"/","language":"zh-CN","path":"search.xml"}
-    KEEP.theme_config = {"toc":{"enable":false,"number":false,"expand_all":false,"init_open":true,"layout":"right"},"style":{"primary_color":"#0066cc","logo":"/images/logo.svg","favicon":"/images/logo.svg","avatar":"/images/avatar.svg","first_screen":{"enable":false,"background_img":"/images/bg.svg","description":"Keep writing and Keep loving.","hitokoto":false},"scroll":{"progress_bar":false,"percent":false}},"local_search":{"enable":false,"preload":false},"code_block":{"tools":{"enable":false,"style":"default"},"highlight_theme":"default"},"pjax":{"enable":false},"lazyload":{"enable":false},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.21"},"waline":{"server_url":null,"reaction":false,"version":2},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false}},"post":{"author_label":{"enable":true,"auto":true,"custom_label_list":["Trainee","Engineer","Architect"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":false,"share":false,"reward":{"enable":false,"img_link":null,"text":null}},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":false,"page_pv":false}},"version":"3.8.6"}
-    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
-    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
-    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+    <script id="hexo-configurations">
+    let KEEP = window.KEEP || {};
+    KEEP.hexo_config = {"hostname":"xmcchv.github.io","root":"/","language":"zh-CN","path":"search.xml"};
+    KEEP.theme_config = {"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true},"style":{"primary_color":"#0066CC","avatar":"/images/avatar.jpg","favicon":"/images/avatar.jpg","article_img_align":"left","left_side_width":"260px","content_max_width":"920px","hover":{"shadow":true,"scale":false},"first_screen":{"enable":true,"background_img":"/images/bg.svg","description":"凡心所向，素履所往；生如逆旅，一苇以航"},"scroll":{"progress_bar":{"enable":true},"percent":{"enable":true}}},"local_search":{"enable":true,"preload":true},"code_copy":{"enable":true,"style":"default"},"pjax":{"enable":false},"lazyload":{"enable":true},"version":"3.4.5"};
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
   </script>
 <meta name="generator" content="Hexo 6.2.0"></head>
 
@@ -46,35 +32,31 @@
 <body>
 <div class="progress-bar-container">
     
+        <span class="scroll-progress-bar"></span>
+    
 
     
 </div>
 
 
-<main class="page-container border-box">
+<main class="page-container">
 
-    <!-- home first screen  -->
     
 
-    <!-- page content -->
-    <div class="page-main-content border-box">
-        <div class="page-main-content-top">
-            
-<header class="header-wrapper">
+    <div class="page-main-content">
 
-    <div class="border-box header-content">
-        <div class="left border-box">
+        <div class="page-main-content-top">
+            <header class="header-wrapper">
+
+    <div class="header-content">
+        <div class="left">
             
-                <a class="logo-image border-box" href="/">
-                    <img src="/images/logo.svg">
-                </a>
-            
-            <a class="site-name border-box" href="/">
-               Keep Theme
+            <a class="logo-title" href="/">
+                云间小栈
             </a>
         </div>
 
-        <div class="right border-box">
+        <div class="right">
             <div class="pc">
                 <ul class="menu-list">
                     
@@ -94,10 +76,40 @@
                             </a>
                         </li>
                     
+                        <li class="menu-item">
+                            <a class=""
+                               href="/tags"
+                            >
+                                标签
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               target="_blank" rel="noopener" href="https://xmcchv.vercel.app/zh-CN/"
+                            >
+                                下载站
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/about"
+                            >
+                                关于
+                            </a>
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="fas fa-search"></i>
+                        </li>
                     
                 </ul>
             </div>
             <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
                 
                 <div class="icon-item menu-bar">
                     <div class="menu-bar-middle"></div>
@@ -119,6 +131,21 @@
                        href="/archives">归档</a>
                 </li>
             
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/tags">标签</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       target="_blank" rel="noopener" href="https://xmcchv.vercel.app/zh-CN/">下载站</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/about">关于</a>
+                </li>
+            
         </ul>
     </div>
 
@@ -129,105 +156,85 @@
 
         </div>
 
-        <div class="page-main-content-middle border-box">
+        <div class="page-main-content-middle">
 
-            <div class="main-content border-box">
+            <div class="main-content">
 
                 
-
                     <div class="fade-in-down-animation">
-    <div class="post-page-container border-box">
+    <div class="article-content-container">
 
-        <div class="article-content-container border-box">
+        <div class="article-title">
+            <span class="title-hover-animation">Ubuntu20.04+noetic+ORB_SLAM2安装记录</span>
+        </div>
 
-            
-
-            <div class="article-content-bottom border-box">
-                
-                    <div class="article-title">
-                        Ubuntu20.04+noetic+ORB_SLAM2安装记录
+        
+            <div class="article-header">
+                <div class="avatar">
+                    <img src="/images/avatar.jpg">
+                </div>
+                <div class="info">
+                    <div class="author">
+                        <span class="name">云间之龙</span>
+                        
                     </div>
+                    <div class="meta-info">
+                        <div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fas fa-edit"></i>&nbsp;
+        <span class="pc">2022-02-21 14:31:13</span>
+        <span class="mobile">2022-02-21 14:31</span>
+    </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fas fa-tags"></i>&nbsp;
+            <ul>
                 
-
+                    <li>
+                        <a href="/tags/ROS/">ROS</a>&nbsp;
+                    </li>
                 
-                    <div class="article-header border-box">
-                        
-                            <div class="avatar-box border-box">
-                                <img src="/images/avatar.svg">
-                            </div>
-                        
-                        <div class="info-box">
-                            <div class="author">
-                                <span class="name">Keep Team</span>
-                                
-                                    <span class="author-label">Lv3</span>
-                                
-                            </div>
-                            <div class="meta-info border-box">
-                                
+                    <li>
+                        | <a href="/tags/ORB-SLAM2/">ORB_SLAM2</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
 
-<div class="article-meta-info-container border-box post">
-    <div class="article-meta-info border-box">
-        
-
-
-        
-            <span class="meta-info-item article-create-date">
-                <i class="icon fa-solid fa-calendar-check"></i>&nbsp;
-                <span class="pc">2022-02-21 14:31:13</span>
-                <span class="mobile">2022-02-21 14:31</span>
-            </span>
-
-            <span class="meta-info-item article-update-date">
-                <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                <span class="pc" data-updated="Sun Oct 27 2024 00:42:49 GMT+0800">2024-10-27 00:42:49</span>
-            </span>
-        
-
-        
-
-        
-            <span class="article-tag meta-info-item border-box">
-                <i class="icon fas fa-tags"></i>&nbsp;
-                <ul class="article-tag-ul">
-                    
-                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/ROS/">ROS</a></li>
-                        
-                    
-                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/ORB-SLAM2/">ORB_SLAM2</a></li>
-                        
-                    
-                </ul>
-            </span>
-        
-
-        
-        
-        
-        
-    </div>
-
+    
+    
+    
     
 </div>
 
-                            </div>
-                        </div>
                     </div>
-                
+                </div>
+            </div>
+        
 
-                <div class="article-content keep-markdown-body">
-                    
-
-                    <h2 id="Ubuntu20-04-安装-noetic"><a href="#Ubuntu20-04-安装-noetic" class="headerlink" title="Ubuntu20.04 安装 noetic"></a>Ubuntu20.04 安装 noetic</h2><p>本段教程参考于 <a class="link"   target="_blank" rel="noopener" href="https://www.guyuehome.com/12640" >https://www.guyuehome.com/12640<i class="fas fa-external-link-alt"></i></a></p>
+        <div class="article-content markdown-body">
+            <h2 id="Ubuntu20-04-安装-noetic"><a href="#Ubuntu20-04-安装-noetic" class="headerlink" title="Ubuntu20.04 安装 noetic"></a>Ubuntu20.04 安装 noetic</h2><p>本段教程参考于 <a class="link"   target="_blank" rel="noopener" href="https://www.guyuehome.com/12640" >https://www.guyuehome.com/12640<i class="fas fa-external-link-alt"></i></a></p>
 <ol>
-<li><p>安装过程与ROS官网一致，网络无法连接时可以换个服务器,或使用国内镜像<br> <img src="/images/choose_best_server.png" alt="选择最快的服务器"><br> 安装完成后可以跑以下小乌龟的例子看一下是否ok</p>
+<li><p>安装过程与ROS官网一致，网络无法连接时可以换个服务器,或使用国内镜像<br> <img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/choose_best_server.png"
+                      alt="选择最快的服务器"
+                ><br> 安装完成后可以跑以下小乌龟的例子看一下是否ok</p>
 </li>
 <li><p>安装完成后需要 sudo rosdep init ,提示website may be down ,总之在浏览器中可以打开这个网址，但终端中不能访问到，复制代码，新建文件，手动放到目录&#x2F;etc&#x2F;ros&#x2F;rosdep&#x2F;sources.list.d下</p>
 </li>
 </ol>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo rosdep init</span><br><span class="line">rosdep update</span><br></pre></td></tr></table></figure>
 
-<p><img src="/images/raw_githubcontent_rosdep_init.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/raw_githubcontent_rosdep_init.png"
+                     
+                ></p>
 <pre><code><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo <span class="built_in">mkdir</span> -p /etc/ros/rosdep/sources.list.d</span><br><span class="line"><span class="built_in">cd</span> /etc/ros/rosdep/sources.list.d</span><br><span class="line">sudo gedit 20-default.list</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># os-specific listings first</span></span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/osx-homebrew.yaml osx</span><br><span class="line"></span><br><span class="line"><span class="comment"># generic</span></span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/base.yaml</span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/python.yaml</span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/ruby.yaml</span><br><span class="line">gbpdistro https://raw.githubusercontent.com/ros/rosdistro/master/releases/fuerte.yaml fuerte</span><br><span class="line"></span><br><span class="line"><span class="comment"># newer distributions (Groovy, Hydro, ...) must not be listed anymore, they are being fetched from the rosdistro index.yaml instead</span></span><br></pre></td></tr></table></figure>
@@ -258,13 +265,28 @@
 </ol>
 <h2 id="把摄像头数据发布到topic"><a href="#把摄像头数据发布到topic" class="headerlink" title="把摄像头数据发布到topic"></a>把摄像头数据发布到topic</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/catkin_ws</span><br><span class="line"><span class="comment"># 若是提示没有usb_cam什么的 运行 source /devel/setup.bash 重试</span></span><br><span class="line">roslaunch usb_cam usb_cam-test.launch</span><br></pre></td></tr></table></figure>
 
-<h2 id="修改ros-mono-cc"><a href="#修改ros-mono-cc" class="headerlink" title="修改ros_mono.cc"></a>修改ros_mono.cc</h2><p>进入～&#x2F;catkin_ws&#x2F;src&#x2F;ORB_SLAM2&#x2F;Examples&#x2F;ROS&#x2F;ORB_SLAM2&#x2F;src<br>打开 ros_mono.cc 把程序里面的topic改为 &#x2F;usb_cam&#x2F;image_raw<br>具体还要查看自己的rviz（即上一步打开的摄像头窗口的标题）<br><img src="/images/ros_mono_usb_cam.png"></p>
+<h2 id="修改ros-mono-cc"><a href="#修改ros-mono-cc" class="headerlink" title="修改ros_mono.cc"></a>修改ros_mono.cc</h2><p>进入～&#x2F;catkin_ws&#x2F;src&#x2F;ORB_SLAM2&#x2F;Examples&#x2F;ROS&#x2F;ORB_SLAM2&#x2F;src<br>打开 ros_mono.cc 把程序里面的topic改为 &#x2F;usb_cam&#x2F;image_raw<br>具体还要查看自己的rviz（即上一步打开的摄像头窗口的标题）<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ros_mono_usb_cam.png"
+                     
+                ></p>
 <h2 id="编译ros下的ORB-SLAM2"><a href="#编译ros下的ORB-SLAM2" class="headerlink" title="编译ros下的ORB_SLAM2"></a>编译ros下的ORB_SLAM2</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="variable">$ROS_PACKAGE_PATH</span></span><br><span class="line"><span class="comment"># 使用echo来检查ros package path 是否配置</span></span><br><span class="line"><span class="comment"># 在~/.bashrc 中添加 </span></span><br><span class="line"><span class="built_in">export</span> ROS_PACKAGE_PATH=<span class="variable">$&#123;ROS_PACKAGE_PATH&#125;</span>:/home/自己的用户名/catkin_ws/src/ORB_SLAM2/Examples/ROS</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#  然后进入～/catkin_ws/src/ORB_SLAM</span></span><br><span class="line"><span class="built_in">chmod</span> +x build_ros.sh</span><br><span class="line">./build_ros.sh</span><br></pre></td></tr></table></figure>
 
 <h2 id="启动mono"><a href="#启动mono" class="headerlink" title="启动mono"></a>启动mono</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在目录~/catkin_ws/src/ORB_SLAM2下</span></span><br><span class="line">rosrun ORB_SLAM2 Mono /home/xmcchv/catkin_ws/src/ORB_SLAM2/Vocabulary/ORBvoc.txt /home/xmcchv/catkin_ws/src/ORB_SLAM2/myUsb_cam.yaml</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>有两个参数，第二个参数是相机参数文件，根据自己的相机参数修改。<br>启动后正常如图<br><img src="/images/ROS_ORB_SLAM2.png"></p>
+<p>有两个参数，第二个参数是相机参数文件，根据自己的相机参数修改。<br>启动后正常如图<br><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ROS_ORB_SLAM2.png"
+                     
+                ></p>
 <h2 id="相机标定-获取参数"><a href="#相机标定-获取参数" class="headerlink" title="相机标定 获取参数"></a>相机标定 获取参数</h2><p>本段教程参考于( <a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/yx868yx/article/details/115366655" >https://blog.csdn.net/yx868yx/article/details/115366655<i class="fas fa-external-link-alt"></i></a> )<br>使用棋盘格 </p>
-<p><img src="/images/qipange.png"></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/qipange.png"
+                     
+                ></p>
 <ol>
 <li><p>下载ros的相机标定包</p>
  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rosdep install camera_calibration</span><br><span class="line">rosmake camera_calibration</span><br></pre></td></tr></table></figure>
@@ -276,13 +298,23 @@
 <p> 其中image:&#x3D; 和camera:&#x3D;后的内容需要根据自己电脑摄像头的话题和节点来修改，可以通过rqt_graph来查看。比如有的会是image:&#x3D;&#x2F;camera&#x2F;image_raw camera:&#x3D;&#x2F;camera</p>
 <p> 标定界面出现后，按照x（左右）、y（上下）、size（前后）、skew（倾斜）等方式移动棋盘，直到x,y,size,skew的进度条都变成绿色位置．</p>
 <p> 此时可以按下CALIBRATE按钮，点击一下后，界面会卡住,此时不要做任何操作，直到运行标定程序的终端输出标定的结果<br> 有标定结果出来后，点击标定界面的SAVE按钮，再点commit按钮，标定结果保存在&#x2F;tmp&#x2F;calibrationdata.tar.gz这个压缩包中，到这里彩色相机的标定就结束了<br> 关闭标定程序,完成后Commit，在终端后会有标定结果yaml文件地址．默认一般为&#x2F;home&#x2F;用户名&#x2F;.ros&#x2F;camera_info&#x2F;head_camera.yaml</p>
-<p> <img src="/images/cam_yaml.png"></p>
+<p> <img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/cam_yaml.png"
+                     
+                ></p>
 </li>
 <li><p>修改相机名称</p>
 <p> 如图</p>
 </li>
 </ol>
-<p><img src="/images/usb_cam-test_launch.png"><br>    修改&#x2F;dev&#x2F;video0 和 usb_cam<br>    与其他地方保持一致</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/usb_cam-test_launch.png"
+                     
+                ><br>    修改&#x2F;dev&#x2F;video0 和 usb_cam<br>    与其他地方保持一致</p>
 <h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p>总体安装教程</p>
 <p><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/xmy306538517/article/details/59501718" >https://blog.csdn.net/xmy306538517/article/details/59501718<i class="fas fa-external-link-alt"></i></a><br><a class="link"   target="_blank" rel="noopener" href="http://www.liuxiao.org/2016/07/ubuntu-orb-slam2-%E5%9C%A8-ros-%E4%B8%8A%E7%BC%96%E8%AF%91%E8%B0%83%E8%AF%95/" >http://www.liuxiao.org/2016/07/ubuntu-orb-slam2-%E5%9C%A8-ros-%E4%B8%8A%E7%BC%96%E8%AF%91%E8%B0%83%E8%AF%95/<i class="fas fa-external-link-alt"></i></a><br><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/qinqinxiansheng/article/details/107079265" >https://blog.csdn.net/qinqinxiansheng/article/details/107079265<i class="fas fa-external-link-alt"></i></a></p>
 <p>编译build_ros.sh时报错<br><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_41111088/article/details/89377368" >https://blog.csdn.net/weixin_41111088/article/details/89377368<i class="fas fa-external-link-alt"></i></a></p>
@@ -292,83 +324,60 @@
 <p>ORB_SLAM2编译build.sh 出错<br><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/lixujie666/article/details/90023059" >https://blog.csdn.net/lixujie666/article/details/90023059<i class="fas fa-external-link-alt"></i></a></p>
 <p>小乌龟<br><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/qq_21835111/article/details/99694286" >https://blog.csdn.net/qq_21835111/article/details/99694286<i class="fas fa-external-link-alt"></i></a></p>
 
-                </div>
+        </div>
 
+        
+
+        
+            <ul class="post-tags-box">
                 
-
-                <div class="post-bottom-tags-and-share border-box">
-                    <div>
-                        
-                            <ul class="post-tags-box border-box">
-                                
-                                    <li class="tag-item border-box">
-                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/ROS/">ROS</a>
-                                    </li>
-                                
-                                    <li class="tag-item border-box">
-                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/ORB-SLAM2/">ORB_SLAM2</a>
-                                    </li>
-                                
-                            </ul>
-                        
-                    </div>
-                    <div>
-                        
-                    </div>
-                </div>
-
+                    <li class="tag-item">
+                        <a href="/tags/ROS/">#ROS</a>&nbsp;
+                    </li>
                 
-
+                    <li class="tag-item">
+                        <a href="/tags/ORB-SLAM2/">#ORB_SLAM2</a>&nbsp;
+                    </li>
                 
-                    <div class="article-nav">
-                        
-                            <div class="article-prev">
-                                <a class="prev"
-                                   rel="prev"
-                                   href="/2024/10/25/webviz/"
-                                   title="Webviz安装记录"
-                                >
-                                    <span class="left arrow-icon flex-center">
-                                      <i class="fas fa-chevron-left"></i>
-                                    </span>
-                                            <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">Webviz安装记录</span>
-                                        <span class="post-nav-item">上一篇</span>
-                                    </span>
-                                </a>
-                            </div>
-                        
-                        
-                            <div class="article-next">
-                                <a class="next"
-                                   rel="next"
-                                   href="/2022/02/17/cmake%E7%BC%96%E8%AF%91/"
-                                   title="cmake编译"
-                                >
-                                    <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">cmake编译</span>
-                                        <span class="post-nav-item">下一篇</span>
-                                    </span>
-                                            <span class="right arrow-icon flex-center">
-                                      <i class="fas fa-chevron-right"></i>
-                                    </span>
-                                </a>
-                            </div>
-                        
+            </ul>
+        
+
+        
+            <div class="article-nav">
+                
+                    <div class="article-prev">
+                        <a class="prev"
+                           rel="prev"
+                           href="/2024/10/25/webviz/"
+                        >
+                            <span class="left arrow-icon flex-center">
+                              <i class="fas fa-chevron-left"></i>
+                            </span>
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">Webviz安装记录</span>
+                                <span class="post-nav-item">上一篇</span>
+                            </span>
+                        </a>
                     </div>
                 
-
                 
-                    
-
-
-
-
-
-
+                    <div class="article-next">
+                        <a class="next"
+                           rel="next"
+                           href="/2022/02/17/cmake%E7%BC%96%E8%AF%91/"
+                        >
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">cmake编译</span>
+                                <span class="post-nav-item">下一篇</span>
+                            </span>
+                            <span class="right arrow-icon flex-center">
+                              <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </a>
+                    </div>
                 
             </div>
-        </div>
+        
 
         
     </div>
@@ -380,49 +389,41 @@
 
         </div>
 
-        <div class="page-main-content-bottom border-box">
+        <div class="page-main-content-bottom">
+            <footer class="footer">
+    <div class="info-container">
+        <div class="copyright-info info-item">
+            &copy;
             
-<footer class="footer border-box">
-    <div class="border-box website-info-box default">
-        
-            <div class="copyright-info info-item default">
-                &copy;&nbsp;<span>2020</span>&nbsp;-&nbsp;2024
-                
-                    &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">Keep Team</a>
-                
-            </div>
-
-            <div class="theme-info info-item default">
-                由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
-            </div>
-
+              <span>2021</span>
+              -
             
-
-            
-        
-
-        <div class="count-item info-item default">
-            
-
-            
-
-            
+            2024&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">云间之龙</a>
         </div>
+        
+        <div class="theme-info info-item">
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.5</a>
+        </div>
+        
+        
     </div>
 </footer>
 
         </div>
     </div>
 
-    <!-- post tools -->
     
-        <div class="post-tools right-toc">
-            <div class="post-tools-container border-box">
-    <ul class="tools-list border-box">
-        <!-- PC TOC show toggle -->
+        <div class="post-tools">
+            <div class="post-tools-container">
+    <ul class="tools-list">
+        <!-- TOC aside toggle -->
+        
+            <li class="tools-item page-aside-toggle">
+                <i class="fas fa-outdent"></i>
+            </li>
         
 
-        <!-- PC go comment -->
+        <!-- go comment -->
         
     </ul>
 </div>
@@ -430,16 +431,19 @@
         </div>
     
 
-    <!-- side tools -->
-    <div class="side-tools">
-        <div class="side-tools-container border-box ">
-    <ul class="side-tools-list side-tools-show-handle border-box">
+    <div class="right-bottom-side-tools">
+        <div class="side-tools-container">
+    <ul class="side-tools-list">
         <li class="tools-item tool-font-adjust-plus flex-center">
             <i class="fas fa-search-plus"></i>
         </li>
 
         <li class="tools-item tool-font-adjust-minus flex-center">
             <i class="fas fa-search-minus"></i>
+        </li>
+
+        <li class="tools-item tool-expand-width flex-center">
+            <i class="fas fa-arrows-alt-h"></i>
         </li>
 
         <li class="tools-item tool-dark-light-toggle flex-center">
@@ -449,47 +453,82 @@
         <!-- rss -->
         
 
+        
+
         <li class="tools-item tool-scroll-to-bottom flex-center">
             <i class="fas fa-arrow-down"></i>
         </li>
     </ul>
 
-    <ul class="exposed-tools-list border-box">
-        
-
-        
-
+    <ul class="exposed-tools-list">
         <li class="tools-item tool-toggle-show flex-center">
             <i class="fas fa-cog fa-spin"></i>
         </li>
-
-        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
-            <i class="arrow fas fa-arrow-up"></i>
-            <span class="percent"></span>
-        </li>
+        
+            <li class="tools-item tool-scroll-to-top flex-center">
+                <i class="arrow-up fas fa-arrow-up"></i>
+                <span class="percent"></span>
+            </li>
+        
     </ul>
 </div>
 
     </div>
 
-    <!-- image mask -->
-    <div class="zoom-in-image-mask">
-    <img class="zoom-in-image">
+    
+        <aside class="page-aside">
+            <div class="post-toc-wrap">
+    <div class="post-toc">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Ubuntu20-04-%E5%AE%89%E8%A3%85-noetic"><span class="nav-text">Ubuntu20.04 安装 noetic</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAROS%E5%B7%A5%E4%BD%9C%E7%A9%BA%E9%97%B4"><span class="nav-text">创建ROS工作空间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91usb-cam"><span class="nav-text">编译usb_cam</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85ORB-SLAM2"><span class="nav-text">编译安装ORB_SLAM2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%8A%E6%91%84%E5%83%8F%E5%A4%B4%E6%95%B0%E6%8D%AE%E5%8F%91%E5%B8%83%E5%88%B0topic"><span class="nav-text">把摄像头数据发布到topic</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9ros-mono-cc"><span class="nav-text">修改ros_mono.cc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91ros%E4%B8%8B%E7%9A%84ORB-SLAM2"><span class="nav-text">编译ros下的ORB_SLAM2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8mono"><span class="nav-text">启动mono</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E6%9C%BA%E6%A0%87%E5%AE%9A-%E8%8E%B7%E5%8F%96%E5%8F%82%E6%95%B0"><span class="nav-text">相机标定 获取参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-text">参考链接</span></a></li></ol>
+    </div>
+</div>
+        </aside>
+    
+
+    <div class="image-viewer-container">
+    <img src="">
 </div>
 
 
-    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="popup-btn-close">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
     
 
-    <!-- tablet toc -->
-    
 </main>
 
 
 
-<!-- common -->
 
 <script src="/js/utils.js"></script>
+
+<script src="/js/main.js"></script>
 
 <script src="/js/header-shrink.js"></script>
 
@@ -497,48 +536,36 @@
 
 <script src="/js/dark-light-toggle.js"></script>
 
-<script src="/js/main.js"></script>
+
+
+    
+<script src="/js/local-search.js"></script>
+
+
+
+
+    
+<script src="/js/code-copy.js"></script>
+
+
+
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="post-scripts">
+    
+        
+<script src="/js/left-side-toggle.js"></script>
 
 <script src="/js/libs/anime.min.js"></script>
 
+<script src="/js/toc.js"></script>
 
-<!-- local-search -->
-
-
-<!-- code-block -->
-
-
-<!-- lazyload -->
-
-
-<div class="">
-    
-        <!-- post-helper -->
-        
-<script src="/js/post/post-helper.js"></script>
-
-
-        <!-- toc -->
-        
-
-        <!-- copyright-info -->
-        
-
-        <!-- share -->
-        
-    
-
-    <!-- category-page -->
-    
-
-    <!-- links-page -->
     
 </div>
-
-<!-- mermaid -->
-
-
-<!-- pjax -->
 
 
 

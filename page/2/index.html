@@ -5,38 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="keywords" content="Hexo Theme Keep">
     <meta name="description" content="Hexo Theme Keep">
-    <meta name="author" content="Keep Team">
+    <meta name="author" content="云间之龙">
     
     <title>
         
-        Keep Theme
+        云间小栈
     </title>
     
 <link rel="stylesheet" href="/css/style.css">
 
+    <link rel="shortcut icon" href="/images/avatar.jpg">
     
-        <link rel="shortcut icon" href="/images/logo.svg">
-    
-    
-<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+<link rel="stylesheet" href="/css/font-awesome.min.css">
 
-    
-<link rel="stylesheet" href="/font/css/regular.min.css">
-
-    
-<link rel="stylesheet" href="/font/css/solid.min.css">
-
-    
-<link rel="stylesheet" href="/font/css/brands.min.css">
-
-    
-    <script class="keep-theme-configurations">
-    const KEEP = window.KEEP || {}
-    KEEP.hexo_config = {"hostname":"xmcchv.github.io","root":"/","language":"zh-CN","path":"search.xml"}
-    KEEP.theme_config = {"toc":{"enable":false,"number":false,"expand_all":false,"init_open":true,"layout":"right"},"style":{"primary_color":"#0066cc","logo":"/images/logo.svg","favicon":"/images/logo.svg","avatar":"/images/avatar.svg","first_screen":{"enable":false,"background_img":"/images/bg.svg","description":"Keep writing and Keep loving.","hitokoto":false},"scroll":{"progress_bar":false,"percent":false}},"local_search":{"enable":false,"preload":false},"code_block":{"tools":{"enable":false,"style":"default"},"highlight_theme":"default"},"pjax":{"enable":false},"lazyload":{"enable":false},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.21"},"waline":{"server_url":null,"reaction":false,"version":2},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false}},"post":{"author_label":{"enable":true,"auto":true,"custom_label_list":["Trainee","Engineer","Architect"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":false,"share":false,"reward":{"enable":false,"img_link":null,"text":null}},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":false,"page_pv":false}},"version":"3.8.6"}
-    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
-    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
-    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+    <script id="hexo-configurations">
+    let KEEP = window.KEEP || {};
+    KEEP.hexo_config = {"hostname":"xmcchv.github.io","root":"/","language":"zh-CN","path":"search.xml"};
+    KEEP.theme_config = {"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true},"style":{"primary_color":"#0066CC","avatar":"/images/avatar.jpg","favicon":"/images/avatar.jpg","article_img_align":"left","left_side_width":"260px","content_max_width":"920px","hover":{"shadow":true,"scale":false},"first_screen":{"enable":true,"background_img":"/images/bg.svg","description":"凡心所向，素履所往；生如逆旅，一苇以航"},"scroll":{"progress_bar":{"enable":true},"percent":{"enable":true}}},"local_search":{"enable":true,"preload":true},"code_copy":{"enable":true,"style":"default"},"pjax":{"enable":false},"lazyload":{"enable":true},"version":"3.4.5"};
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
   </script>
 <meta name="generator" content="Hexo 6.2.0"></head>
 
@@ -44,35 +30,31 @@
 <body>
 <div class="progress-bar-container">
     
+        <span class="scroll-progress-bar"></span>
+    
 
     
 </div>
 
 
-<main class="page-container border-box">
+<main class="page-container">
 
-    <!-- home first screen  -->
     
 
-    <!-- page content -->
-    <div class="page-main-content border-box is-home">
-        <div class="page-main-content-top">
-            
-<header class="header-wrapper">
+    <div class="page-main-content">
 
-    <div class="border-box header-content">
-        <div class="left border-box">
+        <div class="page-main-content-top">
+            <header class="header-wrapper">
+
+    <div class="header-content">
+        <div class="left">
             
-                <a class="logo-image border-box" href="/">
-                    <img src="/images/logo.svg">
-                </a>
-            
-            <a class="site-name border-box" href="/">
-               Keep Theme
+            <a class="logo-title" href="/">
+                云间小栈
             </a>
         </div>
 
-        <div class="right border-box">
+        <div class="right">
             <div class="pc">
                 <ul class="menu-list">
                     
@@ -92,10 +74,40 @@
                             </a>
                         </li>
                     
+                        <li class="menu-item">
+                            <a class=""
+                               href="/tags"
+                            >
+                                标签
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               target="_blank" rel="noopener" href="https://xmcchv.vercel.app/zh-CN/"
+                            >
+                                下载站
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/about"
+                            >
+                                关于
+                            </a>
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="fas fa-search"></i>
+                        </li>
                     
                 </ul>
             </div>
             <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
                 
                 <div class="icon-item menu-bar">
                     <div class="menu-bar-middle"></div>
@@ -117,6 +129,21 @@
                        href="/archives">归档</a>
                 </li>
             
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/tags">标签</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       target="_blank" rel="noopener" href="https://xmcchv.vercel.app/zh-CN/">下载站</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/about">关于</a>
+                </li>
+            
         </ul>
     </div>
 
@@ -127,463 +154,487 @@
 
         </div>
 
-        <div class="page-main-content-middle border-box">
+        <div class="page-main-content-middle">
 
-            <div class="main-content border-box">
+            <div class="main-content">
 
                 
-
                     <div class="home-content-container fade-in-down-animation">
-    <ul class="home-article-list border-box">
+    <ul class="home-article-list">
         
             <li class="home-article-item">
 
                 
 
-                <div class="home-article-item-bottom border-box">
+                <h3 class="home-article-title">
+                    <a href="/2021/07/20/%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC/">
+                        自动求导
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
                     
-                    <h3 class="home-article-title border-box">
-                        <a href="/2024/10/27/python%E5%AD%A6%E4%B9%A0-5/">
+                        自动求导12345678910111213import  torchfrom    torch import autogradx = torch.tensor(1.)a = torch.tensor(1., requires_grad=True)b ...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Tue Jul 20 2021 22:52:19 GMT+0800">2021-07-20</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
                             
-                        </a>
-                    </h3>
-
-                    <div class="home-article-content keep-markdown-body">
-                        
-                            &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEADtitle: python学习-5author: xmcchvdate: 2021-07-07 19:01:38tags: python
-
-CGI编程CGI(Common Gatewa...
-                        
-                    </div>
-
+                            <a href="/tags/pytorch/">pytorch</a>&nbsp;
+                        </li>
                     
-
-<div class="article-meta-info-container border-box home">
-    <div class="article-meta-info border-box">
-        
-            <span class="meta-info-item border-box">
-                <i class="icon fas fa-history"></i>&nbsp;<span class="home-article-history" data-updated="Sun Oct 27 2024 00:42:49 GMT+0800">2024-10-27 00:42:49</span>
+                </ul>
             </span>
-        
-
-
-        
-
-        
-
-        
-
-        
-        
-        
         
     </div>
 
-    
-        <a class="home-read-more" href="/2024/10/27/python%E5%AD%A6%E4%B9%A0-5/">阅读全文&nbsp;<i class="icon fas fa-angles-right"></i></a>
-    
+    <a href="/2021/07/20/%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
 </div>
 
-                </div>
             </li>
         
             <li class="home-article-item">
 
                 
 
-                <div class="home-article-item-bottom border-box">
+                <h3 class="home-article-title">
+                    <a href="/2021/07/07/python%E5%AD%A6%E4%B9%A0-6/">
+                        python学习-6
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
                     
-                    <h3 class="home-article-title border-box">
-                        <a href="/2024/10/27/python%E5%AD%A6%E4%B9%A0-6/">
+                        Socket网络编程1. socket()函数Python 中，我们用 socket（）函数来创建套接字，语法格式如下：socket.socket([family[, type[, proto]]])参数
+
+family: 套接字家族可以使 AF_U...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Wed Jul 07 2021 22:23:45 GMT+0800">2021-07-07</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
                             
-                        </a>
-                    </h3>
-
-                    <div class="home-article-content keep-markdown-body">
-                        
-                            &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEADtitle: python学习-6author: xmcchvdate: 2021-07-07 22:23:45tags: python
-
-Socket网络编程1. socket()函...
-                        
-                    </div>
-
+                            <a href="/tags/python/">python</a>&nbsp;
+                        </li>
                     
-
-<div class="article-meta-info-container border-box home">
-    <div class="article-meta-info border-box">
-        
-            <span class="meta-info-item border-box">
-                <i class="icon fas fa-history"></i>&nbsp;<span class="home-article-history" data-updated="Sun Oct 27 2024 00:42:49 GMT+0800">2024-10-27 00:42:49</span>
+                </ul>
             </span>
-        
-
-
-        
-
-        
-
-        
-
-        
-        
-        
         
     </div>
 
-    
-        <a class="home-read-more" href="/2024/10/27/python%E5%AD%A6%E4%B9%A0-6/">阅读全文&nbsp;<i class="icon fas fa-angles-right"></i></a>
-    
+    <a href="/2021/07/07/python%E5%AD%A6%E4%B9%A0-6/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
 </div>
 
-                </div>
             </li>
         
             <li class="home-article-item">
 
                 
 
-                <div class="home-article-item-bottom border-box">
+                <h3 class="home-article-title">
+                    <a href="/2021/07/07/python%E5%AD%A6%E4%B9%A0-5/">
+                        python学习-5
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
                     
-                    <h3 class="home-article-title border-box">
-                        <a href="/2024/10/27/Python%E5%AD%A6%E4%B9%A0-1/">
+                        CGI编程CGI(Common Gateway Interface)，通用网关接口，它是一段程序，运行在服务器上如：HTTP 服务器，提供同客户端 HTML 页面的接口。
+操作数据库1. pymysql
+若出现问题pymysql连接数据库报错Type...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Wed Jul 07 2021 19:01:38 GMT+0800">2021-07-07</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
                             
-                        </a>
-                    </h3>
+                            <a href="/tags/python/">python</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
 
-                    <div class="home-article-content keep-markdown-body">
-                        
-                            &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEADtitle: Python学习-1author: xmcchvdate: 2021-07-03 17:10:54tags: python
+    <a href="/2021/07/07/python%E5%AD%A6%E4%B9%A0-5/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
+</div>
 
-基础知识
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                <h3 class="home-article-title">
+                    <a href="/2021/07/06/python%E5%AD%A6%E4%B9%A0-4/">
+                        python学习-4
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
+                    
+                        面向对象面向对象技术简介
+
+类(Class): 用来描述具有相同的属性和方法的对象的集合。它定义了该集合中每个对象所共有的属性和方法。对象是类的实例。
+类变量：类变量在整个实例化的对象中是公用的。类变量定义在类中且在函数体之外。类变量通常不作为实例变...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Tue Jul 06 2021 18:13:06 GMT+0800">2021-07-06</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/python/">python</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2021/07/06/python%E5%AD%A6%E4%B9%A0-4/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
+</div>
+
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                <h3 class="home-article-title">
+                    <a href="/2021/07/05/%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB-%E8%AF%86%E5%88%AB%E8%8A%B1%E6%9C%B5/">
+                        图像分类-识别花朵
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
+                    
+                        图像分类-花朵识别使用TensorFlow官网的image classification 实例
+12345678910111213141516171819202122232425262728293031323334353637383940414243...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Mon Jul 05 2021 20:46:12 GMT+0800">2021-07-05</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/">图像分类</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/tensorflow/">tensorflow</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/machine-learning/">machine learning</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2021/07/05/%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB-%E8%AF%86%E5%88%AB%E8%8A%B1%E6%9C%B5/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
+</div>
+
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                <h3 class="home-article-title">
+                    <a href="/2021/07/05/python%E5%AD%A6%E4%B9%A0-3/">
+                        python学习-3
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
+                    
+                        列表Python中列表是可变的，这是它区别于字符串和元组的最重要的特点，一句话概括即：列表可以修改，而字符串和元组不能。
+以下是 Python 中列表的方法：
+
+
+
+方法
+描述
+
+
+
+list.append(x)
+把一个元素添加到列表的结尾，相当于 ...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Mon Jul 05 2021 17:29:56 GMT+0800">2021-07-05</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/python/">python</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2021/07/05/python%E5%AD%A6%E4%B9%A0-3/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
+</div>
+
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                <h3 class="home-article-title">
+                    <a href="/2021/07/05/imgidentity/">
+                        服装图像分类
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
+                    
+                        服装图像分类将训练一个神经网络模型，对运动鞋和衬衫等服装图像进行分类。即使您不理解所有细节也没关系；这只是对完整 TensorFlow 程序的快速概述，详细内容会在您实际操作的同时进行介绍。
+使用 Fashion MNIST 数据集，该数据集包含 1...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Mon Jul 05 2021 14:14:08 GMT+0800">2021-07-05</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/Machine-Learning/">Machine Learning</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/Tensorflow/">Tensorflow</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/">图像分类</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2021/07/05/imgidentity/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
+</div>
+
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                <h3 class="home-article-title">
+                    <a href="/2021/07/05/DCGANs/">
+                        深度卷积生成对抗网络-手写数字识别
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
+                    
+                        深度卷积生成对抗网络生成对抗网络（GANs）是当今计算机科学领域最有趣的想法之一。两个模型通过对抗过程同时训练。一个生成器（“艺术家”）学习创造看起来真实的图像，而判别器（“艺术评论家”）学习区分真假图像。
+本笔记在 MNIST 数据集上演示了该过程...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Mon Jul 05 2021 13:52:57 GMT+0800">2021-07-05</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/Machine-Learning/">Machine Learning</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/Tensorflow/">Tensorflow</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/%E7%94%9F%E6%88%90%E5%AF%B9%E6%8A%97%E7%BD%91%E7%BB%9C/">生成对抗网络</a>&nbsp;
+                        </li>
+                    
+                        <li>
+                            | 
+                            <a href="/tags/%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/">手写数字识别</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2021/07/05/DCGANs/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
+</div>
+
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                <h3 class="home-article-title">
+                    <a href="/2021/07/03/python%E5%AD%A6%E4%B9%A0-2/">
+                        python学习-2
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
+                    
+                        日期和时间1234567891011121314151617181920212223242526272829import time  # 引入time模块# 时间戳ticks = time.time()print &quot;当前时间戳为:&quot...
+                    
+                </div>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Sat Jul 03 2021 22:28:28 GMT+0800">2021-07-03</span></span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/python/">python</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2021/07/03/python%E5%AD%A6%E4%B9%A0-2/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
+</div>
+
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                <h3 class="home-article-title">
+                    <a href="/2021/07/03/Python%E5%AD%A6%E4%B9%A0-1/">
+                        Python学习-1
+                    </a>
+                </h3>
+
+                <div class="home-article-content markdown-body">
+                    
+                        基础知识
 一般格式
 
-123456789# ...
-                        
-                    </div>
-
+123456789# coding:utf-8     # 一个空行import os# 两个空行print(os.getcwd())print(&#x27;hello,world!&#x27;)list = [&quot;a&...
                     
-
-<div class="article-meta-info-container border-box home">
-    <div class="article-meta-info border-box">
-        
-            <span class="meta-info-item border-box">
-                <i class="icon fas fa-history"></i>&nbsp;<span class="home-article-history" data-updated="Sun Oct 27 2024 00:42:49 GMT+0800">2024-10-27 00:42:49</span>
-            </span>
-        
-
-
-        
-
-        
-
-        
-
-        
-        
-        
-        
-    </div>
-
-    
-        <a class="home-read-more" href="/2024/10/27/Python%E5%AD%A6%E4%B9%A0-1/">阅读全文&nbsp;<i class="icon fas fa-angles-right"></i></a>
-    
-</div>
-
                 </div>
-            </li>
+
+                <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fas fa-history"></i>&nbsp;<span class="home-article-date" data-date="Sat Jul 03 2021 17:10:54 GMT+0800">2021-07-03</span></span>
         
-            <li class="home-article-item">
-
-                
-
-                <div class="home-article-item-bottom border-box">
+        
+            <span class="home-article-tag">
+                <i class="fas fa-tags"></i>&nbsp;
+                <ul>
                     
-                    <h3 class="home-article-title border-box">
-                        <a href="/2024/10/27/DCGANs/">
+                        <li>
                             
-                        </a>
-                    </h3>
-
-                    <div class="home-article-content keep-markdown-body">
-                        
-                            &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEADtitle: 深度卷积生成对抗网络-手写数字识别author: xmcchvdate: 2021-07-05 13:52:57tags: 
-
-Machine Learning
-Tens...
-                        
-                    </div>
-
+                            <a href="/tags/python/">python</a>&nbsp;
+                        </li>
                     
-
-<div class="article-meta-info-container border-box home">
-    <div class="article-meta-info border-box">
-        
-            <span class="meta-info-item border-box">
-                <i class="icon fas fa-history"></i>&nbsp;<span class="home-article-history" data-updated="Sun Oct 27 2024 00:42:49 GMT+0800">2024-10-27 00:42:49</span>
+                </ul>
             </span>
-        
-
-
-        
-
-        
-
-        
-
-        
-        
-        
         
     </div>
 
-    
-        <a class="home-read-more" href="/2024/10/27/DCGANs/">阅读全文&nbsp;<i class="icon fas fa-angles-right"></i></a>
-    
+    <a href="/2021/07/03/Python%E5%AD%A6%E4%B9%A0-1/">阅读全文&nbsp;<i class="fas fa-angle-right"></i></a>
 </div>
 
-                </div>
-            </li>
-        
-            <li class="home-article-item">
-
-                
-
-                <div class="home-article-item-bottom border-box">
-                    
-                    <h3 class="home-article-title border-box">
-                        <a href="/2024/10/25/webviz/">
-                            Webviz安装记录
-                        </a>
-                    </h3>
-
-                    <div class="home-article-content keep-markdown-body">
-                        
-                            webviz
-docker 镜像拉取
-
-配置daemon.json 
-1234567891011121314151617181920212223242526272829303132333435sudo gedit /etc/docker/daemon...
-                        
-                    </div>
-
-                    
-
-<div class="article-meta-info-container border-box home">
-    <div class="article-meta-info border-box">
-        
-            <span class="meta-info-item border-box">
-                <i class="icon fas fa-history"></i>&nbsp;<span class="home-article-history" data-updated="Sun Oct 27 2024 00:26:44 GMT+0800">2024-10-27 00:26:44</span>
-            </span>
-        
-
-
-        
-
-        
-
-        
-
-        
-        
-        
-        
-    </div>
-
-    
-        <a class="home-read-more" href="/2024/10/25/webviz/">阅读全文&nbsp;<i class="icon fas fa-angles-right"></i></a>
-    
-</div>
-
-                </div>
-            </li>
-        
-            <li class="home-article-item">
-
-                
-
-                <div class="home-article-item-bottom border-box">
-                    
-                    <h3 class="home-article-title border-box">
-                        <a href="/2022/02/21/Ubuntu20-04-noetic-ORB-SLAM2%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/">
-                            Ubuntu20.04+noetic+ORB_SLAM2安装记录
-                        </a>
-                    </h3>
-
-                    <div class="home-article-content keep-markdown-body">
-                        
-                            Ubuntu20.04 安装 noetic本段教程参考于 https://www.guyuehome.com/12640
-
-安装过程与ROS官网一致，网络无法连接时可以换个服务器,或使用国内镜像  安装完成后可以跑以下小乌龟的例子看一下是否ok
-
-安...
-                        
-                    </div>
-
-                    
-
-<div class="article-meta-info-container border-box home">
-    <div class="article-meta-info border-box">
-        
-            <span class="meta-info-item border-box">
-                <i class="icon fas fa-history"></i>&nbsp;<span class="home-article-history" data-updated="Sun Oct 27 2024 00:42:49 GMT+0800">2024-10-27 00:42:49</span>
-            </span>
-        
-
-
-        
-
-        
-
-        
-
-        
-        
-        
-        
-    </div>
-
-    
-        <a class="home-read-more" href="/2022/02/21/Ubuntu20-04-noetic-ORB-SLAM2%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/">阅读全文&nbsp;<i class="icon fas fa-angles-right"></i></a>
-    
-</div>
-
-                </div>
-            </li>
-        
-            <li class="home-article-item">
-
-                
-
-                <div class="home-article-item-bottom border-box">
-                    
-                    <h3 class="home-article-title border-box">
-                        <a href="/2022/02/17/cmake%E7%BC%96%E8%AF%91/">
-                            cmake编译
-                        </a>
-                    </h3>
-
-                    <div class="home-article-content keep-markdown-body">
-                        
-                            CMakeList.txt记录下CMakeList中包含的内容
-1234567891011121314151617181920212223242526272829303132# 声明cmake的最低版本cmake_minimum_version( V...
-                        
-                    </div>
-
-                    
-
-<div class="article-meta-info-container border-box home">
-    <div class="article-meta-info border-box">
-        
-            <span class="meta-info-item border-box">
-                <i class="icon fas fa-history"></i>&nbsp;<span class="home-article-history" data-updated="Sun Oct 27 2024 00:42:49 GMT+0800">2024-10-27 00:42:49</span>
-            </span>
-        
-
-
-        
-
-        
-
-        
-
-        
-        
-        
-        
-    </div>
-
-    
-        <a class="home-read-more" href="/2022/02/17/cmake%E7%BC%96%E8%AF%91/">阅读全文&nbsp;<i class="icon fas fa-angles-right"></i></a>
-    
-</div>
-
-                </div>
-            </li>
-        
-            <li class="home-article-item">
-
-                
-
-                <div class="home-article-item-bottom border-box">
-                    
-                    <h3 class="home-article-title border-box">
-                        <a href="/2021/12/26/%E9%92%A2%E9%93%81%E9%9B%84%E5%BF%834-No-Step-Back/">
-                            钢铁雄心4 No Step Back
-                        </a>
-                    </h3>
-
-                    <div class="home-article-content keep-markdown-body">
-                        
-                            钢铁雄心4 No Step Back dlc备份图片，音乐：Paradox Interactive
-
-
-
-    new cplayer({
-      element: document.getElementById('mplayer524...
-                        
-                    </div>
-
-                    
-
-<div class="article-meta-info-container border-box home">
-    <div class="article-meta-info border-box">
-        
-            <span class="meta-info-item border-box">
-                <i class="icon fas fa-history"></i>&nbsp;<span class="home-article-history" data-updated="Sun Oct 27 2024 00:42:49 GMT+0800">2024-10-27 00:42:49</span>
-            </span>
-        
-
-
-        
-
-        
-
-        
-
-        
-        
-        
-        
-    </div>
-
-    
-        <a class="home-read-more" href="/2021/12/26/%E9%92%A2%E9%93%81%E9%9B%84%E5%BF%834-No-Step-Back/">阅读全文&nbsp;<i class="icon fas fa-angles-right"></i></a>
-    
-</div>
-
-                </div>
             </li>
         
     </ul>
+
+    <div class="home-paginator">
+        <div class="paginator">
     
-    <div class="paginator border-box flex-center">
-        <div class="btn-wrap allowed">
-            <a class="jump-btn"
-               href="/"
-            ><i class="fa-solid fa-chevron-left"></i></a>
-        </div>
+        <a class="prev btn"
+           href="/"
+        >上一页</a>
+    
 
+    
+</div>
 
-        <div class="page-number-box border-box flex-center">
-            <input class="page-number-input border-box base-color-size"
-                   type="number"
-                   value="2"
-                   min="1"
-                   max="2"
-            ><span class="delimiter base-color-size">/</span><span class="base-color-size">2</span>
-        </div>
-
-
-        <div class="btn-wrap">
-            <a class="jump-btn"
-               href="/"
-            ><i class="fa-solid fa-chevron-right"></i></a>
-        </div>
     </div>
-
-
-
-
 </div>
 
 
@@ -592,53 +643,44 @@ docker 镜像拉取
 
         </div>
 
-        <div class="page-main-content-bottom border-box">
+        <div class="page-main-content-bottom">
+            <footer class="footer">
+    <div class="info-container">
+        <div class="copyright-info info-item">
+            &copy;
             
-<footer class="footer border-box">
-    <div class="border-box website-info-box default">
-        
-            <div class="copyright-info info-item default">
-                &copy;&nbsp;<span>2020</span>&nbsp;-&nbsp;2024
-                
-                    &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">Keep Team</a>
-                
-            </div>
-
-            <div class="theme-info info-item default">
-                由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
-            </div>
-
+              <span>2021</span>
+              -
             
-
-            
-        
-
-        <div class="count-item info-item default">
-            
-
-            
-
-            
+            2024&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">云间之龙</a>
         </div>
+        
+        <div class="theme-info info-item">
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.5</a>
+        </div>
+        
+        
     </div>
 </footer>
 
         </div>
     </div>
 
-    <!-- post tools -->
     
 
-    <!-- side tools -->
-    <div class="side-tools">
-        <div class="side-tools-container border-box side-tools-show-handle">
-    <ul class="side-tools-list side-tools-show-handle border-box">
+    <div class="right-bottom-side-tools">
+        <div class="side-tools-container">
+    <ul class="side-tools-list">
         <li class="tools-item tool-font-adjust-plus flex-center">
             <i class="fas fa-search-plus"></i>
         </li>
 
         <li class="tools-item tool-font-adjust-minus flex-center">
             <i class="fas fa-search-minus"></i>
+        </li>
+
+        <li class="tools-item tool-expand-width flex-center">
+            <i class="fas fa-arrows-alt-h"></i>
         </li>
 
         <li class="tools-item tool-dark-light-toggle flex-center">
@@ -648,48 +690,75 @@ docker 镜像拉取
         <!-- rss -->
         
 
+        
+
         <li class="tools-item tool-scroll-to-bottom flex-center">
             <i class="fas fa-arrow-down"></i>
         </li>
     </ul>
 
-    <ul class="exposed-tools-list border-box">
-        
-
-        
-
+    <ul class="exposed-tools-list">
         <li class="tools-item tool-toggle-show flex-center">
             <i class="fas fa-cog fa-spin"></i>
         </li>
-
-        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
-            <i class="arrow fas fa-arrow-up"></i>
-            <span class="percent"></span>
-        </li>
+        
+            <li class="tools-item tool-scroll-to-top flex-center">
+                <i class="arrow-up fas fa-arrow-up"></i>
+                <span class="percent"></span>
+            </li>
+        
     </ul>
 </div>
 
     </div>
 
-    <!-- image mask -->
-    <div class="zoom-in-image-mask">
-    <img class="zoom-in-image">
+    
+
+    <div class="image-viewer-container">
+    <img src="">
 </div>
 
 
-    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="popup-btn-close">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
     
 
-    <!-- tablet toc -->
-    
 </main>
 
 
 
 
-<!-- common -->
 
 <script src="/js/utils.js"></script>
+
+<script src="/js/main.js"></script>
 
 <script src="/js/header-shrink.js"></script>
 
@@ -697,34 +766,28 @@ docker 镜像拉取
 
 <script src="/js/dark-light-toggle.js"></script>
 
-<script src="/js/main.js"></script>
-
-<script src="/js/libs/anime.min.js"></script>
 
 
-<!-- local-search -->
-
-
-<!-- code-block -->
-
-
-<!-- lazyload -->
-
-
-<div class="">
     
+<script src="/js/local-search.js"></script>
 
-    <!-- category-page -->
+
+
+
     
+<script src="/js/code-copy.js"></script>
 
-    <!-- links-page -->
+
+
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="post-scripts">
     
 </div>
-
-<!-- mermaid -->
-
-
-<!-- pjax -->
 
 
 
