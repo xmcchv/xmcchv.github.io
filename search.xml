@@ -1,7 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>矩阵变换</title>
+    <title>Cartographer 记录</title>
+    <url>/2024/11/08/Cartographer%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<h1 id="Cartographer-记录"><a href="#Cartographer-记录" class="headerlink" title="Cartographer 记录"></a>Cartographer 记录</h1><h2 id="一、安装记录"><a href="#一、安装记录" class="headerlink" title="一、安装记录"></a>一、安装记录</h2><ol>
+<li><p>遇到abseil安装失败的情况下</p>
+<p> 到&#x2F;usr&#x2F;local&#x2F;lib  lib&#x2F;pkgconfig  &#x2F;usr&#x2F;local&#x2F;stow&#x2F;absl 下把absl相关的文件全部删除</p>
+<p> 再重新安装</p>
+</li>
+<li><p>使用脚本自动安装和carto里面的script是一致的</p>
+</li>
+</ol>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/Cartographer/image.png"
+                      alt="image.png"
+                ></p>
+<h2 id="二、-运行记录"><a href="#二、-运行记录" class="headerlink" title="二、 运行记录"></a>二、 运行记录</h2><ol>
+<li>运行纯laser scan建图 首先编写launch文件 其中加载configuration_files路径下的lua配置文件 其中的remap中的to话题需要更改为bag中的laser的topic <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&lt;launch&gt;</span><br><span class="line">  &lt;!-- bag的地址与名称 --&gt;</span><br><span class="line">  &lt;!-- &lt;arg name=<span class="string">&quot;bag_filename&quot;</span> default=<span class="string">&quot;<span class="subst">$(env HOME)</span>/bagfiles/rslidar-outdoor-gps-notf.bag&quot;</span>/&gt; --&gt;</span><br><span class="line">  &lt;arg name=<span class="string">&quot;bag_filename&quot;</span> default=<span class="string">&quot;<span class="subst">$(env HOME)</span>/bagfiles/slam-filtered.bag&quot;</span>/&gt;</span><br><span class="line">  </span><br><span class="line">  &lt;param name=<span class="string">&quot;/use_sim_time&quot;</span> value=<span class="string">&quot;true&quot;</span> /&gt;</span><br><span class="line"></span><br><span class="line">  &lt;node name=<span class="string">&quot;cartographer_node&quot;</span> pkg=<span class="string">&quot;cartographer_ros&quot;</span></span><br><span class="line">      <span class="built_in">type</span>=<span class="string">&quot;cartographer_node&quot;</span> args=<span class="string">&quot;</span></span><br><span class="line"><span class="string">          -configuration_directory <span class="subst">$(find cartographer_ros)</span>/configuration_files</span></span><br><span class="line"><span class="string">          -configuration_basename sz.lua&quot;</span></span><br><span class="line">      output=<span class="string">&quot;screen&quot;</span>&gt;</span><br><span class="line">    &lt;remap from=<span class="string">&quot;scan&quot;</span> to=<span class="string">&quot;front_scan&quot;</span> /&gt;</span><br><span class="line">  &lt;/node&gt;</span><br><span class="line"></span><br><span class="line">  &lt;node name=<span class="string">&quot;cartographer_occupancy_grid_node&quot;</span> pkg=<span class="string">&quot;cartographer_ros&quot;</span></span><br><span class="line">      <span class="built_in">type</span>=<span class="string">&quot;cartographer_occupancy_grid_node&quot;</span> args=<span class="string">&quot;-resolution 0.05&quot;</span> /&gt;</span><br><span class="line"></span><br><span class="line">  &lt;node name=<span class="string">&quot;rviz&quot;</span> pkg=<span class="string">&quot;rviz&quot;</span> <span class="built_in">type</span>=<span class="string">&quot;rviz&quot;</span> required=<span class="string">&quot;true&quot;</span></span><br><span class="line">      args=<span class="string">&quot;-d <span class="subst">$(find cartographer_ros)</span>/configuration_files/demo_2d.rviz&quot;</span> /&gt;</span><br><span class="line">  &lt;node name=<span class="string">&quot;playbag&quot;</span> pkg=<span class="string">&quot;rosbag&quot;</span> <span class="built_in">type</span>=<span class="string">&quot;play&quot;</span></span><br><span class="line">      args=<span class="string">&quot;--clock <span class="subst">$(arg bag_filename)</span>&quot;</span> /&gt;</span><br><span class="line">&lt;/launch&gt;</span><br></pre></td></tr></table></figure>
+ 然后是编写lua配置文件 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">include <span class="string">&quot;map_builder.lua&quot;</span></span><br><span class="line">include <span class="string">&quot;trajectory_builder.lua&quot;</span></span><br><span class="line"></span><br><span class="line">options = &#123;</span><br><span class="line">  map_builder = MAP_BUILDER,</span><br><span class="line">  trajectory_builder = TRAJECTORY_BUILDER,</span><br><span class="line">  map_frame = <span class="string">&quot;map&quot;</span>,</span><br><span class="line">  tracking_frame = <span class="string">&quot;front_laser&quot;</span>,</span><br><span class="line">  published_frame = <span class="string">&quot;front_laser&quot;</span>,</span><br><span class="line">  odom_frame = <span class="string">&quot;odom&quot;</span>,</span><br><span class="line">  provide_odom_frame = <span class="literal">true</span>,</span><br><span class="line">  publish_frame_projected_to_2d = <span class="literal">false</span>,</span><br><span class="line">  use_pose_extrapolator = <span class="literal">true</span>,</span><br><span class="line">  use_odometry = <span class="literal">false</span>,</span><br><span class="line">  use_nav_sat = <span class="literal">false</span>,</span><br><span class="line">  use_landmarks = <span class="literal">false</span>,</span><br><span class="line">  num_laser_scans = 1,</span><br><span class="line">  num_multi_echo_laser_scans = 0,</span><br><span class="line">  num_subdivisions_per_laser_scan = 1,</span><br><span class="line">  num_point_clouds = 0,</span><br><span class="line">  lookup_transform_timeout_sec = 0.2,</span><br><span class="line">  submap_publish_period_sec = 0.3,</span><br><span class="line">  pose_publish_period_sec = 5e-3,</span><br><span class="line">  trajectory_publish_period_sec = 30e-3,</span><br><span class="line">  rangefinder_sampling_ratio = 1.,</span><br><span class="line">  odometry_sampling_ratio = 1.,</span><br><span class="line">  fixed_frame_pose_sampling_ratio = 1.,</span><br><span class="line">  imu_sampling_ratio = 1.,</span><br><span class="line">  landmarks_sampling_ratio = 1.,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">MAP_BUILDER.use_trajectory_builder_2d = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">TRAJECTORY_BUILDER_2D.submaps.num_range_data = 35</span><br><span class="line">TRAJECTORY_BUILDER_2D.min_range = 0.3</span><br><span class="line">TRAJECTORY_BUILDER_2D.max_range = 8.</span><br><span class="line">TRAJECTORY_BUILDER_2D.missing_data_ray_length = 1.</span><br><span class="line">TRAJECTORY_BUILDER_2D.use_imu_data = <span class="literal">false</span></span><br><span class="line">TRAJECTORY_BUILDER_2D.use_online_correlative_scan_matching = <span class="literal">true</span></span><br><span class="line">TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.linear_search_window = 0.1</span><br><span class="line">TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.translation_delta_cost_weight = 10.</span><br><span class="line">TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.rotation_delta_cost_weight = 1e-1</span><br><span class="line"></span><br><span class="line">POSE_GRAPH.optimization_problem.huber_scale = 1e2</span><br><span class="line">POSE_GRAPH.optimize_every_n_nodes = 35</span><br><span class="line">POSE_GRAPH.constraint_builder.min_score = 0.65</span><br><span class="line"></span><br><span class="line"><span class="built_in">return</span> options</span><br></pre></td></tr></table></figure>
+ 其中tracking_frame 指的是全部转到这个坐标系下，因为这里使用的是纯laser建图，如果有imu的话可以改成imu的frame_id，一般是imu_link published_frame指的是发布的话题tf: map -&gt; front_laser</li>
+</ol>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/Cartographer/image%201.png"
+                      alt="image.png"
+                ></p>
+<p>附：</p>
+<p>lua参数解析</p>
+<p><a class="link"   href="https://blog.csdn.net/YiYeZhiNian/article/details/131774720" >https://blog.csdn.net/YiYeZhiNian/article/details/131774720<i class="fas fa-external-link-alt"></i></a></p>
+<p>坐标系转换，rosbag</p>
+<p><a class="link"   href="https://blog.51cto.com/u_14355665/6099741" >https://blog.51cto.com/u_14355665/6099741<i class="fas fa-external-link-alt"></i></a></p>
+<p>cartographer保存2d地图</p>
+<p><a class="link"   href="https://blog.csdn.net/jiesunliu3215/article/details/124359333" >https://blog.csdn.net/jiesunliu3215/article/details/124359333<i class="fas fa-external-link-alt"></i></a></p>
+]]></content>
+      <tags>
+        <tag>SLAM</tag>
+        <tag>Cartographer</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下软件打包</title>
     <url>/2024/10/30/Linux%E4%B8%8B%E8%BD%AF%E4%BB%B6%E6%89%93%E5%8C%85/</url>
     <content><![CDATA[<h2 id="Linux-将Qt程序打包为AppImage包"><a href="#Linux-将Qt程序打包为AppImage包" class="headerlink" title="Linux 将Qt程序打包为AppImage包"></a>Linux 将Qt程序打包为AppImage包</h2><p><a class="link"   href="https://blog.csdn.net/no_say_you_know/article/details/134212620" >https://blog.csdn.net/no_say_you_know/article/details/134212620<i class="fas fa-external-link-alt"></i></a></p>
 <h3 id="1-使用Linuxdeployqt工具打包qt"><a href="#1-使用Linuxdeployqt工具打包qt" class="headerlink" title="1. 使用Linuxdeployqt工具打包qt"></a>1. 使用Linuxdeployqt工具打包qt</h3><p><a class="link"   href="https://github.com/probonopd/linuxdeployqt" >https://github.com/probonopd/linuxdeployqt<i class="fas fa-external-link-alt"></i></a></p>
@@ -261,6 +302,19 @@
       </tags>
   </entry>
   <entry>
+    <title>cmake编译</title>
+    <url>/2022/02/17/cmake%E7%BC%96%E8%AF%91/</url>
+    <content><![CDATA[<h2 id="CMakeList-txt"><a href="#CMakeList-txt" class="headerlink" title="CMakeList.txt"></a>CMakeList.txt</h2><p>记录下CMakeList中包含的内容</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 声明cmake的最低版本</span><br><span class="line">cmake_minimum_version( VERSION 2.0 )</span><br><span class="line"></span><br><span class="line"># 声明一个cmake工程</span><br><span class="line">project( HelloSLAM )</span><br><span class="line"></span><br><span class="line"># 添加一个可执行程序</span><br><span class="line"># 语法 add_executable( 程序名 源代码文件 )</span><br><span class="line">add_executable( helloSLAM helloSLAM.cpp )</span><br><span class="line"></span><br><span class="line"># 编写库</span><br><span class="line"># 静态库 .a 静态库每次被调用都会生成一个副本</span><br><span class="line">add_library( hello libHelloSLAM.cpp )</span><br><span class="line"></span><br><span class="line"># 共享库 .so 共享库只有一个副本</span><br><span class="line">add_library( hello_shared SHARED libHelloSLAM.cpp )</span><br><span class="line"></span><br><span class="line"># 使用 .so 时 还需要定义一个头文件 提供了共享库的函数 以供调用</span><br><span class="line"># 链接 </span><br><span class="line">target_link_libraries( useHello hello_shared )</span><br><span class="line"></span><br><span class="line"># 编译</span><br><span class="line"># 在源文件同级目录下 mkdir build &amp;&amp; cd build &amp;&amp; cmake ..</span><br><span class="line"></span><br><span class="line"># 添加头文件</span><br><span class="line">include_directories(&quot;/user/include/eigen3&quot;)</span><br><span class="line"></span><br><span class="line"># 寻找Opencv库</span><br><span class="line">find_package( OpenCV REQUIRED )</span><br><span class="line">include_directories( $&#123;OpenCV_INCLUDE_DIRS&#125; )</span><br><span class="line">target_link_libraries( 可执行程序名 $&#123;OpenCV_LIBS&#125; )</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+]]></content>
+      <tags>
+        <tag>cmake</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>python学习-2</title>
     <url>/2021/07/03/python%E5%AD%A6%E4%B9%A0-2/</url>
     <content><![CDATA[<h2 id="日期和时间"><a href="#日期和时间" class="headerlink" title="日期和时间"></a>日期和时间</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> time  <span class="comment"># 引入time模块</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 时间戳</span></span><br><span class="line">ticks = time.time()</span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;当前时间戳为:&quot;</span>, ticks</span><br><span class="line">当前时间戳为: <span class="number">1625322855.8431683</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 时间</span></span><br><span class="line">localtime = time.localtime(time.time())</span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;本地时间为 :&quot;</span>, localtime</span><br><span class="line"><span class="comment"># time.struct_time(tm_year=2021, tm_mon=7, tm_mday=3, tm_hour=22, </span></span><br><span class="line"><span class="comment"># tm_min=33, tm_sec=47, tm_wday=5, tm_yday=184, tm_isdst=0)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 格式化时间</span></span><br><span class="line"><span class="comment"># 格式化成2021-07-03 22:44:36形式</span></span><br><span class="line"><span class="built_in">print</span>(time.strftime(<span class="string">&quot;%Y-%m-%d %H:%M:%S&quot;</span>, time.localtime())) </span><br><span class="line"> </span><br><span class="line"><span class="comment"># 格式化成Sat Jul 03 22:44:36 2021形式</span></span><br><span class="line"><span class="built_in">print</span>(time.strftime(<span class="string">&quot;%a %b %d %H:%M:%S %Y&quot;</span>, time.localtime()))</span><br><span class="line">  </span><br><span class="line"><span class="comment"># 将格式字符串转换为时间戳</span></span><br><span class="line">a = <span class="string">&quot;Sat Jul 03 22:44:36 2021&quot;</span></span><br><span class="line"><span class="built_in">print</span>(time.mktime(time.strptime(a,<span class="string">&quot;%a %b %d %H:%M:%S %Y&quot;</span>)))</span><br><span class="line"></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">2021-07-03 22:45:30</span></span><br><span class="line"><span class="string">Sat Jul 03 22:45:30 2021</span></span><br><span class="line"><span class="string">1625323476.0</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br></pre></td></tr></table></figure>
@@ -323,19 +377,6 @@
         <tag>Machine Learning</tag>
         <tag>Tensorflow</tag>
         <tag>图像分类</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>cmake编译</title>
-    <url>/2022/02/17/cmake%E7%BC%96%E8%AF%91/</url>
-    <content><![CDATA[<h2 id="CMakeList-txt"><a href="#CMakeList-txt" class="headerlink" title="CMakeList.txt"></a>CMakeList.txt</h2><p>记录下CMakeList中包含的内容</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 声明cmake的最低版本</span><br><span class="line">cmake_minimum_version( VERSION 2.0 )</span><br><span class="line"></span><br><span class="line"># 声明一个cmake工程</span><br><span class="line">project( HelloSLAM )</span><br><span class="line"></span><br><span class="line"># 添加一个可执行程序</span><br><span class="line"># 语法 add_executable( 程序名 源代码文件 )</span><br><span class="line">add_executable( helloSLAM helloSLAM.cpp )</span><br><span class="line"></span><br><span class="line"># 编写库</span><br><span class="line"># 静态库 .a 静态库每次被调用都会生成一个副本</span><br><span class="line">add_library( hello libHelloSLAM.cpp )</span><br><span class="line"></span><br><span class="line"># 共享库 .so 共享库只有一个副本</span><br><span class="line">add_library( hello_shared SHARED libHelloSLAM.cpp )</span><br><span class="line"></span><br><span class="line"># 使用 .so 时 还需要定义一个头文件 提供了共享库的函数 以供调用</span><br><span class="line"># 链接 </span><br><span class="line">target_link_libraries( useHello hello_shared )</span><br><span class="line"></span><br><span class="line"># 编译</span><br><span class="line"># 在源文件同级目录下 mkdir build &amp;&amp; cd build &amp;&amp; cmake ..</span><br><span class="line"></span><br><span class="line"># 添加头文件</span><br><span class="line">include_directories(&quot;/user/include/eigen3&quot;)</span><br><span class="line"></span><br><span class="line"># 寻找Opencv库</span><br><span class="line">find_package( OpenCV REQUIRED )</span><br><span class="line">include_directories( $&#123;OpenCV_INCLUDE_DIRS&#125; )</span><br><span class="line">target_link_libraries( 可执行程序名 $&#123;OpenCV_LIBS&#125; )</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-]]></content>
-      <tags>
-        <tag>cmake</tag>
       </tags>
   </entry>
   <entry>
@@ -457,6 +498,120 @@
 <h4 id="4-rmdir-方法"><a href="#4-rmdir-方法" class="headerlink" title="4. rmdir()方法"></a>4. rmdir()方法</h4><p>rmdir()方法删除目录，目录名称以参数传递。<br>在删除这个目录之前，它的所有内容应该先被清除。</p>
 <p>语法：<br><code>os.rmdir(&#39;dirname&#39;)</code></p>
 ]]></content>
+      <tags>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>python学习-6</title>
+    <url>/2021/07/07/python%E5%AD%A6%E4%B9%A0-6/</url>
+    <content><![CDATA[<h2 id="Socket网络编程"><a href="#Socket网络编程" class="headerlink" title="Socket网络编程"></a>Socket网络编程</h2><h4 id="1-socket-函数"><a href="#1-socket-函数" class="headerlink" title="1. socket()函数"></a>1. socket()函数</h4><p>Python 中，我们用 socket（）函数来创建套接字，语法格式如下：<br><code>socket.socket([family[, type[, proto]]])</code><br>参数</p>
+<ul>
+<li>family: 套接字家族可以使 AF_UNIX 或者 AF_INET。</li>
+<li>type: 套接字类型可以根据是面向连接的还是非连接分为 SOCK_STREAM 或 SOCK_DGRAM。</li>
+<li>protocol: 一般不填默认为 0。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="left">函数</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">服务器端套接字</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">s.bind()</td>
+<td align="left">绑定地址（host,port）到套接字， 在 AF_INET下，以元组（host,port）的形式表示地址。</td>
+</tr>
+<tr>
+<td align="left">s.listen()</td>
+<td align="left">开始 TCP 监听。backlog 指定在拒绝连接之前，操作系统可以挂起的最大连接数量。该值至少为 1，大部分应用程序设为 5 就可以了。</td>
+</tr>
+<tr>
+<td align="left">s.accept()</td>
+<td align="left">被动接受TCP客户端连接,(阻塞式)等待连接的到来</td>
+</tr>
+<tr>
+<td align="left">客户端套接字</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">s.connect()</td>
+<td align="left">主动初始化TCP服务器连接，。一般address的格式为元组（hostname,port），如果连接出错，返回socket.error错误。</td>
+</tr>
+<tr>
+<td align="left">s.connect_ex()</td>
+<td align="left">connect()函数的扩展版本,出错时返回出错码,而不是抛出异常</td>
+</tr>
+<tr>
+<td align="left">公共用途的套接字函数</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">s.recv()</td>
+<td align="left">接收 TCP 数据，数据以字符串形式返回，bufsize 指定要接收的最大数据量。flag 提供有关消息的其他信息，通常可以忽略。</td>
+</tr>
+<tr>
+<td align="left">s.send()</td>
+<td align="left">发送 TCP 数据，将 string 中的数据发送到连接的套接字。返回值是要发送的字节数量，该数量可能小于 string 的字节大小。</td>
+</tr>
+<tr>
+<td align="left">s.sendall()</td>
+<td align="left">完整发送 TCP 数据。将 string 中的数据发送到连接的套接字，但在返回之前会尝试发送所有数据。成功返回 None，失败则抛出异常。</td>
+</tr>
+<tr>
+<td align="left">s.recvfrom()</td>
+<td align="left">接收 UDP 数据，与 recv() 类似，但返回值是（data,address）。其中 data 是包含接收数据的字符串，address 是发送数据的套接字地址。</td>
+</tr>
+<tr>
+<td align="left">s.sendto()</td>
+<td align="left">发送 UDP 数据，将数据发送到套接字，address 是形式为（ipaddr，port）的元组，指定远程地址。返回值是发送的字节数。</td>
+</tr>
+<tr>
+<td align="left">s.close()</td>
+<td align="left">关闭套接字</td>
+</tr>
+<tr>
+<td align="left">s.getpeername()</td>
+<td align="left">返回连接套接字的远程地址。返回值通常是元组（ipaddr,port）。</td>
+</tr>
+<tr>
+<td align="left">s.getsockname()</td>
+<td align="left">返回套接字自己的地址。通常是一个元组(ipaddr,port)</td>
+</tr>
+<tr>
+<td align="left">s.setsockopt(level,optname,value)</td>
+<td align="left">设置给定套接字选项的值。</td>
+</tr>
+<tr>
+<td align="left">s.getsockopt(level,optname[.buflen])</td>
+<td align="left">返回套接字选项的值。</td>
+</tr>
+<tr>
+<td align="left">s.settimeout(timeout)</td>
+<td align="left">设置套接字操作的超时期，timeout是一个浮点数，单位是秒。值为None表示没有超时期。一般，超时期应该在刚创建套接字时设置，因为它们可能用于连接的操作（如connect()）</td>
+</tr>
+<tr>
+<td align="left">s.gettimeout()</td>
+<td align="left">返回当前超时期的值，单位是秒，如果没有设置超时期，则返回None。</td>
+</tr>
+<tr>
+<td align="left">s.fileno()</td>
+<td align="left">返回套接字的文件描述符。</td>
+</tr>
+<tr>
+<td align="left">s.setblocking(flag)</td>
+<td align="left">如果flag为0，则将套接字设为非阻塞模式，否则将套接字设为阻塞模式（默认值）。非阻塞模式下，如果调用recv()没有发现任何数据，或send()调用无法立即发送数据，那么将引起socket.error异常。</td>
+</tr>
+<tr>
+<td align="left">s.makefile()</td>
+<td align="left">创建一个与该套接字相关连的文件</td>
+</tr>
+</tbody></table>
+<h4 id="2-Socket编程实例"><a href="#2-Socket编程实例" class="headerlink" title="2. Socket编程实例"></a>2. Socket编程实例</h4><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 文件名：server.py</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> socket               <span class="comment"># 导入 socket 模块</span></span><br><span class="line"> </span><br><span class="line">s = socket.socket()         <span class="comment"># 创建 socket 对象</span></span><br><span class="line">host = socket.gethostname() <span class="comment"># 获取本地主机名</span></span><br><span class="line">port = <span class="number">12345</span>                <span class="comment"># 设置端口</span></span><br><span class="line">s.bind((host, port))        <span class="comment"># 绑定端口</span></span><br><span class="line"></span><br><span class="line">s.listen(<span class="number">5</span>)                 <span class="comment"># 等待客户端连接</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    conn,addr = s.accept()     <span class="comment"># 建立客户端连接</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        data=conn.recv(<span class="number">2048</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;访问地址：&#x27;</span>, addr)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;recive:&#x27;</span>,data.decode()) <span class="comment">#打印接收到的数据</span></span><br><span class="line">        msg=<span class="string">&quot;欢迎访问云间小栈！&quot;</span></span><br><span class="line">        conn.send(msg.encode(<span class="string">&quot;utf-8&quot;</span>))</span><br><span class="line">    <span class="keyword">except</span> ConnectionResetError <span class="keyword">as</span> e:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;关闭了正在占线的链接！&quot;</span>)</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    conn.close()                <span class="comment"># 关闭连接</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 文件名：client.py</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> socket               <span class="comment"># 导入 socket 模块</span></span><br><span class="line"> </span><br><span class="line">client = socket.socket()         <span class="comment"># 创建 socket 对象</span></span><br><span class="line">host = socket.gethostname() <span class="comment"># 获取本地主机名</span></span><br><span class="line">port = <span class="number">12345</span>                <span class="comment"># 设置端口号</span></span><br><span class="line"></span><br><span class="line">client.connect((host, port))</span><br><span class="line">msg=<span class="string">&quot;你好云间小栈！&quot;</span></span><br><span class="line">client.send(msg.encode(<span class="string">&quot;utf-8&quot;</span>))</span><br><span class="line">data=client.recv(<span class="number">2048</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;recive:&quot;</span>,data.decode())</span><br><span class="line"></span><br><span class="line">client.close()</span><br></pre></td></tr></table></figure>]]></content>
       <tags>
         <tag>python</tag>
       </tags>
@@ -764,120 +919,6 @@
 <li>持久性（durability）。持续性也称永久性（permanence），指一个事务一旦提交，它对数据库中数据的改变就应该是永久性的。接下来的其他操作或故障不应该对其有任何影响。</li>
 </ul>
 ]]></content>
-      <tags>
-        <tag>python</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>python学习-6</title>
-    <url>/2021/07/07/python%E5%AD%A6%E4%B9%A0-6/</url>
-    <content><![CDATA[<h2 id="Socket网络编程"><a href="#Socket网络编程" class="headerlink" title="Socket网络编程"></a>Socket网络编程</h2><h4 id="1-socket-函数"><a href="#1-socket-函数" class="headerlink" title="1. socket()函数"></a>1. socket()函数</h4><p>Python 中，我们用 socket（）函数来创建套接字，语法格式如下：<br><code>socket.socket([family[, type[, proto]]])</code><br>参数</p>
-<ul>
-<li>family: 套接字家族可以使 AF_UNIX 或者 AF_INET。</li>
-<li>type: 套接字类型可以根据是面向连接的还是非连接分为 SOCK_STREAM 或 SOCK_DGRAM。</li>
-<li>protocol: 一般不填默认为 0。</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th align="left">函数</th>
-<th align="left">描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">服务器端套接字</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">s.bind()</td>
-<td align="left">绑定地址（host,port）到套接字， 在 AF_INET下，以元组（host,port）的形式表示地址。</td>
-</tr>
-<tr>
-<td align="left">s.listen()</td>
-<td align="left">开始 TCP 监听。backlog 指定在拒绝连接之前，操作系统可以挂起的最大连接数量。该值至少为 1，大部分应用程序设为 5 就可以了。</td>
-</tr>
-<tr>
-<td align="left">s.accept()</td>
-<td align="left">被动接受TCP客户端连接,(阻塞式)等待连接的到来</td>
-</tr>
-<tr>
-<td align="left">客户端套接字</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">s.connect()</td>
-<td align="left">主动初始化TCP服务器连接，。一般address的格式为元组（hostname,port），如果连接出错，返回socket.error错误。</td>
-</tr>
-<tr>
-<td align="left">s.connect_ex()</td>
-<td align="left">connect()函数的扩展版本,出错时返回出错码,而不是抛出异常</td>
-</tr>
-<tr>
-<td align="left">公共用途的套接字函数</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">s.recv()</td>
-<td align="left">接收 TCP 数据，数据以字符串形式返回，bufsize 指定要接收的最大数据量。flag 提供有关消息的其他信息，通常可以忽略。</td>
-</tr>
-<tr>
-<td align="left">s.send()</td>
-<td align="left">发送 TCP 数据，将 string 中的数据发送到连接的套接字。返回值是要发送的字节数量，该数量可能小于 string 的字节大小。</td>
-</tr>
-<tr>
-<td align="left">s.sendall()</td>
-<td align="left">完整发送 TCP 数据。将 string 中的数据发送到连接的套接字，但在返回之前会尝试发送所有数据。成功返回 None，失败则抛出异常。</td>
-</tr>
-<tr>
-<td align="left">s.recvfrom()</td>
-<td align="left">接收 UDP 数据，与 recv() 类似，但返回值是（data,address）。其中 data 是包含接收数据的字符串，address 是发送数据的套接字地址。</td>
-</tr>
-<tr>
-<td align="left">s.sendto()</td>
-<td align="left">发送 UDP 数据，将数据发送到套接字，address 是形式为（ipaddr，port）的元组，指定远程地址。返回值是发送的字节数。</td>
-</tr>
-<tr>
-<td align="left">s.close()</td>
-<td align="left">关闭套接字</td>
-</tr>
-<tr>
-<td align="left">s.getpeername()</td>
-<td align="left">返回连接套接字的远程地址。返回值通常是元组（ipaddr,port）。</td>
-</tr>
-<tr>
-<td align="left">s.getsockname()</td>
-<td align="left">返回套接字自己的地址。通常是一个元组(ipaddr,port)</td>
-</tr>
-<tr>
-<td align="left">s.setsockopt(level,optname,value)</td>
-<td align="left">设置给定套接字选项的值。</td>
-</tr>
-<tr>
-<td align="left">s.getsockopt(level,optname[.buflen])</td>
-<td align="left">返回套接字选项的值。</td>
-</tr>
-<tr>
-<td align="left">s.settimeout(timeout)</td>
-<td align="left">设置套接字操作的超时期，timeout是一个浮点数，单位是秒。值为None表示没有超时期。一般，超时期应该在刚创建套接字时设置，因为它们可能用于连接的操作（如connect()）</td>
-</tr>
-<tr>
-<td align="left">s.gettimeout()</td>
-<td align="left">返回当前超时期的值，单位是秒，如果没有设置超时期，则返回None。</td>
-</tr>
-<tr>
-<td align="left">s.fileno()</td>
-<td align="left">返回套接字的文件描述符。</td>
-</tr>
-<tr>
-<td align="left">s.setblocking(flag)</td>
-<td align="left">如果flag为0，则将套接字设为非阻塞模式，否则将套接字设为阻塞模式（默认值）。非阻塞模式下，如果调用recv()没有发现任何数据，或send()调用无法立即发送数据，那么将引起socket.error异常。</td>
-</tr>
-<tr>
-<td align="left">s.makefile()</td>
-<td align="left">创建一个与该套接字相关连的文件</td>
-</tr>
-</tbody></table>
-<h4 id="2-Socket编程实例"><a href="#2-Socket编程实例" class="headerlink" title="2. Socket编程实例"></a>2. Socket编程实例</h4><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 文件名：server.py</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> socket               <span class="comment"># 导入 socket 模块</span></span><br><span class="line"> </span><br><span class="line">s = socket.socket()         <span class="comment"># 创建 socket 对象</span></span><br><span class="line">host = socket.gethostname() <span class="comment"># 获取本地主机名</span></span><br><span class="line">port = <span class="number">12345</span>                <span class="comment"># 设置端口</span></span><br><span class="line">s.bind((host, port))        <span class="comment"># 绑定端口</span></span><br><span class="line"></span><br><span class="line">s.listen(<span class="number">5</span>)                 <span class="comment"># 等待客户端连接</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    conn,addr = s.accept()     <span class="comment"># 建立客户端连接</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        data=conn.recv(<span class="number">2048</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;访问地址：&#x27;</span>, addr)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;recive:&#x27;</span>,data.decode()) <span class="comment">#打印接收到的数据</span></span><br><span class="line">        msg=<span class="string">&quot;欢迎访问云间小栈！&quot;</span></span><br><span class="line">        conn.send(msg.encode(<span class="string">&quot;utf-8&quot;</span>))</span><br><span class="line">    <span class="keyword">except</span> ConnectionResetError <span class="keyword">as</span> e:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;关闭了正在占线的链接！&quot;</span>)</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    conn.close()                <span class="comment"># 关闭连接</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 文件名：client.py</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> socket               <span class="comment"># 导入 socket 模块</span></span><br><span class="line"> </span><br><span class="line">client = socket.socket()         <span class="comment"># 创建 socket 对象</span></span><br><span class="line">host = socket.gethostname() <span class="comment"># 获取本地主机名</span></span><br><span class="line">port = <span class="number">12345</span>                <span class="comment"># 设置端口号</span></span><br><span class="line"></span><br><span class="line">client.connect((host, port))</span><br><span class="line">msg=<span class="string">&quot;你好云间小栈！&quot;</span></span><br><span class="line">client.send(msg.encode(<span class="string">&quot;utf-8&quot;</span>))</span><br><span class="line">data=client.recv(<span class="number">2048</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;recive:&quot;</span>,data.decode())</span><br><span class="line"></span><br><span class="line">client.close()</span><br></pre></td></tr></table></figure>]]></content>
       <tags>
         <tag>python</tag>
       </tags>
@@ -1815,154 +1856,6 @@ tensor([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10])
         <tag>图像分类</tag>
         <tag>tensorflow</tag>
         <tag>machine learning</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>基本优化思想与最小二乘法</title>
-    <url>/2021/08/08/%E5%9F%BA%E6%9C%AC%E4%BC%98%E5%8C%96%E6%80%9D%E6%83%B3%E4%B8%8E%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/</url>
-    <content><![CDATA[<h2 id="基本优化思想与最小二乘法"><a href="#基本优化思想与最小二乘法" class="headerlink" title="基本优化思想与最小二乘法"></a>基本优化思想与最小二乘法</h2><p>在pytorch中最核心的基础数学工具就是梯度计算工具，也就是自动微分模块。<br>所谓优化思想，指的是利用数学工具求解复杂问题的基本思想，我们往往会先给出待解决问题的数值评估指标，并在此基础之上构建方程，采用数学工具，不断优化评估指标结果，以达到最优结果。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch</span><br></pre></td></tr></table></figure>
-
-<h3 id="一、简单线性回归的机器学习建模思路"><a href="#一、简单线性回归的机器学习建模思路" class="headerlink" title="一、简单线性回归的机器学习建模思路"></a>一、简单线性回归的机器学习建模思路</h3><ol>
-<li>回顾简单线性回归建模问题</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib <span class="keyword">as</span> mpl</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.arange(<span class="number">1</span>,<span class="number">5</span>).reshape(<span class="number">2</span>,<span class="number">2</span>).<span class="built_in">float</span>()</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>tensor([[1., 2.],
-        [3., 4.]])
-</code></pre>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.plot(A[:,<span class="number">0</span>],A[:,<span class="number">1</span>],<span class="string">&#x27;o&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-
-
-
-<pre><code>[&lt;matplotlib.lines.Line2D at 0x1f7eff7f160&gt;]
-</code></pre>
-<p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/output_5_1.png"
-                      alt="png"
-                ></p>
-<ol start="2">
-<li>转化为优化问题<br>上述问题除了可以用矩阵方法求解以外，还可以将其转化为最优化问题，然后通过求解最优化问题的方法对其进行求解。最优化问题的转化分为两步。其一是确定优化数值指标，其二是确定优化目标函数。<br>如果我们希望通过一条直线拟合二维平面空间上分布的点，最核心的目标就是希望方程的预测值和真实值相差较小。假设真实的y值用y表示，预测值用$\widehat{y}$表示，带入a、b参数，择优数值表示如下：</li>
-</ol>
-<table>
-<thead>
-<tr>
-<th align="left">$x^{(i)}$</th>
-<th align="left">$y^{(i)}$</th>
-<th align="left">$\widehat{y}^{(i)}$</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">1</td>
-<td align="left">2</td>
-<td align="left">a+b</td>
-</tr>
-<tr>
-<td align="left">3</td>
-<td align="left">4</td>
-<td align="left">3a+b</td>
-</tr>
-</tbody></table>
-<p>$\widehat{y}$ 表示对应预测值</p>
-<p>$$\widehat{y}_{1} &#x3D; 1 * a + b &#x3D; a + b$$</p>
-<p>$$\widehat{y}_{2} &#x3D; 3 * a + b &#x3D; 3a + b$$</p>
-<p>因此</p>
-<p>$$(y_{1}-\widehat{y}<em>{1})^{2}+(y</em>{2}-\widehat{y}_{2})^{2}&#x3D;(2-a-b)^{2}+(4-3a-b)^{2}$$</p>
-<p>上式就是两个点的预测值和真实值的差值平方和，也就是误差平方和——SSE(Sum of the Squard Errors)</p>
-<blockquote>
-<p>此处我们只带入(1,2)和(3,4)两个点来计算SSE，也就是带入了两条数据来训练y&#x3D;ax+b这个模型。</p>
-</blockquote>
-<p>当a,b取何值时，SSE取值最小?SSE方程就是我们优化的目标方程（求最小值），因此上述方程也被成为目标函数，同时，SSE代表着真实值和预测值之间的差值(误差平方和)，因此也被成为损失函数(预测值距真实值的损失)。</p>
-<blockquote>
-<p>换而言之，当SSE取值最小时，a,b的取值就是最终线性回归方程的系数取值</p>
-</blockquote>
-<blockquote>
-<p>目标函数和损失函数并不完全等价，但大多数目标函数都由损失函数构成</p>
-</blockquote>
-<ol start="3">
-<li>最优化问题的求解方法<br>在机器学习领域，大多数优化问题都是围绕目标函数(或者损失函数)进行求解。在上述问题中，我们需要围绕SSE求最小值，SSE是一个关于a和b的二元函数，要求最小值，需要最优化方法，选择优化方法并执行相应计算。</li>
-</ol>
-<ul>
-<li>图形展示目标函数<br>使用Python中matplotlib包和Axes3D函数进行三维图像绘制</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">x=np.arange(-<span class="number">1</span>,<span class="number">3</span>,<span class="number">0.05</span>)</span><br><span class="line">y=np.arange(-<span class="number">1</span>,<span class="number">3</span>,<span class="number">0.05</span>)</span><br><span class="line">a,b=np.meshgrid(x,y)</span><br><span class="line">SSE=(<span class="number">2</span>-a-b)**<span class="number">2</span>+(<span class="number">4</span>-<span class="number">3</span>*a-b)**<span class="number">2</span></span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fig=plt.figure()</span><br><span class="line">ax=plt.axes(projection=<span class="string">&#x27;3d&#x27;</span>)</span><br><span class="line"></span><br><span class="line">ax.plot_surface(a,b,SSE,cmap=<span class="string">&#x27;rainbow&#x27;</span>)</span><br><span class="line">ax.contour(a,b,SSE,zdir=<span class="string">&#x27;z&#x27;</span>,offset=<span class="number">0</span>,cmap=<span class="string">&quot;rainbow&quot;</span>) <span class="comment"># 生成z方向的投影，投到x-y平面</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
-
-
-
-<p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/output_9_0.png"
-                      alt="png"
-                ></p>
-<ul>
-<li>函数的凹凸性<br>绘制$y&#x3D;x^{2}$图像</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">x=np.arange(-<span class="number">10</span>,<span class="number">10</span>,<span class="number">0.1</span>)</span><br><span class="line">y=x**<span class="number">2</span></span><br><span class="line">plt.plot(x,y,<span class="string">&#x27;-&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
-
-
-<p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/output_11_0.png"
-                      alt="png"
-                ></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">x=np.arange(-<span class="number">5</span>,<span class="number">5</span>,<span class="number">0.5</span>)</span><br><span class="line">y=x**<span class="number">2</span>+<span class="number">2</span>*x+<span class="number">1</span></span><br><span class="line">plt.plot(x,y,<span class="string">&#x27;-&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
-
-
-<p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/output_12_0.png"
-                      alt="png"
-                ></p>
-<ul>
-<li>SSE最小值<br>对于简单线性回归的损失函数，SSE是凸函数，因此对于SSE(a,b)&#x3D;(2-a-b)^2+(4-3a-b)^2而言，最小值点就是a,b两个参数求偏导等于0的点。</li>
-</ul>
-<p>$$\frac{\partial SSE(a,b)}{\partial a}&#x3D;20a+8b-28&#x3D;0$$</p>
-<p>$$\frac{\partial SSE(a,b)}{\partial b}&#x3D;8a+4b-12&#x3D;0$$</p>
-<p>所以a&#x3D;1,b&#x3D;1，因此y&#x3D;x+1<br>利用偏导等于0得出的方程组求解线性回归方程参数，就是最小二乘法求解过程。</p>
-<ol start="4">
-<li>机器学习建模一般流程</li>
-</ol>
-<ul>
-<li>Step 1：提出基本模型<br>本节中，我们使用的直线(y&#x3D;ax+b)去拟合二维平面空间中的点，这条直线就是基本模型，不同的模型能够使用不同的场景，在提出模型时，我们往往会预设一些影响模型结构或者实际判别性能的参数，如简单线性回归中a和b；</li>
-<li>Step 2：确定损失函数和目标函数<br>围绕建模的目标，需要设置合理损失函数，并在此基础上设置目标函数，很多情况下，这二者是相同的，这里需要注意，损失函数不是模型，而是模型参数所组成的一个函数。</li>
-<li>Step 3：根据目标函数特性，选择优化方法，求解目标函数<br>目标函数既承载了我们优化的目标(让预测值和真实值尽可能接近)，同时也是包含了模型参数的函数，因此，完成建模需要确定参数、优化结果需要预测值尽可能接近真实值这两方面需求就统一到了求解目标函数最小值的过程中了，也就是说，当我们围绕目标函数求解最小值时，也就完成了模型参数的求解。不同类型、不同性质的函数会影响优化方法的选择。在简单线性回归中，由于目标函数是凸函数，我们选取偏导数取值为0的点就是最小值点，进而使用最小二乘法完成a,b的计算，就是通过函数本身的性质进行最优化方法的选取。</li>
-</ul>
-<h3 id="二、第一个优化算法：最小二乘法"><a href="#二、第一个优化算法：最小二乘法" class="headerlink" title="二、第一个优化算法：最小二乘法"></a>二、第一个优化算法：最小二乘法</h3><ol>
-<li><p>最小二乘法的代数表示方法<br> 从更加严格的数学角度出发，最小二乘法有两种表示形式，分别是代数法表示和矩阵表示，我们先看最小二乘法的代数表示方法。首先，假设多元线性方程有如下形式</p>
-<p> $$f(x)&#x3D;w_{1}x_{1}+w_{2}x_{2}+\dots+w_{d}x_{d}+b$$</p>
-</li>
-</ol>
-<p>令$w&#x3D;(w_{1},w_{2},\dots w_{d}),x&#x3D;(x_{1},x_{2},\dots x_{d})$则上式可写为</p>
-<p>$$f(x)&#x3D;w^{T}x+b$$</p>
-<blockquote>
-<p>在机器学习领域，线性回归自变量系数一般命名为w，weight的简写，指自变量的权重</p>
-</blockquote>
-<p>多元线性回归的最小二乘法的代数表示较为复杂，此处先考虑简单线性回归的最小二乘法表示形式，在简单线性回归中，w只包含一个分量，x也只包含一个分量，我们令此时的$ x_{i} $就是对应的自变量的取值。<br>优化目标可写为</p>
-<p>$$SSE&#x3D;\sum^{m}<em>{i&#x3D;1}(f(x</em>{i}-y_{i})^{2}&#x3D;E(w,b)$$</p>
-<p>通过偏导为0求得最终结果的最小二乘法求解过程为：</p>
-<p>$$\frac{\partial SSE(w,b)}{\partial w}&#x3D;2(w\sum^{m}<em>{i&#x3D;1}x</em>{i}^{2}-\sum^{m}<em>{i&#x3D;1}(y</em>{i}-b)x_{i})&#x3D;0$$</p>
-<p>$$\frac{\partial SSE(w,b)}{\partial b}&#x3D;2(mb-\sum^{m}<em>{i&#x3D;1}(y</em>{i}-wx_{i}))&#x3D;0$$</p>
-]]></content>
-      <tags>
-        <tag>pytorch</tag>
       </tags>
   </entry>
   <entry>
@@ -2930,6 +2823,154 @@ indices=tensor([[3, 2, 1, 0],
       </tags>
   </entry>
   <entry>
+    <title>基本优化思想与最小二乘法</title>
+    <url>/2021/08/08/%E5%9F%BA%E6%9C%AC%E4%BC%98%E5%8C%96%E6%80%9D%E6%83%B3%E4%B8%8E%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/</url>
+    <content><![CDATA[<h2 id="基本优化思想与最小二乘法"><a href="#基本优化思想与最小二乘法" class="headerlink" title="基本优化思想与最小二乘法"></a>基本优化思想与最小二乘法</h2><p>在pytorch中最核心的基础数学工具就是梯度计算工具，也就是自动微分模块。<br>所谓优化思想，指的是利用数学工具求解复杂问题的基本思想，我们往往会先给出待解决问题的数值评估指标，并在此基础之上构建方程，采用数学工具，不断优化评估指标结果，以达到最优结果。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch</span><br></pre></td></tr></table></figure>
+
+<h3 id="一、简单线性回归的机器学习建模思路"><a href="#一、简单线性回归的机器学习建模思路" class="headerlink" title="一、简单线性回归的机器学习建模思路"></a>一、简单线性回归的机器学习建模思路</h3><ol>
+<li>回顾简单线性回归建模问题</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib <span class="keyword">as</span> mpl</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">A=torch.arange(<span class="number">1</span>,<span class="number">5</span>).reshape(<span class="number">2</span>,<span class="number">2</span>).<span class="built_in">float</span>()</span><br><span class="line">A</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>tensor([[1., 2.],
+        [3., 4.]])
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.plot(A[:,<span class="number">0</span>],A[:,<span class="number">1</span>],<span class="string">&#x27;o&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>[&lt;matplotlib.lines.Line2D at 0x1f7eff7f160&gt;]
+</code></pre>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/output_5_1.png"
+                      alt="png"
+                ></p>
+<ol start="2">
+<li>转化为优化问题<br>上述问题除了可以用矩阵方法求解以外，还可以将其转化为最优化问题，然后通过求解最优化问题的方法对其进行求解。最优化问题的转化分为两步。其一是确定优化数值指标，其二是确定优化目标函数。<br>如果我们希望通过一条直线拟合二维平面空间上分布的点，最核心的目标就是希望方程的预测值和真实值相差较小。假设真实的y值用y表示，预测值用$\widehat{y}$表示，带入a、b参数，择优数值表示如下：</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th align="left">$x^{(i)}$</th>
+<th align="left">$y^{(i)}$</th>
+<th align="left">$\widehat{y}^{(i)}$</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">2</td>
+<td align="left">a+b</td>
+</tr>
+<tr>
+<td align="left">3</td>
+<td align="left">4</td>
+<td align="left">3a+b</td>
+</tr>
+</tbody></table>
+<p>$\widehat{y}$ 表示对应预测值</p>
+<p>$$\widehat{y}_{1} &#x3D; 1 * a + b &#x3D; a + b$$</p>
+<p>$$\widehat{y}_{2} &#x3D; 3 * a + b &#x3D; 3a + b$$</p>
+<p>因此</p>
+<p>$$(y_{1}-\widehat{y}<em>{1})^{2}+(y</em>{2}-\widehat{y}_{2})^{2}&#x3D;(2-a-b)^{2}+(4-3a-b)^{2}$$</p>
+<p>上式就是两个点的预测值和真实值的差值平方和，也就是误差平方和——SSE(Sum of the Squard Errors)</p>
+<blockquote>
+<p>此处我们只带入(1,2)和(3,4)两个点来计算SSE，也就是带入了两条数据来训练y&#x3D;ax+b这个模型。</p>
+</blockquote>
+<p>当a,b取何值时，SSE取值最小?SSE方程就是我们优化的目标方程（求最小值），因此上述方程也被成为目标函数，同时，SSE代表着真实值和预测值之间的差值(误差平方和)，因此也被成为损失函数(预测值距真实值的损失)。</p>
+<blockquote>
+<p>换而言之，当SSE取值最小时，a,b的取值就是最终线性回归方程的系数取值</p>
+</blockquote>
+<blockquote>
+<p>目标函数和损失函数并不完全等价，但大多数目标函数都由损失函数构成</p>
+</blockquote>
+<ol start="3">
+<li>最优化问题的求解方法<br>在机器学习领域，大多数优化问题都是围绕目标函数(或者损失函数)进行求解。在上述问题中，我们需要围绕SSE求最小值，SSE是一个关于a和b的二元函数，要求最小值，需要最优化方法，选择优化方法并执行相应计算。</li>
+</ol>
+<ul>
+<li>图形展示目标函数<br>使用Python中matplotlib包和Axes3D函数进行三维图像绘制</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">x=np.arange(-<span class="number">1</span>,<span class="number">3</span>,<span class="number">0.05</span>)</span><br><span class="line">y=np.arange(-<span class="number">1</span>,<span class="number">3</span>,<span class="number">0.05</span>)</span><br><span class="line">a,b=np.meshgrid(x,y)</span><br><span class="line">SSE=(<span class="number">2</span>-a-b)**<span class="number">2</span>+(<span class="number">4</span>-<span class="number">3</span>*a-b)**<span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fig=plt.figure()</span><br><span class="line">ax=plt.axes(projection=<span class="string">&#x27;3d&#x27;</span>)</span><br><span class="line"></span><br><span class="line">ax.plot_surface(a,b,SSE,cmap=<span class="string">&#x27;rainbow&#x27;</span>)</span><br><span class="line">ax.contour(a,b,SSE,zdir=<span class="string">&#x27;z&#x27;</span>,offset=<span class="number">0</span>,cmap=<span class="string">&quot;rainbow&quot;</span>) <span class="comment"># 生成z方向的投影，投到x-y平面</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/output_9_0.png"
+                      alt="png"
+                ></p>
+<ul>
+<li>函数的凹凸性<br>绘制$y&#x3D;x^{2}$图像</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">x=np.arange(-<span class="number">10</span>,<span class="number">10</span>,<span class="number">0.1</span>)</span><br><span class="line">y=x**<span class="number">2</span></span><br><span class="line">plt.plot(x,y,<span class="string">&#x27;-&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/output_11_0.png"
+                      alt="png"
+                ></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">x=np.arange(-<span class="number">5</span>,<span class="number">5</span>,<span class="number">0.5</span>)</span><br><span class="line">y=x**<span class="number">2</span>+<span class="number">2</span>*x+<span class="number">1</span></span><br><span class="line">plt.plot(x,y,<span class="string">&#x27;-&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/output_12_0.png"
+                      alt="png"
+                ></p>
+<ul>
+<li>SSE最小值<br>对于简单线性回归的损失函数，SSE是凸函数，因此对于SSE(a,b)&#x3D;(2-a-b)^2+(4-3a-b)^2而言，最小值点就是a,b两个参数求偏导等于0的点。</li>
+</ul>
+<p>$$\frac{\partial SSE(a,b)}{\partial a}&#x3D;20a+8b-28&#x3D;0$$</p>
+<p>$$\frac{\partial SSE(a,b)}{\partial b}&#x3D;8a+4b-12&#x3D;0$$</p>
+<p>所以a&#x3D;1,b&#x3D;1，因此y&#x3D;x+1<br>利用偏导等于0得出的方程组求解线性回归方程参数，就是最小二乘法求解过程。</p>
+<ol start="4">
+<li>机器学习建模一般流程</li>
+</ol>
+<ul>
+<li>Step 1：提出基本模型<br>本节中，我们使用的直线(y&#x3D;ax+b)去拟合二维平面空间中的点，这条直线就是基本模型，不同的模型能够使用不同的场景，在提出模型时，我们往往会预设一些影响模型结构或者实际判别性能的参数，如简单线性回归中a和b；</li>
+<li>Step 2：确定损失函数和目标函数<br>围绕建模的目标，需要设置合理损失函数，并在此基础上设置目标函数，很多情况下，这二者是相同的，这里需要注意，损失函数不是模型，而是模型参数所组成的一个函数。</li>
+<li>Step 3：根据目标函数特性，选择优化方法，求解目标函数<br>目标函数既承载了我们优化的目标(让预测值和真实值尽可能接近)，同时也是包含了模型参数的函数，因此，完成建模需要确定参数、优化结果需要预测值尽可能接近真实值这两方面需求就统一到了求解目标函数最小值的过程中了，也就是说，当我们围绕目标函数求解最小值时，也就完成了模型参数的求解。不同类型、不同性质的函数会影响优化方法的选择。在简单线性回归中，由于目标函数是凸函数，我们选取偏导数取值为0的点就是最小值点，进而使用最小二乘法完成a,b的计算，就是通过函数本身的性质进行最优化方法的选取。</li>
+</ul>
+<h3 id="二、第一个优化算法：最小二乘法"><a href="#二、第一个优化算法：最小二乘法" class="headerlink" title="二、第一个优化算法：最小二乘法"></a>二、第一个优化算法：最小二乘法</h3><ol>
+<li><p>最小二乘法的代数表示方法<br> 从更加严格的数学角度出发，最小二乘法有两种表示形式，分别是代数法表示和矩阵表示，我们先看最小二乘法的代数表示方法。首先，假设多元线性方程有如下形式</p>
+<p> $$f(x)&#x3D;w_{1}x_{1}+w_{2}x_{2}+\dots+w_{d}x_{d}+b$$</p>
+</li>
+</ol>
+<p>令$w&#x3D;(w_{1},w_{2},\dots w_{d}),x&#x3D;(x_{1},x_{2},\dots x_{d})$则上式可写为</p>
+<p>$$f(x)&#x3D;w^{T}x+b$$</p>
+<blockquote>
+<p>在机器学习领域，线性回归自变量系数一般命名为w，weight的简写，指自变量的权重</p>
+</blockquote>
+<p>多元线性回归的最小二乘法的代数表示较为复杂，此处先考虑简单线性回归的最小二乘法表示形式，在简单线性回归中，w只包含一个分量，x也只包含一个分量，我们令此时的$ x_{i} $就是对应的自变量的取值。<br>优化目标可写为</p>
+<p>$$SSE&#x3D;\sum^{m}<em>{i&#x3D;1}(f(x</em>{i}-y_{i})^{2}&#x3D;E(w,b)$$</p>
+<p>通过偏导为0求得最终结果的最小二乘法求解过程为：</p>
+<p>$$\frac{\partial SSE(w,b)}{\partial w}&#x3D;2(w\sum^{m}<em>{i&#x3D;1}x</em>{i}^{2}-\sum^{m}<em>{i&#x3D;1}(y</em>{i}-b)x_{i})&#x3D;0$$</p>
+<p>$$\frac{\partial SSE(w,b)}{\partial b}&#x3D;2(mb-\sum^{m}<em>{i&#x3D;1}(y</em>{i}-wx_{i}))&#x3D;0$$</p>
+]]></content>
+      <tags>
+        <tag>pytorch</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>张量的线性代数运算</title>
     <url>/2021/07/31/%E5%BC%A0%E9%87%8F%E7%9A%84%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0%E8%BF%90%E7%AE%97/</url>
     <content><![CDATA[<h2 id="张量的线性代数运算"><a href="#张量的线性代数运算" class="headerlink" title="张量的线性代数运算"></a>张量的线性代数运算</h2><ul>
@@ -3826,11 +3867,11 @@ V=tensor([[-0.2673, -0.9636,  0.0000],
     <title>钢铁雄心4 No Step Back</title>
     <url>/2021/12/26/%E9%92%A2%E9%93%81%E9%9B%84%E5%BF%834-No-Step-Back/</url>
     <content><![CDATA[<h3 id="钢铁雄心4-No-Step-Back-dlc备份"><a href="#钢铁雄心4-No-Step-Back-dlc备份" class="headerlink" title="钢铁雄心4 No Step Back dlc备份"></a>钢铁雄心4 No Step Back dlc备份</h3><p>图片，音乐：Paradox Interactive</p>
-<div id="mplayer1873"></div>
+<div id="mplayer8863"></div>
 <script src="https://cdn.jsdelivr.net/gh/MoePlayer/cPlayer/dist/cplayer.js"></script>
 <script>
     new cplayer({
-      element: document.getElementById('mplayer1873'),
+      element: document.getElementById('mplayer8863'),
       
 playlist: [
     {
