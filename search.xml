@@ -3922,4 +3922,36 @@ size:'20px'
         <tag>game</tag>
       </tags>
   </entry>
+  <entry>
+    <title>jetson nano运行Astra相机</title>
+    <url>/2024/11/10/jetson-nano%E8%BF%90%E8%A1%8CAstra%E7%9B%B8%E6%9C%BA/</url>
+    <content><![CDATA[<h2 id="Astra相机"><a href="#Astra相机" class="headerlink" title="Astra相机"></a>Astra相机</h2><p>使用ros-astra-camera包</p>
+<ol>
+<li><p>安装libuvc</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/libuvc/libuvc.git</span><br><span class="line"><span class="built_in">cd</span> libuvc</span><br><span class="line"><span class="built_in">mkdir</span> build &amp;&amp; <span class="built_in">cd</span> build</span><br><span class="line">cmake .. &amp;&amp; make -j4</span><br><span class="line">sudo make install</span><br><span class="line">sudo ldconfig</span><br></pre></td></tr></table></figure>
+
+</li>
+<li><p>安装udev</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/ros_ws</span><br><span class="line"><span class="built_in">source</span> ./devel/setup.bash</span><br><span class="line">roscd astra_camera</span><br><span class="line">./scripts/create_udev_rules</span><br><span class="line">sudo udevadm control --reload &amp;&amp; sudo  udevadm trigger</span><br></pre></td></tr></table></figure>
+
+</li>
+<li><p>编译运行</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">catkin_make</span><br><span class="line"><span class="built_in">source</span> devel/setup.bash</span><br><span class="line">roslaunch astra_camera astra.launch</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="运行报错"><a href="#运行报错" class="headerlink" title="运行报错"></a>运行报错</h2><p>启动相机能够正常启动，但是一到打开depth就报错</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/astra_error.png"
+                      alt="image.png"
+                ></p>
+<p>原因是同目录下需要额外的ros_bridge一起编译，使ros环境不使用自带cv_bridge</p>
+<p><a class="link"   href="https://github.com/orbbec/ros_astra_camera/issues/189#issuecomment-1687006729" >https://github.com/orbbec/ros_astra_camera/issues/189#issuecomment-1687006729<i class="fas fa-external-link-alt"></i></a></p>
+]]></content>
+      <tags>
+        <tag>SLAM</tag>
+        <tag>RGBD相机</tag>
+        <tag>奥比中光</tag>
+      </tags>
+  </entry>
 </search>
