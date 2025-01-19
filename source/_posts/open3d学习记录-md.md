@@ -1,6 +1,7 @@
 ---
 title: open3d学习记录.md
 date: 2025-01-19 11:26:08
+mathjax: True
 tags:
 - python
 - open3d
