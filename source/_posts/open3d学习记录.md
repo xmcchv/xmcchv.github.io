@@ -1,5 +1,5 @@
 ---
-title: open3d学习记录.md
+title: open3d学习记录
 date: 2025-01-19 11:26:08
 mathjax: True
 tags:
