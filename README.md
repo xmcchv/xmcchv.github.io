@@ -1,6 +1,6 @@
 # xmcchv.github.io
 
-### Hi there 👋
+### Hi! welcome to my bolg👋
 
 
 <p align="center"> 
