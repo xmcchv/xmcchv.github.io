@@ -2,6 +2,8 @@
 title: linux创建开机自启动服务
 date: 2025-05-29 14:08:32
 tags:
+- Linux
+- 开机自启动
 ---
 
 在 Ubuntu 中创建开机启动的 service 通常使用 systemd。以下是详细步骤：

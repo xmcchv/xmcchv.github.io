@@ -2,6 +2,8 @@
 title: python打包成dll给其他语言调用
 date: 2025-01-20 23:34:30
 tags:
+- python 
+- dll
 ---
 
 将 Python 代码打包成 DLL 供其他语言调用
