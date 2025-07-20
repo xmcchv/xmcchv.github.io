@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="云间之龙">
+    
+    <title>
+        
+            多传感器时间同步问题记录 |
+        
+        云间小栈
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/avatar.jpg">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/font/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/font/css/regular.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/font/css/solid.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/font/css/brands.min.css">
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"xmcchv.github.io","root":"/","language":"zh-CN","path":"search.xml"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#0066cc","title":"云间小栈","author":"云间之龙","url":"https://xmcchv.github.io","avatar":"/images/avatar.jpg","logo":"/images/avatar.jpg","favicon":"/images/avatar.jpg"},"menu":{"home":"/ || fa-solid fa-home","archives":"/archives || fa-solid fa-box-archive","tags":"/tags  || fa-solid fa-tags","下载站":"https://xmcchv.vercel.app/zh-CN/ || fa-solid fa-download","About":"/about  || fa-solid fa-user-graduate"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"凡心所向，素履所往；生如逆旅，一苇以航","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://github.com/xmcchv"}},"scroll":{"progress_bar":true,"percent":true,"hide_header":true},"home":{"announcement":"stay hungry, stay foolish","category":true,"tag":true,"post_datetime":"updated"},"post":{"author_badge":{"enable":false,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY-MM-DD HH:mm","copyright_info":true,"share":true,"reward":{"enable":false,"img_link":null,"text":null,"icon":null}},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true,"layout":"left"},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":false,"page_pv":false}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":true},"cdn":{"enable":true,"provider":"cdnjs"},"pjax":{"enable":false},"footer":{"since":2021,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/avatar.jpg">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               云间小栈
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                    <i class="menu-text-color menu-icon fa-solid fa-home"></i>
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                    <i class="menu-text-color menu-icon fa-solid fa-box-archive"></i>
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                    <i class="menu-text-color menu-icon fa-solid fa-tags"></i>
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" target="_blank" rel="noopener" href="https://xmcchv.vercel.app/zh-cn/">
+                                
+                                    <i class="menu-text-color menu-icon fa-solid fa-download"></i>
+                                
+                                下载站
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                    <i class="menu-text-color menu-icon fa-solid fa-user-graduate"></i>
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                                <span class="menu-icon-wrap border-box flex-center">
+                                    <i class="drawer-menu-text-color menu-icon fa-solid fa-home"></i>
+                                </span>
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                                <span class="menu-icon-wrap border-box flex-center">
+                                    <i class="drawer-menu-text-color menu-icon fa-solid fa-box-archive"></i>
+                                </span>
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                                <span class="menu-icon-wrap border-box flex-center">
+                                    <i class="drawer-menu-text-color menu-icon fa-solid fa-tags"></i>
+                                </span>
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" target="_blank" rel="noopener" href="https://xmcchv.vercel.app/zh-cn/">
+                            
+                                <span class="menu-icon-wrap border-box flex-center">
+                                    <i class="drawer-menu-text-color menu-icon fa-solid fa-download"></i>
+                                </span>
+                            
+                            下载站
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                                <span class="menu-icon-wrap border-box flex-center">
+                                    <i class="drawer-menu-text-color menu-icon fa-solid fa-user-graduate"></i>
+                                </span>
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        多传感器时间同步问题记录
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/avatar.jpg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">云间之龙</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-07-20 21:25</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Sun Jul 20 2025 21:51:46 GMT+0800">2025-07-20 21:51</span>
+                </span>
+            
+        
+
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/ROS/">ROS</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5/">时间同步</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+        
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h2 id="1-多传感器时间同步问题描述"><a class="markdownIt-Anchor" href="#1-多传感器时间同步问题描述"></a> 1. 多传感器时间同步问题描述</h2>
+<p>对多传感器数据（Lidar，Camera，GPS/IMU）进行高精度的时间同步的原因：</p>
+<p>1.每个传感器拥有自己的内部时钟，时钟之间存在“钟漂”，导致各传感器的时间基准不一致；<br><br />
+2.不同的传感器采样频率不一样；<br><br />
+3.数据传输、Camera 曝光等会产生不可控的延迟。<br></p>
+<h2 id="2-多传感器时间特点"><a class="markdownIt-Anchor" href="#2-多传感器时间特点"></a> 2. 多传感器时间特点</h2>
+<table>
+<thead>
+<tr>
+<th>传感器</th>
+<th>时间特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GNSS</td>
+<td>GNSS 接收机在接收到卫星信号后，通过解算即可获得接收机系统时间与卫星原子钟之间钟差，并通过钟差来校准自己的系统时间，完成授时功能。</td>
+</tr>
+<tr>
+<td>Camera</td>
+<td>自动驾驶上使用的相机（Rolling Shutter）一般是支持外部触发曝光的。 Camera 帧周期包括曝光时间（exposure time）和读出时间（readout time，cmos 相同时固定）。</td>
+</tr>
+<tr>
+<td>Lidar</td>
+<td>自动驾驶中所使用的 Lidar，例如 Mid-360，从硬件层面上支持PPS+NMEA协议（PPS硬件触发，GPRMC授时）。LiDAR 通常支持两种时间同步接口：基于以太网的PTP/gPTP时间同步和基于GPS的PPS+NMEA协议。</td>
+</tr>
+<tr>
+<td>Rader</td>
+<td>主流的车载毫米波雷达采用 FMCW 调制方式，上电后开始进行信号的发送和接收，内部有专门的时间机制，无法接收外部的时间。但毫米波雷达周期性发送 CAN 信号，所以可以从 CAN 信号中获取时间信息。</td>
+</tr>
+<tr>
+<td>IMU</td>
+<td>一般和 Lidar/GNSS 集成，不需要额外考虑。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-统一时钟源"><a class="markdownIt-Anchor" href="#3-统一时钟源"></a> 3. 统一时钟源</h2>
+<p>为了解决&quot;钟漂&quot;问题，我们引入了统一时钟源的概念。统一时钟源的作用是提供一个所有传感器都遵循的共同时间参考。<br />
+<img  
+                       lazyload
+                       alt="image"
+                       data-src="/images/%E6%97%B6%E9%92%9F%E6%BA%90%E5%90%8C%E6%AD%A5.png"
+                        alt="时钟源同步" 
+                 ></p>
+<h3 id="31-pps-gnss"><a class="markdownIt-Anchor" href="#31-pps-gnss"></a> 3.1 PPS + GNSS</h3>
+<p>GNSS 接收机获取时钟信号后，会输出两类同步信号：①同步脉冲信号 PPS。其时间周期为 1s ，脉冲宽度5ms~100ms；②GPRMC 时间同步报文。通过标准串口输出，符合 GPRMC 格式，用于提供精确的时间同步信息。</p>
+<p>GPRMC 是一种包含UTC时间（精确到秒），经纬度定位数据的标准格式报文。其格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"># 示例数据</span><br><span class="line">$GPRMC,001155.00,A,2237.496474,N,11356.089515,E,0.0,225.5,230520,2.3,W,A*28</span><br><span class="line"> </span><br><span class="line"># 数据说明</span><br><span class="line">field 0：$GPRMC, 格式ID，表示该格式为建议的最低特定GPS / TRANSIT数据（RMC）推荐最低定位信息</span><br><span class="line">field 1: UTC时间, 格式hhmmss.ssss，代表时分秒.毫秒</span><br><span class="line">field 2: 状态 A:代表定位成功 V:代表定位失败 </span><br><span class="line">field 3: 纬度 ddmm.mmmmmm 度格式（如果前导位数不足，则用0填充）</span><br><span class="line">field 4: 纬度 N(北纬)  S(南纬)</span><br><span class="line">field 5: 经度 dddmm.mmmmmm 度格式（如果前导位数不足，则用0填充）</span><br><span class="line">field 6: 经度 E(东经) W(西经)</span><br><span class="line">field 7: 速度（也为1.852 km / h）</span><br><span class="line">field 8: 方位角，度（二维方向，等效于二维罗盘）</span><br><span class="line">field 9: UTC日期 DDMMYY 天月年</span><br><span class="line">field 10: 磁偏角（000-180）度，如果前导位数不足，则用0填充）</span><br><span class="line">field 11: 磁偏角方向E =东W =西</span><br><span class="line">field 12: 模式，A =自动，D =差分，E =估计，AND =无效数据（3.0协议内容）</span><br><span class="line">field 13: 校验和</span><br></pre></td></tr></table></figure>
+<p>其中 PPS 前沿时刻与 GPRMC报文 的发送在同一时刻，误差为 ns 级别，可以忽略。PPS 秒脉冲（通常为1PPS，即1次每秒）为物理电平输出，接收及处理 PPS 信号的时间在 ns 级别，依旧可以忽略。但 GPRMC数据一般通过波特率 9600 的串口发送，其发送、接收、处理时间 tx 在 ms 级别，是时间同步的关键。以下是使用 PPS+GPRMC 进行时间同步的原理。<br />
+<img  
+                       lazyload
+                       alt="image"
+                       data-src="/images/pps_gnss.png"
+                        alt="PPS+GNSS" 
+                 ></p>
+<h3 id="32-ptp"><a class="markdownIt-Anchor" href="#32-ptp"></a> 3.2 PTP</h3>
+<p>PTP(Precision Time Protocol，IEEE 1588 V2)是基于以太网的高精度时钟同步协议，是一种主从式的时间同步系统，能够实现主节点（Master Node）和从节点（Slave Node）之间的亚微秒级时钟同步，前提是所有节点之间都通过以太网互联，交换机支持 PTP 协议，并且每个节点都支持 PTP 协议。</p>
+<p><img  
+                       lazyload
+                       alt="image"
+                       data-src="/images/PTP%E6%9E%B6%E6%9E%84.png"
+                        alt="PTP架构" 
+                 ></p>
+<p>设备中运行 PTP 协议的网络端口称为 PTP 端口，PTP主端口用来发布时间，PTP从端口用来接收时间。同时定义了三种时钟节点，边界时钟节点（BC，Boundary Clock）、普通时钟节点（OC，Ordinary Clock）和透明时钟节点（TC，Transparent clock）。 <br></p>
+<ol>
+<li>边界时钟节点拥有多个PTP端口，其中一个用来同步上游设备时间，其余端口用来向下游设备发送时间。当边界时钟节点的上游时间同步设备是GNSS接收机时，此时的边界时钟节点就是一个主时钟节点（最优时钟） <br></li>
+<li>普通时钟节点只有一个PTP端口，用来同步上游时钟节点的时间。<br></li>
+<li>透明时钟节点具有多个PTP端口，收到什么时间，转发什么时间，不进行协议解析，内部不参与时间同步。<br></li>
+</ol>
+<p><img  
+                       lazyload
+                       alt="image"
+                       data-src="/images/PTP%E6%8A%A5%E6%96%87.png"
+                        alt="PTP报文" 
+                 ></p>
+<h2 id="4-时间戳误差"><a class="markdownIt-Anchor" href="#4-时间戳误差"></a> 4. 时间戳误差</h2>
+<p>完成时钟源的统一后，每个传感器数据都有了全局一致的时间参考。但会面临一个新问题，不同的传感器采样频率不一样，比如激光雷达（通常为 10Hz）和相机（通常为 30Hz）。导致在特定时间获取同步数据可能会有延迟，在动态环境中可能造成较大的误差。</p>
+<p>如下图所示，三个传感器具有不同的采样频率。在 T1 时刻，传感器2 有一个数据，此时，我们需要对应传感器1 和  3的数据是多少，就会进行查找。查找的方式就是找对应的传感器数据和传感器2时间差最近的数据包。如果查找的数据包时间和 T1 时刻传感器2 数据包的差距较大，在加上车身和障碍物都在移动，这样误差会比较大。为了缓解查找时间戳造成的误差现象，主要采用的方式有硬件同步和软件同步。</p>
+<p><img  
+                       lazyload
+                       alt="image"
+                       data-src="/images/%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E6%88%B3.png"
+                        alt="传感器时间戳" 
+                 ></p>
+<h3 id="41-ros时间对齐"><a class="markdownIt-Anchor" href="#41-ros时间对齐"></a> 4.1 ROS时间对齐</h3>
+<p>ROS自带的同步工具包：message_filters，它可以实现对多个话题进行时间同步，并且支持不同话题的时间误差。</p>
+<h3 id="42-自定义软件时间同步"><a class="markdownIt-Anchor" href="#42-自定义软件时间同步"></a> 4.2 自定义软件时间同步</h3>
+<p>自定义软件时间同步的核心思想是：根据不同传感器的时间戳，计算出一个参考时间，然后将所有传感器的时间戳对齐到这个参考时间。对齐的过程中，需要考虑不同传感器之间的时间误差，以及传感器数据的采集频率。对齐后的时间戳，可以用于后续的时间同步和数据处理。</p>
+<p>例如：共享内存的方式将一个传感器的时间戳作为参考时间，其他传感器在读取共享的时间戳后修改自己的消息为参考时间戳，这样所有传感器的时间戳就对齐了。参考代码如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义共享内存位置</span></span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *user_name = <span class="built_in">getlogin</span>();</span><br><span class="line">std::string path_for_time_stamp = <span class="string">&quot;/home/&quot;</span> + std::<span class="built_in">string</span>(user_name) + <span class="string">&quot;/timeshare&quot;</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *shared_file_name = path_for_time_stamp.<span class="built_in">c_str</span>();</span><br><span class="line"><span class="type">int</span> fd = <span class="built_in">open</span>(shared_file_name, O_RDWR);</span><br><span class="line">pointt = (time_stamp *)<span class="built_in">mmap</span>(<span class="literal">NULL</span>, <span class="built_in">sizeof</span>(time_stamp), PROT_READ | PROT_WRITE, MAP_SHARED, fd, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取时间</span></span><br><span class="line"><span class="keyword">if</span>(pointt != MAP_FAILED &amp;&amp; pointt-&gt;low != <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 赋值共享内存中的时间戳给相机帧</span></span><br><span class="line">    <span class="type">int64_t</span> b = pointt-&gt;low;</span><br><span class="line">    <span class="type">double</span> time_pc = b / <span class="number">1000000000.0</span>;</span><br><span class="line">    camera::refframetime = ros::<span class="built_in">Time</span>(time_pc);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">    camera::refframetime = ros::Time::<span class="built_in">now</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="5-参考链接"><a class="markdownIt-Anchor" href="#5-参考链接"></a> 5. 参考链接</h2>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV15cK6ziE6Z" >https://www.bilibili.com/video/BV15cK6ziE6Z<i class="fas fa-external-link-alt"></i></a><br />
+<a class="link"   target="_blank" rel="noopener" href="https://keymotek.com/solution_datalogging/sensor-time-synchronization/" >https://keymotek.com/solution_datalogging/sensor-time-synchronization/<i class="fas fa-external-link-alt"></i></a><br />
+<a class="link"   target="_blank" rel="noopener" href="https://github.com/xmcchv/HIKROBOT-MVS-CAMERA-ROS" >https://github.com/xmcchv/HIKROBOT-MVS-CAMERA-ROS<i class="fas fa-external-link-alt"></i></a></p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                多传感器时间同步问题记录
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2025/07/20/多传感器时间同步问题记录/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">云间之龙</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2025-07-20 21:25</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/ROS/">ROS</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5/">时间同步</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                            <div class="post-share-container border-box">
+    <ul class="share-list-wrap border-box">
+        <li class="qq share-item border-box flex-center tooltip"
+            data-tooltip-content="分享到 QQ"
+        >
+            <i class="fa-brands fa-qq"></i>
+        </li>
+        <li class="wechat share-item border-box flex-center tooltip tooltip-img"
+            data-tooltip-content="分享到微信"
+            data-tooltip-img-tip="微信扫一扫"
+            data-tooltip-img-style="background-color: #fff; top: -10px; padding: 0.6rem 0.6rem 0.1rem 0.6rem;"
+        >
+            <i class="fa-brands fa-weixin"></i>
+        </li>
+        <li class="weibo share-item border-box flex-center tooltip"
+            data-tooltip-content="分享到微博"
+        >
+            <i class="fa-brands fa-weibo"></i>
+        </li>
+    </ul>
+</div>
+
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/05/29/%E6%89%8B%E7%9C%BC%E6%A0%87%E5%AE%9A/"
+                                   title="手眼标定"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">手眼标定</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc left-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-text"> 1. 多传感器时间同步问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E7%89%B9%E7%82%B9"><span class="nav-text"> 2. 多传感器时间特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E7%BB%9F%E4%B8%80%E6%97%B6%E9%92%9F%E6%BA%90"><span class="nav-text"> 3. 统一时钟源</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#31-pps-gnss"><span class="nav-text"> 3.1 PPS + GNSS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#32-ptp"><span class="nav-text"> 3.2 PTP</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%97%B6%E9%97%B4%E6%88%B3%E8%AF%AF%E5%B7%AE"><span class="nav-text"> 4. 时间戳误差</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#41-ros%E6%97%B6%E9%97%B4%E5%AF%B9%E9%BD%90"><span class="nav-text"> 4.1 ROS时间对齐</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#42-%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BD%AF%E4%BB%B6%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5"><span class="nav-text"> 4.2 自定义软件时间同步</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-text"> 5. 参考链接</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2021</span>&nbsp;-&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">云间之龙</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools left-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-text"> 1. 多传感器时间同步问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E7%89%B9%E7%82%B9"><span class="nav-text"> 2. 多传感器时间特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E7%BB%9F%E4%B8%80%E6%97%B6%E9%92%9F%E6%BA%90"><span class="nav-text"> 3. 统一时钟源</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#31-pps-gnss"><span class="nav-text"> 3.1 PPS + GNSS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#32-ptp"><span class="nav-text"> 3.2 PTP</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%97%B6%E9%97%B4%E6%88%B3%E8%AF%AF%E5%B7%AE"><span class="nav-text"> 4. 时间戳误差</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#41-ros%E6%97%B6%E9%97%B4%E5%AF%B9%E9%BD%90"><span class="nav-text"> 4.1 ROS时间对齐</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#42-%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BD%AF%E4%BB%B6%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5"><span class="nav-text"> 4.2 自定义软件时间同步</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-text"> 5. 参考链接</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/utils.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/header-shrink.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/back2top.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/toggle-theme.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/code-block.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/main.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/libs/anime.min.js"></script>
+
+<!-- local search -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/local-search.min.js"></script>
+
+
+<!-- lazyload -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/lazyload.min.js"></script>
+
+
+<div class="">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/post/post-helper.min.js"></script>
+
+        <!-- toc -->
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/post/toc.min.js"></script>
+        
+
+        <!-- copyright-info -->
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/post/copyright-info.min.js"></script>
+        
+
+        <!-- share -->
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/post/share.min.js"></script>
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+
+
+</body>
+</html>

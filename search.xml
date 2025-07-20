@@ -3642,4 +3642,107 @@ size:'20px'
         <tag>game</tag>
       </tags>
   </entry>
+  <entry>
+    <title>多传感器时间同步问题记录</title>
+    <url>/2025/07/20/%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<h2 id="1-多传感器时间同步问题描述"><a class="markdownIt-Anchor" href="#1-多传感器时间同步问题描述"></a> 1. 多传感器时间同步问题描述</h2>
+<p>对多传感器数据（Lidar，Camera，GPS/IMU）进行高精度的时间同步的原因：</p>
+<p>1.每个传感器拥有自己的内部时钟，时钟之间存在“钟漂”，导致各传感器的时间基准不一致；<br><br />
+2.不同的传感器采样频率不一样；<br><br />
+3.数据传输、Camera 曝光等会产生不可控的延迟。<br></p>
+<h2 id="2-多传感器时间特点"><a class="markdownIt-Anchor" href="#2-多传感器时间特点"></a> 2. 多传感器时间特点</h2>
+<table>
+<thead>
+<tr>
+<th>传感器</th>
+<th>时间特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GNSS</td>
+<td>GNSS 接收机在接收到卫星信号后，通过解算即可获得接收机系统时间与卫星原子钟之间钟差，并通过钟差来校准自己的系统时间，完成授时功能。</td>
+</tr>
+<tr>
+<td>Camera</td>
+<td>自动驾驶上使用的相机（Rolling Shutter）一般是支持外部触发曝光的。 Camera 帧周期包括曝光时间（exposure time）和读出时间（readout time，cmos 相同时固定）。</td>
+</tr>
+<tr>
+<td>Lidar</td>
+<td>自动驾驶中所使用的 Lidar，例如 Mid-360，从硬件层面上支持PPS+NMEA协议（PPS硬件触发，GPRMC授时）。LiDAR 通常支持两种时间同步接口：基于以太网的PTP/gPTP时间同步和基于GPS的PPS+NMEA协议。</td>
+</tr>
+<tr>
+<td>Rader</td>
+<td>主流的车载毫米波雷达采用 FMCW 调制方式，上电后开始进行信号的发送和接收，内部有专门的时间机制，无法接收外部的时间。但毫米波雷达周期性发送 CAN 信号，所以可以从 CAN 信号中获取时间信息。</td>
+</tr>
+<tr>
+<td>IMU</td>
+<td>一般和 Lidar/GNSS 集成，不需要额外考虑。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-统一时钟源"><a class="markdownIt-Anchor" href="#3-统一时钟源"></a> 3. 统一时钟源</h2>
+<p>为了解决&quot;钟漂&quot;问题，我们引入了统一时钟源的概念。统一时钟源的作用是提供一个所有传感器都遵循的共同时间参考。<br />
+<img  
+                       lazyload
+                       alt="image"
+                       data-src="/images/%E6%97%B6%E9%92%9F%E6%BA%90%E5%90%8C%E6%AD%A5.png"
+                        alt="时钟源同步" 
+                 ></p>
+<h3 id="31-pps-gnss"><a class="markdownIt-Anchor" href="#31-pps-gnss"></a> 3.1 PPS + GNSS</h3>
+<p>GNSS 接收机获取时钟信号后，会输出两类同步信号：①同步脉冲信号 PPS。其时间周期为 1s ，脉冲宽度5ms~100ms；②GPRMC 时间同步报文。通过标准串口输出，符合 GPRMC 格式，用于提供精确的时间同步信息。</p>
+<p>GPRMC 是一种包含UTC时间（精确到秒），经纬度定位数据的标准格式报文。其格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 示例数据</span><br><span class="line">$GPRMC,001155.00,A,2237.496474,N,11356.089515,E,0.0,225.5,230520,2.3,W,A*28</span><br><span class="line"> </span><br><span class="line"># 数据说明</span><br><span class="line">field 0：$GPRMC, 格式ID，表示该格式为建议的最低特定GPS / TRANSIT数据（RMC）推荐最低定位信息</span><br><span class="line">field 1: UTC时间, 格式hhmmss.ssss，代表时分秒.毫秒</span><br><span class="line">field 2: 状态 A:代表定位成功 V:代表定位失败 </span><br><span class="line">field 3: 纬度 ddmm.mmmmmm 度格式（如果前导位数不足，则用0填充）</span><br><span class="line">field 4: 纬度 N(北纬)  S(南纬)</span><br><span class="line">field 5: 经度 dddmm.mmmmmm 度格式（如果前导位数不足，则用0填充）</span><br><span class="line">field 6: 经度 E(东经) W(西经)</span><br><span class="line">field 7: 速度（也为1.852 km / h）</span><br><span class="line">field 8: 方位角，度（二维方向，等效于二维罗盘）</span><br><span class="line">field 9: UTC日期 DDMMYY 天月年</span><br><span class="line">field 10: 磁偏角（000-180）度，如果前导位数不足，则用0填充）</span><br><span class="line">field 11: 磁偏角方向E =东W =西</span><br><span class="line">field 12: 模式，A =自动，D =差分，E =估计，AND =无效数据（3.0协议内容）</span><br><span class="line">field 13: 校验和</span><br></pre></td></tr></table></figure>
+<p>其中 PPS 前沿时刻与 GPRMC报文 的发送在同一时刻，误差为 ns 级别，可以忽略。PPS 秒脉冲（通常为1PPS，即1次每秒）为物理电平输出，接收及处理 PPS 信号的时间在 ns 级别，依旧可以忽略。但 GPRMC数据一般通过波特率 9600 的串口发送，其发送、接收、处理时间 tx 在 ms 级别，是时间同步的关键。以下是使用 PPS+GPRMC 进行时间同步的原理。<br />
+<img  
+                       lazyload
+                       alt="image"
+                       data-src="/images/pps_gnss.png"
+                        alt="PPS+GNSS" 
+                 ></p>
+<h3 id="32-ptp"><a class="markdownIt-Anchor" href="#32-ptp"></a> 3.2 PTP</h3>
+<p>PTP(Precision Time Protocol，IEEE 1588 V2)是基于以太网的高精度时钟同步协议，是一种主从式的时间同步系统，能够实现主节点（Master Node）和从节点（Slave Node）之间的亚微秒级时钟同步，前提是所有节点之间都通过以太网互联，交换机支持 PTP 协议，并且每个节点都支持 PTP 协议。</p>
+<p><img  
+                       lazyload
+                       alt="image"
+                       data-src="/images/PTP%E6%9E%B6%E6%9E%84.png"
+                        alt="PTP架构" 
+                 ></p>
+<p>设备中运行 PTP 协议的网络端口称为 PTP 端口，PTP主端口用来发布时间，PTP从端口用来接收时间。同时定义了三种时钟节点，边界时钟节点（BC，Boundary Clock）、普通时钟节点（OC，Ordinary Clock）和透明时钟节点（TC，Transparent clock）。 <br></p>
+<ol>
+<li>边界时钟节点拥有多个PTP端口，其中一个用来同步上游设备时间，其余端口用来向下游设备发送时间。当边界时钟节点的上游时间同步设备是GNSS接收机时，此时的边界时钟节点就是一个主时钟节点（最优时钟） <br></li>
+<li>普通时钟节点只有一个PTP端口，用来同步上游时钟节点的时间。<br></li>
+<li>透明时钟节点具有多个PTP端口，收到什么时间，转发什么时间，不进行协议解析，内部不参与时间同步。<br></li>
+</ol>
+<p><img  
+                       lazyload
+                       alt="image"
+                       data-src="/images/PTP%E6%8A%A5%E6%96%87.png"
+                        alt="PTP报文" 
+                 ></p>
+<h2 id="4-时间戳误差"><a class="markdownIt-Anchor" href="#4-时间戳误差"></a> 4. 时间戳误差</h2>
+<p>完成时钟源的统一后，每个传感器数据都有了全局一致的时间参考。但会面临一个新问题，不同的传感器采样频率不一样，比如激光雷达（通常为 10Hz）和相机（通常为 30Hz）。导致在特定时间获取同步数据可能会有延迟，在动态环境中可能造成较大的误差。</p>
+<p>如下图所示，三个传感器具有不同的采样频率。在 T1 时刻，传感器2 有一个数据，此时，我们需要对应传感器1 和  3的数据是多少，就会进行查找。查找的方式就是找对应的传感器数据和传感器2时间差最近的数据包。如果查找的数据包时间和 T1 时刻传感器2 数据包的差距较大，在加上车身和障碍物都在移动，这样误差会比较大。为了缓解查找时间戳造成的误差现象，主要采用的方式有硬件同步和软件同步。</p>
+<p><img  
+                       lazyload
+                       alt="image"
+                       data-src="/images/%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E6%88%B3.png"
+                        alt="传感器时间戳" 
+                 ></p>
+<h3 id="41-ros时间对齐"><a class="markdownIt-Anchor" href="#41-ros时间对齐"></a> 4.1 ROS时间对齐</h3>
+<p>ROS自带的同步工具包：message_filters，它可以实现对多个话题进行时间同步，并且支持不同话题的时间误差。</p>
+<h3 id="42-自定义软件时间同步"><a class="markdownIt-Anchor" href="#42-自定义软件时间同步"></a> 4.2 自定义软件时间同步</h3>
+<p>自定义软件时间同步的核心思想是：根据不同传感器的时间戳，计算出一个参考时间，然后将所有传感器的时间戳对齐到这个参考时间。对齐的过程中，需要考虑不同传感器之间的时间误差，以及传感器数据的采集频率。对齐后的时间戳，可以用于后续的时间同步和数据处理。</p>
+<p>例如：共享内存的方式将一个传感器的时间戳作为参考时间，其他传感器在读取共享的时间戳后修改自己的消息为参考时间戳，这样所有传感器的时间戳就对齐了。参考代码如下：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 定义共享内存位置</span></span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *user_name = <span class="built_in">getlogin</span>();</span><br><span class="line">std::string path_for_time_stamp = <span class="string">&quot;/home/&quot;</span> + std::<span class="built_in">string</span>(user_name) + <span class="string">&quot;/timeshare&quot;</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *shared_file_name = path_for_time_stamp.<span class="built_in">c_str</span>();</span><br><span class="line"><span class="type">int</span> fd = <span class="built_in">open</span>(shared_file_name, O_RDWR);</span><br><span class="line">pointt = (time_stamp *)<span class="built_in">mmap</span>(<span class="literal">NULL</span>, <span class="built_in">sizeof</span>(time_stamp), PROT_READ | PROT_WRITE, MAP_SHARED, fd, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取时间</span></span><br><span class="line"><span class="keyword">if</span>(pointt != MAP_FAILED &amp;&amp; pointt-&gt;low != <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 赋值共享内存中的时间戳给相机帧</span></span><br><span class="line">    <span class="type">int64_t</span> b = pointt-&gt;low;</span><br><span class="line">    <span class="type">double</span> time_pc = b / <span class="number">1000000000.0</span>;</span><br><span class="line">    camera::refframetime = ros::<span class="built_in">Time</span>(time_pc);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">    camera::refframetime = ros::Time::<span class="built_in">now</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="5-参考链接"><a class="markdownIt-Anchor" href="#5-参考链接"></a> 5. 参考链接</h2>
+<p><a class="link"   href="https://www.bilibili.com/video/BV15cK6ziE6Z" >https://www.bilibili.com/video/BV15cK6ziE6Z<i class="fas fa-external-link-alt"></i></a><br />
+<a class="link"   href="https://keymotek.com/solution_datalogging/sensor-time-synchronization/" >https://keymotek.com/solution_datalogging/sensor-time-synchronization/<i class="fas fa-external-link-alt"></i></a><br />
+<a class="link"   href="https://github.com/xmcchv/HIKROBOT-MVS-CAMERA-ROS" >https://github.com/xmcchv/HIKROBOT-MVS-CAMERA-ROS<i class="fas fa-external-link-alt"></i></a></p>
+]]></content>
+      <tags>
+        <tag>ROS</tag>
+        <tag>时间同步</tag>
+      </tags>
+  </entry>
 </search>
