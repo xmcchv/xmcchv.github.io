@@ -9,7 +9,7 @@
     
     <title>
         
-            多传感器时间同步问题记录 |
+            std::ref、引用和智能指针在std::bind和lambda中的使用区别记录 |
         
         云间小栈
     </title>
@@ -261,7 +261,7 @@
             <div class="post-content-bottom border-box">
                 
                     <div class="post-title">
-                        多传感器时间同步问题记录
+                        std::ref、引用和智能指针在std::bind和lambda中的使用区别记录
                     </div>
                 
 
@@ -287,31 +287,19 @@
         
             <span class="meta-info-item post-create-date">
                 <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
-                <span class="datetime">2025-07-20 21:25</span>
+                <span class="datetime">2025-08-02 22:08</span>
             </span>
 
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Sun Jul 20 2025 21:51:46 GMT+0800">2025-07-20 21:51</span>
+                    <span class="datetime" data-updated="Sat Aug 02 2025 22:09:08 GMT+0800">2025-08-02 22:09</span>
                 </span>
             
         
 
         
 
-        
-            <span class="post-tag meta-info-item border-box">
-                <ul class="post-tag-ul">
-                    
-                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/ROS/">ROS</a></li>
-                        
-                    
-                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5/">时间同步</a></li>
-                        
-                    
-                </ul>
-            </span>
         
 
         
@@ -332,100 +320,144 @@
                     
 
                     
-                         <h2 id="1-多传感器时间同步问题描述"><a class="markdownIt-Anchor" href="#1-多传感器时间同步问题描述"></a> 1. 多传感器时间同步问题描述</h2>
-<p>对多传感器数据（Lidar，Camera，GPS/IMU）进行高精度的时间同步的原因：</p>
-<p>1.每个传感器拥有自己的内部时钟，时钟之间存在“钟漂”，导致各传感器的时间基准不一致；<br><br />
-2.不同的传感器采样频率不一样；<br><br />
-3.数据传输、Camera 曝光等会产生不可控的延迟。<br></p>
-<h2 id="2-多传感器时间特点"><a class="markdownIt-Anchor" href="#2-多传感器时间特点"></a> 2. 多传感器时间特点</h2>
+                         <h2 id="一-引言"><a class="markdownIt-Anchor" href="#一-引言"></a> 一、引言</h2>
+<p>  本人在写代码的时候用到这方面的内容，具体情况是有四个雷达和相机融合的数据时间同步的进到callback，然后要同时处理雷达点云的转换，以及雷达点到图像上的映射。我的写法使用了线程池，将处理过程写成lambda函数添加进线程池任务。但在我写的时候遇到了ref,取地址，智能指针在里面该怎么用的疑惑，记录一下。</p>
+<ol>
+<li>雷达点云转换<br />
+这个比较简单就是，ros的convertmsg，我这是还有其他处理，再封了一层函数。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">std::future&lt;pcl::PointCloud&lt;pcl::PointXYZI&gt;::Ptr&gt; mfuture1 = mthreadPool-&gt;<span class="built_in">enqueue</span>([<span class="keyword">this</span>,pcl1]() -&gt; pcl::PointCloud&lt;pcl::PointXYZI&gt;::Ptr&#123;<span class="keyword">return</span> <span class="keyword">this</span>-&gt;<span class="built_in">ConvertLidarMsg</span>(<span class="keyword">this</span>-&gt;xyzi1, <span class="keyword">this</span>-&gt;mLidarQueue1, pcl1);&#125;);</span><br><span class="line">std::future&lt;pcl::PointCloud&lt;pcl::PointXYZI&gt;::Ptr&gt; mfuture2 = mthreadPool-&gt;<span class="built_in">enqueue</span>([<span class="keyword">this</span>,pcl2]() -&gt; pcl::PointCloud&lt;pcl::PointXYZI&gt;::Ptr&#123;<span class="keyword">return</span> <span class="keyword">this</span>-&gt;<span class="built_in">ConvertLidarMsg</span>(<span class="keyword">this</span>-&gt;xyzi2, <span class="keyword">this</span>-&gt;mLidarQueue2, pcl2);&#125;);</span><br><span class="line">std::future&lt;pcl::PointCloud&lt;pcl::PointXYZI&gt;::Ptr&gt; mfuture3 = mthreadPool-&gt;<span class="built_in">enqueue</span>([<span class="keyword">this</span>,pcl3]() -&gt; pcl::PointCloud&lt;pcl::PointXYZI&gt;::Ptr&#123;<span class="keyword">return</span> <span class="keyword">this</span>-&gt;<span class="built_in">ConvertLidarMsg</span>(<span class="keyword">this</span>-&gt;xyzi3, <span class="keyword">this</span>-&gt;mLidarQueue3, pcl3);&#125;);</span><br><span class="line">std::future&lt;pcl::PointCloud&lt;pcl::PointXYZI&gt;::Ptr&gt; mfuture4 = mthreadPool-&gt;<span class="built_in">enqueue</span>([<span class="keyword">this</span>,pcl4]() -&gt; pcl::PointCloud&lt;pcl::PointXYZI&gt;::Ptr&#123;<span class="keyword">return</span> <span class="keyword">this</span>-&gt;<span class="built_in">ConvertLidarMsg</span>(<span class="keyword">this</span>-&gt;xyzi4, <span class="keyword">this</span>-&gt;mLidarQueue4, pcl4);&#125;);</span><br></pre></td></tr></table></figure>
+<p>这里传入this即可在lambda函数体中使用当前类中的成员变量了。然后pcd1是一个智能指针，所以直接传即可。如果是其他变量的话就会默认拷贝进去，这个地方不当心就会出浅拷贝问题。</p>
+<ol start="2">
+<li>雷达到图像的映射<br />
+这一块对每张图要做语义分割，然后转成灰度图；将雷达点映射到灰度图上作为该点的语义信息；转换的点云还要经过一个变换矩阵统一到一个坐标系中。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">std::future&lt;<span class="type">void</span>&gt; fusiontask4 = mthreadPool-&gt;<span class="built_in">enqueue</span>([<span class="keyword">this</span>]() -&gt; <span class="type">void</span> &#123;</span><br><span class="line">   cv::Mat segmap4 = <span class="keyword">this</span>-&gt;mpSegment-&gt;<span class="built_in">createSegmentationMap</span>(<span class="keyword">this</span>-&gt;mpSegment-&gt;vecResult[<span class="number">3</span>], cv::<span class="built_in">Size</span>(<span class="keyword">this</span>-&gt;rgb4.cols, <span class="keyword">this</span>-&gt;rgb4.rows));</span><br><span class="line">   <span class="keyword">this</span>-&gt;pcd4 = <span class="keyword">this</span>-&gt;<span class="built_in">GeneratePointCloudinLidar</span>(segmap4, <span class="keyword">this</span>-&gt;pcd4,</span><br><span class="line">       <span class="keyword">this</span>-&gt;mvLidarDeviceList[<span class="number">3</span>]-&gt;<span class="built_in">GetIntrisicMatrix</span>(), <span class="keyword">this</span>-&gt;mvLidarDeviceList[<span class="number">3</span>]-&gt;<span class="built_in">GetDistortMatrix</span>(),<span class="keyword">this</span>-&gt;mvLidarDeviceList[<span class="number">3</span>]-&gt;<span class="built_in">GetExtrisicMatrix</span>());</span><br><span class="line">   Converter::<span class="built_in">transformXYZIPointCloud</span>(<span class="keyword">this</span>-&gt;pcd4, <span class="keyword">this</span>-&gt;Twc4);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这个就比较简单了，看起来代码多，其实传入this之后，内部全部使用this指针即可。</p>
+<h2 id="二-在-stdbind-lambda-普通函数中的使用区别"><a class="markdownIt-Anchor" href="#二-在-stdbind-lambda-普通函数中的使用区别"></a> 二、在 std::bind、Lambda、普通函数中的使用区别</h2>
+<p>以下是三者核心区别的对比表格：</p>
 <table>
 <thead>
 <tr>
-<th>传感器</th>
-<th>时间特点</th>
+<th>特性</th>
+<th>std::ref（引用包装）</th>
+<th>原生引用 T&amp;</th>
+<th>std::shared_ptr<T></th>
+<th>std::unique_ptr<T></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>GNSS</td>
-<td>GNSS 接收机在接收到卫星信号后，通过解算即可获得接收机系统时间与卫星原子钟之间钟差，并通过钟差来校准自己的系统时间，完成授时功能。</td>
+<td>本质</td>
+<td>生成 reference_wrapper 对象</td>
+<td>变量的别名</td>
+<td>共享所有权的智能指针</td>
+<td>独占所有权的智能指针</td>
 </tr>
 <tr>
-<td>Camera</td>
-<td>自动驾驶上使用的相机（Rolling Shutter）一般是支持外部触发曝光的。 Camera 帧周期包括曝光时间（exposure time）和读出时间（readout time，cmos 相同时固定）。</td>
+<td>所有权语义</td>
+<td>❌ 无所有权</td>
+<td>❌ 无所有权</td>
+<td>✅ 共享所有权</td>
+<td>✅ 独占所有权</td>
 </tr>
 <tr>
-<td>Lidar</td>
-<td>自动驾驶中所使用的 Lidar，例如 Mid-360，从硬件层面上支持PPS+NMEA协议（PPS硬件触发，GPRMC授时）。LiDAR 通常支持两种时间同步接口：基于以太网的PTP/gPTP时间同步和基于GPS的PPS+NMEA协议。</td>
+<td>能否为空 (Nullable)</td>
+<td>❌ 不能（必须绑定对象）</td>
+<td>❌ 不能</td>
+<td>✅ 可以 (nullptr)</td>
+<td>✅ 可以 (nullptr)</td>
 </tr>
 <tr>
-<td>Rader</td>
-<td>主流的车载毫米波雷达采用 FMCW 调制方式，上电后开始进行信号的发送和接收，内部有专门的时间机制，无法接收外部的时间。但毫米波雷达周期性发送 CAN 信号，所以可以从 CAN 信号中获取时间信息。</td>
+<td>线程安全性</td>
+<td>❌ 需手动同步</td>
+<td>❌ 需手动同步</td>
+<td>✅ 引用计数线程安全</td>
+<td>❌ 需手动转移所有权</td>
 </tr>
 <tr>
-<td>IMU</td>
-<td>一般和 Lidar/GNSS 集成，不需要额外考虑。</td>
+<td>生命周期管理</td>
+<td>❌ 依赖外部对象</td>
+<td>❌ 依赖外部对象</td>
+<td>✅ 自动释放</td>
+<td>✅ 自动释放</td>
+</tr>
+<tr>
+<td>重新绑定</td>
+<td>❌ 不能</td>
+<td>❌ 不能</td>
+<td>✅ 可重置指向新对象</td>
+<td>✅ 可移动转移所有权</td>
+</tr>
+<tr>
+<td>典型用途</td>
+<td>1. std::bind 保持引用 <br> 2. 存储引用到容器</td>
+<td>函数参数/返回值优化</td>
+<td>跨线程共享数据</td>
+<td>独占资源管理</td>
+</tr>
+<tr>
+<td>跨线程传递</td>
+<td>❌ 不安全</td>
+<td>❌ 不安全</td>
+<td>✅ 安全</td>
+<td>❌ 需移动语义</td>
+</tr>
+<tr>
+<td>延长对象生命周期</td>
+<td>❌ 不能</td>
+<td>❌ 不能</td>
+<td>✅ 能</td>
+<td>✅ 能（但独占）</td>
+</tr>
+<tr>
+<td>修改原对象</td>
+<td>✅ 能</td>
+<td>✅ 能</td>
+<td>✅ 能</td>
+<td>✅ 能</td>
 </tr>
 </tbody>
 </table>
-<h2 id="3-统一时钟源"><a class="markdownIt-Anchor" href="#3-统一时钟源"></a> 3. 统一时钟源</h2>
-<p>为了解决&quot;钟漂&quot;问题，我们引入了统一时钟源的概念。统一时钟源的作用是提供一个所有传感器都遵循的共同时间参考。<br />
-<img  
-                       lazyload
-                       alt="image"
-                       data-src="/images/%E6%97%B6%E9%92%9F%E6%BA%90%E5%90%8C%E6%AD%A5.png"
-                        alt="时钟源同步" 
-                 ></p>
-<h3 id="31-pps-gnss"><a class="markdownIt-Anchor" href="#31-pps-gnss"></a> 3.1 PPS + GNSS</h3>
-<p>GNSS 接收机获取时钟信号后，会输出两类同步信号：①同步脉冲信号 PPS。其时间周期为 1s ，脉冲宽度5ms~100ms；②GPRMC 时间同步报文。通过标准串口输出，符合 GPRMC 格式，用于提供精确的时间同步信息。</p>
-<p>GPRMC 是一种包含UTC时间（精确到秒），经纬度定位数据的标准格式报文。其格式如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"># 示例数据</span><br><span class="line">$GPRMC,001155.00,A,2237.496474,N,11356.089515,E,0.0,225.5,230520,2.3,W,A*28</span><br><span class="line"> </span><br><span class="line"># 数据说明</span><br><span class="line">field 0：$GPRMC, 格式ID，表示该格式为建议的最低特定GPS / TRANSIT数据（RMC）推荐最低定位信息</span><br><span class="line">field 1: UTC时间, 格式hhmmss.ssss，代表时分秒.毫秒</span><br><span class="line">field 2: 状态 A:代表定位成功 V:代表定位失败 </span><br><span class="line">field 3: 纬度 ddmm.mmmmmm 度格式（如果前导位数不足，则用0填充）</span><br><span class="line">field 4: 纬度 N(北纬)  S(南纬)</span><br><span class="line">field 5: 经度 dddmm.mmmmmm 度格式（如果前导位数不足，则用0填充）</span><br><span class="line">field 6: 经度 E(东经) W(西经)</span><br><span class="line">field 7: 速度（也为1.852 km / h）</span><br><span class="line">field 8: 方位角，度（二维方向，等效于二维罗盘）</span><br><span class="line">field 9: UTC日期 DDMMYY 天月年</span><br><span class="line">field 10: 磁偏角（000-180）度，如果前导位数不足，则用0填充）</span><br><span class="line">field 11: 磁偏角方向E =东W =西</span><br><span class="line">field 12: 模式，A =自动，D =差分，E =估计，AND =无效数据（3.0协议内容）</span><br><span class="line">field 13: 校验和</span><br></pre></td></tr></table></figure>
-<p>其中 PPS 前沿时刻与 GPRMC报文 的发送在同一时刻，误差为 ns 级别，可以忽略。PPS 秒脉冲（通常为1PPS，即1次每秒）为物理电平输出，接收及处理 PPS 信号的时间在 ns 级别，依旧可以忽略。但 GPRMC数据一般通过波特率 9600 的串口发送，其发送、接收、处理时间 tx 在 ms 级别，是时间同步的关键。以下是使用 PPS+GPRMC 进行时间同步的原理。<br />
-<img  
-                       lazyload
-                       alt="image"
-                       data-src="/images/pps_gnss.png"
-                        alt="PPS+GNSS" 
-                 ></p>
-<h3 id="32-ptp"><a class="markdownIt-Anchor" href="#32-ptp"></a> 3.2 PTP</h3>
-<p>PTP(Precision Time Protocol，IEEE 1588 V2)是基于以太网的高精度时钟同步协议，是一种主从式的时间同步系统，能够实现主节点（Master Node）和从节点（Slave Node）之间的亚微秒级时钟同步，前提是所有节点之间都通过以太网互联，交换机支持 PTP 协议，并且每个节点都支持 PTP 协议。</p>
-<p><img  
-                       lazyload
-                       alt="image"
-                       data-src="/images/PTP%E6%9E%B6%E6%9E%84.png"
-                        alt="PTP架构" 
-                 ></p>
-<p>设备中运行 PTP 协议的网络端口称为 PTP 端口，PTP主端口用来发布时间，PTP从端口用来接收时间。同时定义了三种时钟节点，边界时钟节点（BC，Boundary Clock）、普通时钟节点（OC，Ordinary Clock）和透明时钟节点（TC，Transparent clock）。 <br></p>
+<h3 id="1-stdref-的使用场景"><a class="markdownIt-Anchor" href="#1-stdref-的使用场景"></a> 1. std::ref 的使用场景</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">(<span class="type">int</span>&amp; x)</span></span>;</span><br><span class="line"><span class="type">int</span> a = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 普通函数调用无需包装</span></span><br><span class="line"><span class="built_in">foo</span>(std::<span class="built_in">ref</span>(a));  <span class="comment">// 错误：不能将 reference_wrapper 传给 int&amp;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> task = std::<span class="built_in">bind</span>(update, val); <span class="comment">// 无效</span></span><br><span class="line"><span class="built_in">task</span>(); <span class="comment">// val 仍为 0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// std::bind 必须显式包装引用</span></span><br><span class="line"><span class="keyword">auto</span> task = std::<span class="built_in">bind</span>(foo, std::<span class="built_in">ref</span>(a)); </span><br><span class="line"><span class="built_in">task</span>(); <span class="comment">// 修改原变量 a</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Lambda 中通常不需要（优先用 [&amp;]）</span></span><br><span class="line"><span class="keyword">auto</span> lambda = [&amp;a]() &#123; <span class="built_in">foo</span>(a); &#125;; </span><br></pre></td></tr></table></figure>
+<h3 id="2-智能指针的使用场景"><a class="markdownIt-Anchor" href="#2-智能指针的使用场景"></a> 2. 智能指针的使用场景</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> ptr = std::<span class="built_in">make_shared</span>&lt;<span class="type">int</span>&gt;(<span class="number">42</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Lambda 捕获智能指针（共享所有权）</span></span><br><span class="line"><span class="keyword">auto</span> lambda = [ptr]() &#123; </span><br><span class="line">    std::cout &lt;&lt; *ptr; <span class="comment">// 安全：ptr 的生命周期由引用计数保证</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// std::bind 直接传递（自动处理所有权）</span></span><br><span class="line"><span class="keyword">auto</span> task = std::<span class="built_in">bind</span>([](std::shared_ptr&lt;<span class="type">int</span>&gt; p) &#123;&#125;, ptr);</span><br></pre></td></tr></table></figure>
+<h3 id="3-原生引用的限制"><a class="markdownIt-Anchor" href="#3-原生引用的限制"></a> 3. 原生引用的限制</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">10</span>;</span><br><span class="line"><span class="type">int</span>&amp; ref = a;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 错误示例：跨线程传递原生引用</span></span><br><span class="line">std::<span class="built_in">thread</span>([&amp;ref]() &#123; ref++; &#125;).<span class="built_in">detach</span>(); <span class="comment">// ❌ 危险！可能悬垂引用</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 正确做法：改用智能指针</span></span><br><span class="line"><span class="keyword">auto</span> shared_a = std::<span class="built_in">make_shared</span>&lt;<span class="type">int</span>&gt;(a);</span><br><span class="line">std::<span class="built_in">thread</span>([shared_a]() &#123; (*shared_a)++; &#125;).<span class="built_in">join</span>(); <span class="comment">// ✅ 安全</span></span><br></pre></td></tr></table></figure>
+<h2 id="三-lambda-函数中传递不同类型值的几种方法总结"><a class="markdownIt-Anchor" href="#三-lambda-函数中传递不同类型值的几种方法总结"></a> 三、Lambda 函数中传递不同类型值的几种方法总结</h2>
 <ol>
-<li>边界时钟节点拥有多个PTP端口，其中一个用来同步上游设备时间，其余端口用来向下游设备发送时间。当边界时钟节点的上游时间同步设备是GNSS接收机时，此时的边界时钟节点就是一个主时钟节点（最优时钟） <br></li>
-<li>普通时钟节点只有一个PTP端口，用来同步上游时钟节点的时间。<br></li>
-<li>透明时钟节点具有多个PTP端口，收到什么时间，转发什么时间，不进行协议解析，内部不参与时间同步。<br></li>
+<li>按值捕获（[=] 或 [var]）<br />
+适用类型：基本类型（int, float）、小型结构体、需要副本的对象。<br />
+特点：创建变量的副本，Lambda 内修改不影响外部变量。</li>
 </ol>
-<p><img  
-                       lazyload
-                       alt="image"
-                       data-src="/images/PTP%E6%8A%A5%E6%96%87.png"
-                        alt="PTP报文" 
-                 ></p>
-<h2 id="4-时间戳误差"><a class="markdownIt-Anchor" href="#4-时间戳误差"></a> 4. 时间戳误差</h2>
-<p>完成时钟源的统一后，每个传感器数据都有了全局一致的时间参考。但会面临一个新问题，不同的传感器采样频率不一样，比如激光雷达（通常为 10Hz）和相机（通常为 30Hz）。导致在特定时间获取同步数据可能会有延迟，在动态环境中可能造成较大的误差。</p>
-<p>如下图所示，三个传感器具有不同的采样频率。在 T1 时刻，传感器2 有一个数据，此时，我们需要对应传感器1 和  3的数据是多少，就会进行查找。查找的方式就是找对应的传感器数据和传感器2时间差最近的数据包。如果查找的数据包时间和 T1 时刻传感器2 数据包的差距较大，在加上车身和障碍物都在移动，这样误差会比较大。为了缓解查找时间戳造成的误差现象，主要采用的方式有硬件同步和软件同步。</p>
-<p><img  
-                       lazyload
-                       alt="image"
-                       data-src="/images/%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E6%88%B3.png"
-                        alt="传感器时间戳" 
-                 ></p>
-<h3 id="41-ros时间对齐"><a class="markdownIt-Anchor" href="#41-ros时间对齐"></a> 4.1 ROS时间对齐</h3>
-<p>ROS自带的同步工具包：message_filters，它可以实现对多个话题进行时间同步，并且支持不同话题的时间误差。</p>
-<h3 id="42-自定义软件时间同步"><a class="markdownIt-Anchor" href="#42-自定义软件时间同步"></a> 4.2 自定义软件时间同步</h3>
-<p>自定义软件时间同步的核心思想是：根据不同传感器的时间戳，计算出一个参考时间，然后将所有传感器的时间戳对齐到这个参考时间。对齐的过程中，需要考虑不同传感器之间的时间误差，以及传感器数据的采集频率。对齐后的时间戳，可以用于后续的时间同步和数据处理。</p>
-<p>例如：共享内存的方式将一个传感器的时间戳作为参考时间，其他传感器在读取共享的时间戳后修改自己的消息为参考时间戳，这样所有传感器的时间戳就对齐了。参考代码如下：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义共享内存位置</span></span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *user_name = <span class="built_in">getlogin</span>();</span><br><span class="line">std::string path_for_time_stamp = <span class="string">&quot;/home/&quot;</span> + std::<span class="built_in">string</span>(user_name) + <span class="string">&quot;/timeshare&quot;</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *shared_file_name = path_for_time_stamp.<span class="built_in">c_str</span>();</span><br><span class="line"><span class="type">int</span> fd = <span class="built_in">open</span>(shared_file_name, O_RDWR);</span><br><span class="line">pointt = (time_stamp *)<span class="built_in">mmap</span>(<span class="literal">NULL</span>, <span class="built_in">sizeof</span>(time_stamp), PROT_READ | PROT_WRITE, MAP_SHARED, fd, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取时间</span></span><br><span class="line"><span class="keyword">if</span>(pointt != MAP_FAILED &amp;&amp; pointt-&gt;low != <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 赋值共享内存中的时间戳给相机帧</span></span><br><span class="line">    <span class="type">int64_t</span> b = pointt-&gt;low;</span><br><span class="line">    <span class="type">double</span> time_pc = b / <span class="number">1000000000.0</span>;</span><br><span class="line">    camera::refframetime = ros::<span class="built_in">Time</span>(time_pc);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">    camera::refframetime = ros::Time::<span class="built_in">now</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="5-参考链接"><a class="markdownIt-Anchor" href="#5-参考链接"></a> 5. 参考链接</h2>
-<p><a class="link"   target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV15cK6ziE6Z" >https://www.bilibili.com/video/BV15cK6ziE6Z<i class="fas fa-external-link-alt"></i></a><br />
-<a class="link"   target="_blank" rel="noopener" href="https://keymotek.com/solution_datalogging/sensor-time-synchronization/" >https://keymotek.com/solution_datalogging/sensor-time-synchronization/<i class="fas fa-external-link-alt"></i></a><br />
-<a class="link"   target="_blank" rel="noopener" href="https://github.com/xmcchv/HIKROBOT-MVS-CAMERA-ROS" >https://github.com/xmcchv/HIKROBOT-MVS-CAMERA-ROS<i class="fas fa-external-link-alt"></i></a></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> x = <span class="number">10</span>;</span><br><span class="line"><span class="keyword">auto</span> lambda = [x]() &#123; </span><br><span class="line">    <span class="comment">// 捕获的是 x 的副本， mutable 修改的也是副本</span></span><br><span class="line">    std::cout &lt;&lt; x; </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>按引用捕获（[&amp;] 或 [&amp;var]）<br />
+适用类型：大型对象（如 cv::Mat）、需要修改外部变量时。<br />
+特点：直接引用外部变量，无拷贝开销，但需确保 Lambda 执行时变量仍有效。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">std::vector&lt;<span class="type">int</span>&gt; data = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;</span><br><span class="line"><span class="keyword">auto</span> lambda = [&amp;data]() &#123; </span><br><span class="line">    data.<span class="built_in">push_back</span>(<span class="number">4</span>); <span class="comment">// 修改原数据</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>捕获智能指针（std::shared_ptr/std::unique_ptr）<br />
+适用类型：需要跨线程共享或管理动态对象的生命周期。<br />
+特点：自动管理内存，避免悬垂指针。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> ptr = std::<span class="built_in">make_shared</span>&lt;<span class="type">int</span>&gt;(<span class="number">42</span>);</span><br><span class="line"><span class="keyword">auto</span> lambda = [ptr]() &#123; </span><br><span class="line">    std::cout &lt;&lt; *ptr; <span class="comment">// 安全：ptr 的引用计数增加</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// std::unique_ptr 需移动捕获（所有权转移）</span></span><br><span class="line"><span class="keyword">auto</span> uptr = std::<span class="built_in">make_unique</span>&lt;<span class="type">int</span>&gt;(<span class="number">100</span>);</span><br><span class="line"><span class="keyword">auto</span> lambda = [uptr = std::<span class="built_in">move</span>(uptr)]() &#123; <span class="comment">/* 使用 uptr */</span> &#125;;</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>捕获 std::ref 包装的引用<br />
+适用场景：需要将引用存储到容器或延迟调用（如 std::bind）。<br />
+特点：显式包装引用，但生命周期仍需手动管理。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">10</span>;</span><br><span class="line"><span class="keyword">auto</span> ref_a = std::<span class="built_in">ref</span>(a);</span><br><span class="line"><span class="keyword">auto</span> lambda = [ref_a]() &#123; </span><br><span class="line">    ref_a.<span class="built_in">get</span>()++; <span class="comment">// 修改原变量 a</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>捕获成员变量（通过 this 或局部引用）<br />
+适用类型：类成员变量。<br />
+特点：需通过 this 或局部变量间接捕获。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyClass</span> &#123;</span><br><span class="line">    <span class="type">int</span> value = <span class="number">100</span>;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">auto</span> <span class="title">getLambda</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> [<span class="keyword">this</span>]() &#123; std::cout &lt;&lt; value; &#125;; <span class="comment">// 捕获 this</span></span><br><span class="line">        <span class="comment">// 或通过局部引用：</span></span><br><span class="line">        <span class="comment">// int&amp; ref_val = value;</span></span><br><span class="line">        <span class="comment">// return [&amp;ref_val]() &#123; std::cout &lt;&lt; ref_val; &#125;;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这里的value编译器会自动写成this-&gt;value，根据c++命名查找规则，只写value时会优先使用局部变量。代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">getLambda</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="type">int</span> value = <span class="number">10</span>;</span><br><span class="line">       <span class="keyword">return</span> [<span class="keyword">this</span>]() &#123; </span><br><span class="line">       	std::cout &lt;&lt; value; <span class="comment">// value 10</span></span><br><span class="line">       	std::cout &lt;&lt; <span class="keyword">this</span>-&gt;value; </span><br><span class="line">       &#125;; </span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
                     
                 </div>
@@ -436,11 +468,11 @@
     <div class="copyright-info-content border-box">
         <div class="copyright-info-top border-box">
             <div class="copyright-post-title border-box text-ellipsis">
-                多传感器时间同步问题记录
+                std::ref、引用和智能指针在std::bind和lambda中的使用区别记录
             </div>
 
             <div class="copyright-post-link border-box text-ellipsis">
-                2025/07/20/多传感器时间同步问题记录/
+                2025/08/02/std-ref、引用和智能指针在std-bind和lambda中的使用区别记录/
             </div>
         </div>
 
@@ -456,7 +488,7 @@
                 <div class="type">
                     发布于
                 </div>
-                <div class="content">2025-07-20 21:25</div>
+                <div class="content">2025-08-02 22:08</div>
             </div>
 
 
@@ -488,18 +520,6 @@
 
                 <div class="post-bottom-tags-and-share border-box">
                     <div>
-                        
-                            <ul class="post-tags-box border-box">
-                                
-                                    <li class="tag-item border-box">
-                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/ROS/">ROS</a>
-                                    </li>
-                                
-                                    <li class="tag-item border-box">
-                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5/">时间同步</a>
-                                    </li>
-                                
-                            </ul>
                         
                     </div>
                     <div>
@@ -535,31 +555,15 @@
                 
                     <div class="post-nav border-box">
                         
-                            <div class="prev-post">
-                                <a class="prev"
-                                   rel="prev"
-                                   href="/2025/08/02/std-ref%E3%80%81%E5%BC%95%E7%94%A8%E5%92%8C%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E5%9C%A8std-bind%E5%92%8Clambda%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8%E5%8C%BA%E5%88%AB%E8%AE%B0%E5%BD%95/"
-                                   title="std::ref、引用和智能指针在std::bind和lambda中的使用区别记录"
-                                >
-                                    <span class="left arrow-icon flex-center">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </span>
-                                    <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">std::ref、引用和智能指针在std::bind和lambda中的使用区别记录</span>
-                                        <span class="post-nav-item">上一篇</span>
-                                    </span>
-                                </a>
-                            </div>
-                        
                         
                             <div class="next-post">
                                 <a class="next"
                                    rel="next"
-                                   href="/2025/05/29/%E6%89%8B%E7%9C%BC%E6%A0%87%E5%AE%9A/"
-                                   title="手眼标定"
+                                   href="/2025/07/20/%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/"
+                                   title="多传感器时间同步问题记录"
                                 >
                                     <span class="title flex-center">
-                                        <span class="post-nav-title-item text-ellipsis">手眼标定</span>
+                                        <span class="post-nav-title-item text-ellipsis">多传感器时间同步问题记录</span>
                                         <span class="post-nav-item">下一篇</span>
                                     </span>
                                     <span class="right arrow-icon flex-center">
@@ -587,7 +591,7 @@
             <div class="pc-post-toc left-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-text"> 1. 多传感器时间同步问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E7%89%B9%E7%82%B9"><span class="nav-text"> 2. 多传感器时间特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E7%BB%9F%E4%B8%80%E6%97%B6%E9%92%9F%E6%BA%90"><span class="nav-text"> 3. 统一时钟源</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#31-pps-gnss"><span class="nav-text"> 3.1 PPS + GNSS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#32-ptp"><span class="nav-text"> 3.2 PTP</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%97%B6%E9%97%B4%E6%88%B3%E8%AF%AF%E5%B7%AE"><span class="nav-text"> 4. 时间戳误差</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#41-ros%E6%97%B6%E9%97%B4%E5%AF%B9%E9%BD%90"><span class="nav-text"> 4.1 ROS时间对齐</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#42-%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BD%AF%E4%BB%B6%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5"><span class="nav-text"> 4.2 自定义软件时间同步</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-text"> 5. 参考链接</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80-%E5%BC%95%E8%A8%80"><span class="nav-text"> 一、引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C-%E5%9C%A8-stdbind-lambda-%E6%99%AE%E9%80%9A%E5%87%BD%E6%95%B0%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8%E5%8C%BA%E5%88%AB"><span class="nav-text"> 二、在 std::bind、Lambda、普通函数中的使用区别</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-stdref-%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-text"> 1. std::ref 的使用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-text"> 2. 智能指针的使用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8E%9F%E7%94%9F%E5%BC%95%E7%94%A8%E7%9A%84%E9%99%90%E5%88%B6"><span class="nav-text"> 3. 原生引用的限制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89-lambda-%E5%87%BD%E6%95%B0%E4%B8%AD%E4%BC%A0%E9%80%92%E4%B8%8D%E5%90%8C%E7%B1%BB%E5%9E%8B%E5%80%BC%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93"><span class="nav-text"> 三、Lambda 函数中传递不同类型值的几种方法总结</span></a></li></ol>
     </div>
 </div>
 
@@ -754,7 +758,7 @@
             <div class="tablet-post-toc">
                 <div class="post-toc-wrap border-box">
     <div class="post-toc border-box">
-        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-text"> 1. 多传感器时间同步问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E6%97%B6%E9%97%B4%E7%89%B9%E7%82%B9"><span class="nav-text"> 2. 多传感器时间特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E7%BB%9F%E4%B8%80%E6%97%B6%E9%92%9F%E6%BA%90"><span class="nav-text"> 3. 统一时钟源</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#31-pps-gnss"><span class="nav-text"> 3.1 PPS + GNSS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#32-ptp"><span class="nav-text"> 3.2 PTP</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%97%B6%E9%97%B4%E6%88%B3%E8%AF%AF%E5%B7%AE"><span class="nav-text"> 4. 时间戳误差</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#41-ros%E6%97%B6%E9%97%B4%E5%AF%B9%E9%BD%90"><span class="nav-text"> 4.1 ROS时间对齐</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#42-%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BD%AF%E4%BB%B6%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5"><span class="nav-text"> 4.2 自定义软件时间同步</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-text"> 5. 参考链接</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80-%E5%BC%95%E8%A8%80"><span class="nav-text"> 一、引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C-%E5%9C%A8-stdbind-lambda-%E6%99%AE%E9%80%9A%E5%87%BD%E6%95%B0%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8%E5%8C%BA%E5%88%AB"><span class="nav-text"> 二、在 std::bind、Lambda、普通函数中的使用区别</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-stdref-%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-text"> 1. std::ref 的使用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-text"> 2. 智能指针的使用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8E%9F%E7%94%9F%E5%BC%95%E7%94%A8%E7%9A%84%E9%99%90%E5%88%B6"><span class="nav-text"> 3. 原生引用的限制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89-lambda-%E5%87%BD%E6%95%B0%E4%B8%AD%E4%BC%A0%E9%80%92%E4%B8%8D%E5%90%8C%E7%B1%BB%E5%9E%8B%E5%80%BC%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93"><span class="nav-text"> 三、Lambda 函数中传递不同类型值的几种方法总结</span></a></li></ol>
     </div>
 </div>
 
