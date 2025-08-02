@@ -1885,6 +1885,9 @@ tensor([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10])
 <p>这里的value编译器会自动写成this-&gt;value，根据c++命名查找规则，只写value时会优先使用局部变量。代码如下：</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">getLambda</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="type">int</span> value = <span class="number">10</span>;</span><br><span class="line">       <span class="keyword">return</span> [<span class="keyword">this</span>]() &#123; </span><br><span class="line">       	std::cout &lt;&lt; value; <span class="comment">// value 10</span></span><br><span class="line">       	std::cout &lt;&lt; <span class="keyword">this</span>-&gt;value; </span><br><span class="line">       &#125;; </span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
+      <tags>
+        <tag>C++</tag>
+      </tags>
   </entry>
   <entry>
     <title>图像分类-识别花朵</title>
