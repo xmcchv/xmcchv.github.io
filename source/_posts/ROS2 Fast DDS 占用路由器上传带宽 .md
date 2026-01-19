@@ -4,6 +4,7 @@ date: 2025-12-23 15:50:08
 mathjax: True
 tags:
 - FastDDS
+- CycloneDDS
 - ROS2
 ---
 
@@ -15,7 +16,7 @@ ROS2默认的DDS中间件（如Fast DDS）会使用**多播(Multicast)**和**广
 
 ✨解决方案：
 
-**定制Fast DDS XML配置文件**，禁用内置传输、绑定网卡、并**将节点发现严格限制在指定的单播IP列表**
+**1. 定制Fast DDS XML配置文件**，禁用内置传输、绑定网卡、并**将节点发现严格限制在指定的单播IP列表**
 
 **关键配置**：
 
@@ -90,3 +91,20 @@ ROS2默认的DDS中间件（如Fast DDS）会使用**多播(Multicast)**和**广
     </participant>
 </profiles>
 ```
+
+**2. 切换DDS中间件为CycloneDDS**
+
+CycloneDDS默认不会使用多播进行节点发现，适合对网络流量敏感的应用场景。
+可以通过以下命令安装CycloneDDS：
+
+```bash
+sudo apt install ros-<distro>-cyclonedds
+```
+
+然后在运行ROS2节点时，设置环境变量指定使用CycloneDDS：
+
+```bash
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+```
+
+通过上述两种方法，可以有效避免ROS2 Fast DDS占用路由器上传带宽的问题。
