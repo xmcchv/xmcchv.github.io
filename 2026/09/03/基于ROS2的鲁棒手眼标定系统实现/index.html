@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="云间之龙">
+    
+    <title>
+        
+            基于ROS2的鲁棒手眼标定系统实现 |
+        
+        云间小栈
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/avatar.jpg">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/font/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/font/css/regular.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/font/css/solid.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/font/css/brands.min.css">
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"xmcchv.github.io","root":"/","language":"zh-CN","path":"search.xml"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#0066cc","title":"云间小栈","author":"云间之龙","url":"https://xmcchv.github.io","avatar":"/images/avatar.jpg","logo":"/images/avatar.jpg","favicon":"/images/avatar.jpg"},"menu":{"home":"/ || fa-solid fa-home","archives":"/archives || fa-solid fa-box-archive","tags":"/tags  || fa-solid fa-tags","下载站":"https://xmcchv.vercel.app/zh-CN/ || fa-solid fa-download","About":"/about  || fa-solid fa-user-graduate"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"凡心所向，素履所往；生如逆旅，一苇以航","hitokoto":false},"social_contact":{"enable":true,"links":{"github":"https://github.com/xmcchv"}},"scroll":{"progress_bar":true,"percent":true,"hide_header":true},"home":{"announcement":"stay hungry, stay foolish","category":true,"tag":true,"post_datetime":"updated"},"post":{"author_badge":{"enable":false,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY-MM-DD HH:mm","copyright_info":true,"share":true,"reward":{"enable":false,"img_link":null,"text":null,"icon":null}},"code_block":{"tools":{"enable":true,"style":"default"},"highlight_theme":"default"},"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true,"layout":"left"},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":false,"page_pv":false}},"local_search":{"enable":true,"preload":true},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":true},"cdn":{"enable":true,"provider":"cdnjs"},"pjax":{"enable":false},"footer":{"since":2021,"word_count":true,"site_deploy":{"enable":true,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"aplayer":{"meting":true,"asset_inject":false},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/avatar.jpg">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               云间小栈
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                    <i class="menu-text-color menu-icon fa-solid fa-home"></i>
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                    <i class="menu-text-color menu-icon fa-solid fa-box-archive"></i>
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/tags">
+                                
+                                    <i class="menu-text-color menu-icon fa-solid fa-tags"></i>
+                                
+                                标签
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" target="_blank" rel="noopener" href="https://xmcchv.vercel.app/zh-cn/">
+                                
+                                    <i class="menu-text-color menu-icon fa-solid fa-download"></i>
+                                
+                                下载站
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/about">
+                                
+                                    <i class="menu-text-color menu-icon fa-solid fa-user-graduate"></i>
+                                
+                                关于
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                        <li class="menu-item search search-popup-trigger">
+                            <i class="menu-text-color fas search fa-search"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fas fa-search"></i></div>
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                                <span class="menu-icon-wrap border-box flex-center">
+                                    <i class="drawer-menu-text-color menu-icon fa-solid fa-home"></i>
+                                </span>
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                                <span class="menu-icon-wrap border-box flex-center">
+                                    <i class="drawer-menu-text-color menu-icon fa-solid fa-box-archive"></i>
+                                </span>
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/tags">
+                            
+                                <span class="menu-icon-wrap border-box flex-center">
+                                    <i class="drawer-menu-text-color menu-icon fa-solid fa-tags"></i>
+                                </span>
+                            
+                            标签
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" target="_blank" rel="noopener" href="https://xmcchv.vercel.app/zh-cn/">
+                            
+                                <span class="menu-icon-wrap border-box flex-center">
+                                    <i class="drawer-menu-text-color menu-icon fa-solid fa-download"></i>
+                                </span>
+                            
+                            下载站
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/about">
+                            
+                                <span class="menu-icon-wrap border-box flex-center">
+                                    <i class="drawer-menu-text-color menu-icon fa-solid fa-user-graduate"></i>
+                                </span>
+                            
+                            关于
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        基于ROS2的鲁棒手眼标定系统实现
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/avatar.jpg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">云间之龙</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026-09-03 12:00</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Thu Sep 03 2026 17:49:12 GMT+0800">2026-09-03 17:49</span>
+                </span>
+            
+        
+
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/ROS2/">ROS2</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E6%89%8B%E7%9C%BC%E6%A0%87%E5%AE%9A/">手眼标定</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E6%9C%BA%E6%A2%B0%E8%87%82/">机械臂</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E7%9B%B8%E6%9C%BA/">相机</a></li>
+                        
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/%E6%A0%87%E5%AE%9A/">标定</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+        
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h2 id="1-引言"><a class="markdownIt-Anchor" href="#1-引言"></a> 1. 引言</h2>
+<p>手眼标定（Hand-Eye Calibration）是机器人视觉中的核心问题。它的目标是确定相机坐标系与机械臂坐标系之间的空间变换关系，使得相机感知到的物体坐标能够准确转换到机械臂基座坐标系，从而实现精确的抓取和操作。</p>
+<p>我将介绍我在最近的双臂机器人工程中实现的一个<strong>生产级手眼标定系统</strong>，该系统同时支持**眼在手上（Eye-in-Hand）<strong>和</strong>眼在手外（Eye-to-Hand）**两种经典配置，并引入了多项鲁棒性优化技术。</p>
+<h2 id="2-手眼标定问题回顾"><a class="markdownIt-Anchor" href="#2-手眼标定问题回顾"></a> 2. 手眼标定问题回顾</h2>
+<h3 id="21-两种配置"><a class="markdownIt-Anchor" href="#21-两种配置"></a> 2.1 两种配置</h3>
+<table>
+<thead>
+<tr>
+<th>配置</th>
+<th>相机位置</th>
+<th>求解目标</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Eye-in-Hand</strong></td>
+<td>相机固定在机械臂末端</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>T</mi><mrow><mi>e</mi><mi>n</mi><mi>d</mi></mrow><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><mi>a</mi></mrow></msubsup></mrow><annotation encoding="application/x-tex">T_{end}^{camera}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9664379999999999em;vertical-align:-0.2831079999999999em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.664392em;"><span style="top:-2.4168920000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">d</span></span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">a</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2831079999999999em;"><span></span></span></span></span></span></span></span></span></span>（末端到相机变换）</td>
+<td>随臂运动，灵活抓取</td>
+</tr>
+<tr>
+<td><strong>Eye-to-Hand</strong></td>
+<td>相机固定在外部</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>T</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><mi>a</mi></mrow></msubsup></mrow><annotation encoding="application/x-tex">T_{base}^{camera}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9664379999999999em;vertical-align:-0.2831079999999999em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.664392em;"><span style="top:-2.4168920000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">e</span></span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">a</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2831079999999999em;"><span></span></span></span></span></span></span></span></span></span>（基座到相机变换）</td>
+<td>全局观察，视野稳定</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-数学推导从闭环关系到-axxb"><a class="markdownIt-Anchor" href="#22-数学推导从闭环关系到-axxb"></a> 2.2 数学推导：从闭环关系到 AX=XB</h3>
+<p>无论是哪种配置，都可以通过坐标变换的闭环关系推导出著名的 <strong>AX = XB</strong> 问题形式。</p>
+<h4 id="对于-eye-in-hand"><a class="markdownIt-Anchor" href="#对于-eye-in-hand"></a> 对于 Eye-in-hand：</h4>
+<p>标定板固定在世界中，机械臂带动相机移动到多个位姿。对于任意两帧 i 和 j，闭环关系为：</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msubsup><mi>T</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow><mrow><mi>o</mi><mi>b</mi><mi>j</mi><mi>e</mi><mi>c</mi><mi>t</mi></mrow></msubsup><mo>=</mo><msubsup><mi>T</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow><mrow><mi>e</mi><mi>n</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msubsup><mo>⋅</mo><msubsup><mi>T</mi><mrow><mi>e</mi><mi>n</mi><mi>d</mi></mrow><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><mi>a</mi></mrow></msubsup><mo>⋅</mo><msubsup><mi>T</mi><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><msub><mi>a</mi><mi>i</mi></msub></mrow><mrow><mi>o</mi><mi>b</mi><mi>j</mi><mi>e</mi><mi>c</mi><mi>t</mi></mrow></msubsup></mrow><annotation encoding="application/x-tex">T_{base}^{object} = T_{base}^{end_i} \cdot T_{end}^{camera} \cdot T_{camera_i}^{object}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2683239999999998em;vertical-align:-0.3013079999999999em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9670159999999998em;"><span style="top:-2.3986920000000005em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">e</span></span></span></span><span style="top:-3.180908em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3013079999999999em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.232316em;vertical-align:-0.30130799999999996em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9310080000000001em;"><span style="top:-2.398692em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">e</span></span></span></span><span style="top:-3.1449000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3280857142857143em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.30130799999999996em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.9613919999999999em;vertical-align:-0.247em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7143919999999999em;"><span style="top:-2.4530000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">d</span></span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">a</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.2462079999999998em;vertical-align:-0.34709999999999996em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8991079999999999em;"><span style="top:-2.453em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3280857142857143em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.1130000000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.34709999999999996em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msubsup><mi>T</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow><mrow><mi>o</mi><mi>b</mi><mi>j</mi><mi>e</mi><mi>c</mi><mi>t</mi></mrow></msubsup><mo>=</mo><msubsup><mi>T</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow><mrow><mi>e</mi><mi>n</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msubsup><mo>⋅</mo><msubsup><mi>T</mi><mrow><mi>e</mi><mi>n</mi><mi>d</mi></mrow><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><mi>a</mi></mrow></msubsup><mo>⋅</mo><msubsup><mi>T</mi><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><msub><mi>a</mi><mi>j</mi></msub></mrow><mrow><mi>o</mi><mi>b</mi><mi>j</mi><mi>e</mi><mi>c</mi><mi>t</mi></mrow></msubsup></mrow><annotation encoding="application/x-tex">T_{base}^{object} = T_{base}^{end_j} \cdot T_{end}^{camera} \cdot T_{camera_j}^{object}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2683239999999998em;vertical-align:-0.3013079999999999em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9670159999999998em;"><span style="top:-2.3986920000000005em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">e</span></span></span></span><span style="top:-3.180908em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3013079999999999em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.3295359999999998em;vertical-align:-0.3013079999999999em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.028228em;"><span style="top:-2.3986920000000005em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">e</span></span></span></span><span style="top:-3.2421200000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3280857142857143em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2818857142857143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3013079999999999em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.9613919999999999em;vertical-align:-0.247em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7143919999999999em;"><span style="top:-2.4530000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">d</span></span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">a</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.3434279999999998em;vertical-align:-0.44432em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8991079999999998em;"><span style="top:-2.4530000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3280857142857143em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2818857142857143em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.1130000000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.44432em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p>联立得：</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo stretchy="false">(</mo><msubsup><mi>T</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow><mrow><mi>e</mi><mi>n</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msubsup><msup><mo stretchy="false">)</mo><mrow><mo>−</mo><mn>1</mn></mrow></msup><mo>⋅</mo><msubsup><mi>T</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow><mrow><mi>e</mi><mi>n</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msubsup><mo>⋅</mo><msubsup><mi>T</mi><mrow><mi>e</mi><mi>n</mi><mi>d</mi></mrow><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><mi>a</mi></mrow></msubsup><mo>=</mo><msubsup><mi>T</mi><mrow><mi>e</mi><mi>n</mi><mi>d</mi></mrow><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><mi>a</mi></mrow></msubsup><mo>⋅</mo><msubsup><mi>T</mi><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><msub><mi>a</mi><mi>i</mi></msub></mrow><mrow><mi>o</mi><mi>b</mi><mi>j</mi><mi>e</mi><mi>c</mi><mi>t</mi></mrow></msubsup><mo>⋅</mo><mo stretchy="false">(</mo><msubsup><mi>T</mi><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><msub><mi>a</mi><mi>j</mi></msub></mrow><mrow><mi>o</mi><mi>b</mi><mi>j</mi><mi>e</mi><mi>c</mi><mi>t</mi></mrow></msubsup><msup><mo stretchy="false">)</mo><mrow><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">(T_{base}^{end_j})^{-1} \cdot T_{base}^{end_i} \cdot T_{end}^{camera} = T_{end}^{camera} \cdot T_{camera_i}^{object} \cdot (T_{camera_j}^{object})^{-1}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.3295359999999998em;vertical-align:-0.3013079999999999em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.028228em;"><span style="top:-2.3986920000000005em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">e</span></span></span></span><span style="top:-3.2421200000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3280857142857143em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2818857142857143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3013079999999999em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.864108em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.232316em;vertical-align:-0.30130799999999996em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9310080000000001em;"><span style="top:-2.398692em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">e</span></span></span></span><span style="top:-3.1449000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3280857142857143em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.30130799999999996em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.9613919999999999em;vertical-align:-0.247em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7143919999999999em;"><span style="top:-2.4530000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">d</span></span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">a</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.9613919999999999em;vertical-align:-0.247em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7143919999999999em;"><span style="top:-2.4530000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">d</span></span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">a</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.2462079999999998em;vertical-align:-0.34709999999999996em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8991079999999999em;"><span style="top:-2.453em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3280857142857143em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.1130000000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.34709999999999996em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.3434279999999998em;vertical-align:-0.44432em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8991079999999998em;"><span style="top:-2.4530000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3280857142857143em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2818857142857143em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.1130000000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.44432em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.864108em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p>令：</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>A</mi><mo>=</mo><mo stretchy="false">(</mo><msubsup><mi>T</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow><mrow><mi>e</mi><mi>n</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msubsup><msup><mo stretchy="false">)</mo><mrow><mo>−</mo><mn>1</mn></mrow></msup><mo>⋅</mo><msubsup><mi>T</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow><mrow><mi>e</mi><mi>n</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msubsup></mrow><annotation encoding="application/x-tex">A = (T_{base}^{end_j})^{-1} \cdot T_{base}^{end_i}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal">A</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.3295359999999998em;vertical-align:-0.3013079999999999em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.028228em;"><span style="top:-2.3986920000000005em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">e</span></span></span></span><span style="top:-3.2421200000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3280857142857143em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2818857142857143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3013079999999999em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.864108em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.232316em;vertical-align:-0.30130799999999996em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9310080000000001em;"><span style="top:-2.398692em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">e</span></span></span></span><span style="top:-3.1449000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3280857142857143em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.30130799999999996em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>B</mi><mo>=</mo><msubsup><mi>T</mi><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><msub><mi>a</mi><mi>i</mi></msub></mrow><mrow><mi>o</mi><mi>b</mi><mi>j</mi><mi>e</mi><mi>c</mi><mi>t</mi></mrow></msubsup><mo>⋅</mo><mo stretchy="false">(</mo><msubsup><mi>T</mi><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><msub><mi>a</mi><mi>j</mi></msub></mrow><mrow><mi>o</mi><mi>b</mi><mi>j</mi><mi>e</mi><mi>c</mi><mi>t</mi></mrow></msubsup><msup><mo stretchy="false">)</mo><mrow><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">B = T_{camera_i}^{object} \cdot (T_{camera_j}^{object})^{-1}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.2462079999999998em;vertical-align:-0.34709999999999996em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8991079999999999em;"><span style="top:-2.453em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3280857142857143em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.1130000000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.34709999999999996em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.3434279999999998em;vertical-align:-0.44432em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8991079999999998em;"><span style="top:-2.4530000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3280857142857143em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2818857142857143em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.1130000000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.44432em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.864108em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>X</mi><mo>=</mo><msubsup><mi>T</mi><mrow><mi>e</mi><mi>n</mi><mi>d</mi></mrow><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><mi>a</mi></mrow></msubsup></mrow><annotation encoding="application/x-tex">X = T_{end}^{camera}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.9613919999999999em;vertical-align:-0.247em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7143919999999999em;"><span style="top:-2.4530000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">d</span></span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">a</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p>得到：</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>A</mi><mi>X</mi><mo>=</mo><mi>X</mi><mi>B</mi></mrow><annotation encoding="application/x-tex">AX = XB
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal">A</span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span></span></span></span></span></p>
+<h4 id="对于-eye-to-hand"><a class="markdownIt-Anchor" href="#对于-eye-to-hand"></a> 对于 Eye-to-hand：</h4>
+<p>标定板固定在机械臂末端，相机固定在外部。类似推导可得相同形式的 AX=XB，只是 X 的含义不同：</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>X</mi><mo>=</mo><msubsup><mi>T</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow><mrow><mi>c</mi><mi>a</mi><mi>m</mi><mi>e</mi><mi>r</mi><mi>a</mi></mrow></msubsup></mrow><annotation encoding="application/x-tex">X = T_{base}^{camera}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.9613919999999999em;vertical-align:-0.247em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7143919999999999em;"><span style="top:-2.4530000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">e</span></span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">a</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<h2 id="3-系统架构设计"><a class="markdownIt-Anchor" href="#3-系统架构设计"></a> 3. 系统架构设计</h2>
+<p>我们的标定系统采用模块化设计，整体架构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">depth_chessboard_calib/</span><br><span class="line">├── include/depth_chessboard_calib/</span><br><span class="line">│   ├── calibrators/</span><br><span class="line">│   │   ├── eye_in_hand_calibrator.hpp     # Eye-in-hand 标定器</span><br><span class="line">│   │   ├── joint_handeye_calibrator.hpp   # Eye-to-hand 联合标定器</span><br><span class="line">│   │   ├── calibration_validator.hpp      # 标定结果验证器</span><br><span class="line">│   │   └── types.hpp                       # 数据类型定义</span><br><span class="line">│   └── algorithms/</span><br><span class="line">│       └── handeye_solver.hpp             # 手眼求解器</span><br><span class="line">└── src/</span><br><span class="line">    ├── calibrators/</span><br><span class="line">    ├── algorithms/handeye_solver.cpp       # 核心求解算法</span><br><span class="line">    └── ros2/calibration_server.cpp        # ROS2 服务端</span><br></pre></td></tr></table></figure>
+<h3 id="31-多层过滤与标定流水线"><a class="markdownIt-Anchor" href="#31-多层过滤与标定流水线"></a> 3.1 多层过滤与标定流水线</h3>
+<p>整个系统采用<strong>多层过滤</strong>的设计思想，每层过滤解决不同粒度的问题，避免&quot;一刀切&quot;的粗暴拒绝：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">    subgraph 采集层</span><br><span class="line">        A0[实时采集] --&gt; A1[棋盘检测&lt;br&gt;失败则拒绝该帧]</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph 预处理层</span><br><span class="line">        A1 --&gt; B0[帧数检查&lt;br&gt;&gt;= 3帧]</span><br><span class="line">        B0 --&gt; B1[运动多样性检查&lt;br&gt;整体覆盖范围]</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph 内参估计层</span><br><span class="line">        B1 --&gt; C1[Zhang初始化&lt;br&gt;或加载已知内参]</span><br><span class="line">        C1 --&gt; C2[逐帧PNP求解外参]</span><br><span class="line">        C2 --&gt; C3[Ceres稀疏BA&lt;br&gt;精炼内参+外参]</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph 手眼求解层</span><br><span class="line">        C3 --&gt; D1[AX=XB初始求解&lt;br&gt;Tsai/Park]</span><br><span class="line">        D1 --&gt; D2[鲁棒平均T_ee_target&lt;br&gt;MAD剔除野值帧]</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph 精炼层</span><br><span class="line">        D2 --&gt; E1[可选: 闭环异常值剔除&lt;br&gt;MAD重新求解]</span><br><span class="line">        E1 --&gt; E2[可选: 位姿先验Ceres精炼&lt;br&gt;修正机械臂读数]</span><br><span class="line">        E2 --&gt; E3[可选: 重投影异常值剔除&lt;br&gt;二次过滤]</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    E3 --&gt; F[输出标定结果&lt;br&gt;+质量评估]</span><br></pre></td></tr></table></figure>
+<p>各层过滤的职责总结：</p>
+<table>
+<thead>
+<tr>
+<th>过滤层级</th>
+<th>过滤对象</th>
+<th>触发时机</th>
+<th>过滤方式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>① 棋盘检测过滤</strong></td>
+<td>单帧</td>
+<td>实时采集时</td>
+<td>逐帧拒绝</td>
+<td>这一帧棋盘没检测到，直接拒绝，不影响已存的帧</td>
+</tr>
+<tr>
+<td><strong>② 运动多样性检查</strong></td>
+<td>整组数据</td>
+<td>标定开始前</td>
+<td>整组拒绝</td>
+<td>检查整体覆盖范围，防止 AX=XB 病态</td>
+</tr>
+<tr>
+<td><strong>③ 鲁棒平均异常值剔除</strong></td>
+<td>个别帧</td>
+<td>反推 T_ee_target 时</td>
+<td>自动剔除野值帧</td>
+<td>基于平移 MAD，只影响平均过程</td>
+</tr>
+<tr>
+<td><strong>④ 闭环异常值剔除</strong></td>
+<td>个别帧</td>
+<td>AX=XB 初解后</td>
+<td>逐帧剔除，重新求解</td>
+<td>基于闭环残差 MAD，多次标定后自动淘汰坏帧</td>
+</tr>
+<tr>
+<td><strong>⑤ 重投影异常值剔除</strong></td>
+<td>个别帧</td>
+<td>最终解后</td>
+<td>逐帧剔除，重新求解</td>
+<td>基于重投影误差 MAD，二次过滤</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-关键技术点解析"><a class="markdownIt-Anchor" href="#4-关键技术点解析"></a> 4. 关键技术点解析</h2>
+<h3 id="41-运动多样性预检查"><a class="markdownIt-Anchor" href="#41-运动多样性预检查"></a> 4.1 运动多样性预检查</h3>
+<p><strong>问题</strong>：如果机械臂在采集数据时运动范围太小，AX=XB 问题会变成病态（ill-posed），解出来的结果不可靠。这个检查是<strong>对整个数据集的一次性前置检查</strong>，不是逐帧判断。</p>
+<p><strong>源码实现</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 对任意两两组合，取最大平移差和最大旋转差</span></span><br><span class="line"><span class="keyword">for</span> (lhs = <span class="number">0.</span>.N; rhs = lhs+<span class="number">1.</span>.N):</span><br><span class="line">    max_trans_delta = <span class="built_in">max</span>(||T_lhs.trans - T_rhs.trans||)   <span class="comment">// 最远的两帧相距多远</span></span><br><span class="line">    max_rot_delta  = <span class="built_in">max</span>(<span class="built_in">angle</span>(R_lhs, R_rhs))              <span class="comment">// 最远的两帧转了多少度</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 当且仅当 平移和旋转都小于阈值，才拒绝</span></span><br><span class="line"><span class="keyword">if</span> (max_trans_delta &lt; <span class="type">min_t</span> &amp;&amp; max_rot_delta &lt; min_r):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;标定失败: 机器人位姿变化不足&quot;</span></span><br></pre></td></tr></table></figure>
+<p><strong>关键点</strong>：</p>
+<ul>
+<li>计算的是<strong>所有帧对之间的最大距离</strong>，不是每个轴的最小跨度</li>
+<li>判断条件是 <code>&amp;&amp;</code>（且），不是 <code>||</code>（或）—— 平移和旋转<strong>都小于阈值</strong>才拒绝</li>
+<li>也就是说，只要平移变化足够大 <strong>或</strong> 旋转变化足够大，检查就通过</li>
+<li>这是<strong>整体数据集的准入检查</strong>，不是逐帧评价</li>
+</ul>
+<p><strong>对此你可能会有疑问：“那对于已经采集好的数据，不会自动剔除不好的姿态吗？”</strong></p>
+<p>答案是：<strong>它确实不会在这步剔除个别帧，因为这不是它的职责。</strong> 个别帧的过滤由其他层级完成（见 3.1 节表格中的 ③④⑤）。运动多样性检查只回答一个问题：“这套数据整体有没有足够的运动覆盖？” 如果覆盖不够，标定结果必然不可靠，所以直接拒绝是最合理的做法。</p>
+<h3 id="42-联合标定内参与外参同时估计"><a class="markdownIt-Anchor" href="#42-联合标定内参与外参同时估计"></a> 4.2 联合标定：内参与外参同时估计</h3>
+<p>很多人误以为&quot;联合标定&quot;是同时优化内参和手眼矩阵，实际上不是：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>优化对象</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>内参 + 所有帧外参</td>
+<td>Ceres 稀疏BA</td>
+</tr>
+<tr>
+<td>2</td>
+<td>手眼矩阵</td>
+<td>固定内参外参，单独 AX=XB 求解</td>
+</tr>
+</tbody>
+</table>
+<p><strong>联合标定 vs 固定内参</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>使用场景</th>
+<th>计算量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>固定内参</td>
+<td>已经通过标定板得到内参</td>
+<td>快</td>
+</tr>
+<tr>
+<td>联合标定</td>
+<td>不知道相机内参，从零开始</td>
+<td>较慢，但精度相当</td>
+</tr>
+</tbody>
+</table>
+<p>我们使用 Ceres 做 BA 而非 OpenCV 的 <code>calibrateCamera</code>：</p>
+<ul>
+<li><strong>优点</strong>：稀疏 BA 只优化内参和外参，在多帧下比 OpenCV 的稠密优化更快</li>
+<li><strong>鲁棒性</strong>：使用 Huber 损失函数，对异常点更鲁棒</li>
+</ul>
+<h3 id="43-tsai-vs-park两种经典解法对比"><a class="markdownIt-Anchor" href="#43-tsai-vs-park两种经典解法对比"></a> 4.3 Tsai vs Park：两种经典解法对比</h3>
+<p>OpenCV 提供了多种 AX=XB 解法，我们项目中结合使用：</p>
+<table>
+<thead>
+<tr>
+<th>对比维度</th>
+<th>Tsai (1989)</th>
+<th>Park (1994)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>求解顺序</td>
+<td>先旋转，后平移（两步线性）</td>
+<td>旋转平移同时最小化</td>
+</tr>
+<tr>
+<td>方法性质</td>
+<td>闭式解，不迭代</td>
+<td>最小二乘，迭代求解</td>
+</tr>
+<tr>
+<td>噪声敏感性</td>
+<td>较高</td>
+<td>较低</td>
+</tr>
+<tr>
+<td>精度</td>
+<td>一般</td>
+<td>通常更高</td>
+</tr>
+</tbody>
+</table>
+<p><strong>我们的策略</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 优先尝试 Park，如果失败（产生NaN），回退到 Tsai</span></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    cv::<span class="built_in">calibrateHandEye</span>(..., cv::CALIB_HAND_EYE_PARK);</span><br><span class="line">&#125; <span class="built_in">catch</span> (...) &#123;</span><br><span class="line">    cv::<span class="built_in">calibrateHandEye</span>(..., cv::CALIB_HAND_EYE_TSAI);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="44-位姿先验精炼为什么需要理论依据是什么"><a class="markdownIt-Anchor" href="#44-位姿先验精炼为什么需要理论依据是什么"></a> 4.4 位姿先验精炼：为什么需要，理论依据是什么？</h3>
+<p><strong>问题背景</strong>：</p>
+<ul>
+<li>机械臂编码器读数有误差</li>
+<li>TCP 标定本身也有误差</li>
+<li>这些误差会传递到 <code>T_base_end</code>，进而影响 AX=XB 的解</li>
+</ul>
+<p><strong>核心思想</strong>：</p>
+<ul>
+<li>不把 <code>T_base_end</code> 当作常量，而是当作优化变量</li>
+<li>添加马氏先验：<code>(T_optimized - T_measured)^2 * weight</code></li>
+<li>允许优化器小幅修正机械臂位姿，但不允许偏离太远</li>
+<li>同时联合优化手眼矩阵，减小闭环残差</li>
+</ul>
+<p><strong>Ceres 误差项设计</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 标准手眼约束：T_base_cam * T_cam_target = T_base_ee * T_ee_target</span></span><br><span class="line"><span class="comment">// 残差由旋转部分（四元数）和平移部分组成</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="type">int</span>&gt;</span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">HandEyePoseError::operator</span><span class="params">()</span><span class="params">(...)</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 计算左右两边变换</span></span><br><span class="line">    Eigen::Quaterniond q_lhs = q_base_cam * q_cam_target;</span><br><span class="line">    Eigen::Quaterniond q_rhs = q_base_ee * q_ee_target;</span><br><span class="line">    Eigen::Quaterniond q_err = q_rhs * q_lhs.<span class="built_in">inverse</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 残差：[旋转误差(3), 平移误差(3)]</span></span><br><span class="line">    residual[<span class="number">0</span><span class="number">-2</span>] = <span class="number">2</span> * Eigen::<span class="built_in">Vector3d</span>(q_err.<span class="built_in">x</span>(), q_err.<span class="built_in">y</span>(), q_err.<span class="built_in">z</span>());</span><br><span class="line">    residual[<span class="number">3</span><span class="number">-5</span>] = t_lhs - t_rhs;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>为什么可选</strong>：</p>
+<ul>
+<li>如果机械臂精度已经很高，TCP 标定准确，这一步增益有限</li>
+<li>开启会增加计算时间</li>
+<li>但对于高精度应用，建议开启</li>
+</ul>
+<h3 id="45-闭环异常值剔除mad-方法"><a class="markdownIt-Anchor" href="#45-闭环异常值剔除mad-方法"></a> 4.5 闭环异常值剔除：MAD 方法</h3>
+<p>在 AX=XB 求解出初值后，系统会做第一次异常值剔除，基于<strong>闭环残差</strong>（手眼链的几何一致性）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 计算每帧的闭环残差</span></span><br><span class="line"><span class="keyword">for</span> each frame i:</span><br><span class="line">    error[i] = ||T_base_cam * T_cam_target_i - T_base_ee_i * T_ee_target||</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. MAD 计算</span></span><br><span class="line">med = <span class="built_in">median</span>(error)</span><br><span class="line">mad = <span class="built_in">median</span>(|error_i - med|)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 剔除阈值</span></span><br><span class="line">threshold = med + <span class="number">3.0</span> * mad</span><br><span class="line"></span><br><span class="line"><span class="comment">// 4. 按误差降序排序，优先剔除残差最大的帧</span></span><br><span class="line"><span class="comment">//    保留至少 3 帧，最多剔除 30%</span></span><br></pre></td></tr></table></figure>
+<p><strong>为什么这是必要的</strong>：</p>
+<ul>
+<li>运动多样性检查只保证整体覆盖范围，不保证个别帧的质量</li>
+<li>个别帧可能因为抖动、棋盘检测偏差等原因，导致 PnP 求解出的外参与其他帧不一致</li>
+<li>这些坏帧会严重拉低 AX=XB 的解，必须剔除后重新求解</li>
+</ul>
+<p><strong>为什么在这里做而不是在采集时做</strong>：</p>
+<ul>
+<li>采集时只知道棋盘检测是否成功，不知道手眼链是否一致</li>
+<li>只有解出 AX=XB 的初值后，才能通过闭环残差判断哪些帧是坏的</li>
+</ul>
+<h3 id="46-重投影异常值剔除二次过滤"><a class="markdownIt-Anchor" href="#46-重投影异常值剔除二次过滤"></a> 4.6 重投影异常值剔除：二次过滤</h3>
+<p>在闭环异常值剔除和位姿先验精炼之后，系统还会做第二次过滤，基于<strong>重投影误差</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1. 用最终标定结果逐帧计算重投影误差</span><br><span class="line">2. median_err = 中位数(error)</span><br><span class="line">3. mad = 中位数(|error_i - median_err|)</span><br><span class="line">4. 剔除阈值：error_i &gt; median_err + threshold * mad</span><br><span class="line">5. 保留至少 3 帧，最多剔除 max_reject_fraction（默认30%）</span><br></pre></td></tr></table></figure>
+<p><strong>与闭环异常值剔除的区别</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>过滤方式</th>
+<th>评价指标</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>闭环异常值剔除</td>
+<td>手眼链闭环残差</td>
+<td>检查手眼链几何一致性</td>
+</tr>
+<tr>
+<td>重投影异常值剔除</td>
+<td>像素重投影误差</td>
+<td>检查图像投影精度</td>
+</tr>
+</tbody>
+</table>
+<p>两者互补，一个检查的是 3D 几何一致性，一个检查的是 2D 像素精度。</p>
+<h2 id="5-实际标定教程"><a class="markdownIt-Anchor" href="#5-实际标定教程"></a> 5. 实际标定教程</h2>
+<h3 id="51-环境准备"><a class="markdownIt-Anchor" href="#51-环境准备"></a> 5.1 环境准备</h3>
+<p>项目基于 ROS2 Humble 开发，需要以下依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">depend</span>&gt;</span>rclcpp<span class="tag">&lt;/<span class="name">depend</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">depend</span>&gt;</span>sensor_msgs<span class="tag">&lt;/<span class="name">depend</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">depend</span>&gt;</span>cv_bridge<span class="tag">&lt;/<span class="name">depend</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">depend</span>&gt;</span>image_transport<span class="tag">&lt;/<span class="name">depend</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">depend</span>&gt;</span>ceres-solver<span class="tag">&lt;/<span class="name">depend</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">depend</span>&gt;</span>OpenCV<span class="tag">&lt;/<span class="name">depend</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">depend</span>&gt;</span>Eigen3<span class="tag">&lt;/<span class="name">depend</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>编译：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/colcon_ws</span><br><span class="line">colcon build --packages-select depth_chessboard_calib</span><br><span class="line"><span class="built_in">source</span> install/setup.bash</span><br></pre></td></tr></table></figure>
+<h3 id="52-数据采集准备"><a class="markdownIt-Anchor" href="#52-数据采集准备"></a> 5.2 数据采集准备</h3>
+<h4 id="对于-eye-in-hand眼在手上"><a class="markdownIt-Anchor" href="#对于-eye-in-hand眼在手上"></a> 对于 Eye-in-hand（眼在手上）：</h4>
+<ol>
+<li>
+<p><strong>打印棋盘格</strong>，固定在平稳的桌面上（相对于基座固定）</p>
+<ul>
+<li>测量实际方格边长，填入配置</li>
+<li>记录内角点数（例如 9x6）</li>
+</ul>
+</li>
+<li>
+<p><strong>采集要求</strong>：</p>
+<ul>
+<li>机械臂带动相机移动到不同位姿</li>
+<li>保证棋盘充满视野，且姿态变化大（平移+旋转都要有）</li>
+<li>采集 10~20 帧足够</li>
+<li>每帧保存：
+<ul>
+<li>图像（放到 <code>data_dir/images/</code>）</li>
+<li>当前 <code>T_base_end</code>（保存到 <code>data_dir/poses/</code>，每个位姿一个文件）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="对于-eye-to-hand眼在手外"><a class="markdownIt-Anchor" href="#对于-eye-to-hand眼在手外"></a> 对于 Eye-to-hand（眼在手外）：</h4>
+<ol>
+<li><strong>把棋盘格固定在机械臂末端</strong></li>
+<li><strong>相机固定不动</strong></li>
+<li>机械臂带动棋盘到不同位姿，采集要求同上</li>
+</ol>
+<h3 id="53-配置文件"><a class="markdownIt-Anchor" href="#53-配置文件"></a> 5.3 配置文件</h3>
+<p>创建 <code>config/calibration.yaml</code>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">calibration:</span></span><br><span class="line">  <span class="attr">eye_hand_mode:</span> <span class="string">&quot;eye_in_hand&quot;</span>  <span class="comment"># 或 &quot;eye_to_hand&quot;</span></span><br><span class="line">  <span class="attr">square_size_m:</span> <span class="number">0.025</span>          <span class="comment"># 棋盘方格边长，单位米</span></span><br><span class="line">  <span class="attr">inner_corners_cols:</span> <span class="number">9</span></span><br><span class="line">  <span class="attr">inner_corners_rows:</span> <span class="number">6</span></span><br><span class="line">  <span class="attr">max_calibration_frames:</span> <span class="number">20</span></span><br><span class="line">  <span class="attr">reproj_error_threshold_px:</span> <span class="number">1.0</span></span><br><span class="line">  <span class="attr">fix_intrinsics:</span> <span class="literal">false</span>         <span class="comment"># false=联合标定内参，true=使用已有内参</span></span><br><span class="line">  <span class="attr">min_motion_diversity_translation_m:</span> <span class="number">0.02</span></span><br><span class="line">  <span class="attr">min_motion_diversity_rotation_deg:</span> <span class="number">5.0</span></span><br><span class="line">  <span class="attr">outlier_rejection_enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">outlier_rejection_mad_factor:</span> <span class="number">2.5</span></span><br><span class="line">  <span class="attr">outlier_rejection_max_reject_fraction:</span> <span class="number">0.3</span></span><br><span class="line">  <span class="attr">pose_refinement_enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">pose_refinement_max_translation_m:</span> <span class="number">0.005</span></span><br><span class="line">  <span class="attr">pose_refinement_max_rotation_deg:</span> <span class="number">4.0</span></span><br></pre></td></tr></table></figure>
+<h3 id="54-启动标定服务"><a class="markdownIt-Anchor" href="#54-启动标定服务"></a> 5.4 启动标定服务</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ros2 launch depth_chessboard_calib calibration.launch.py \</span><br><span class="line">    config_file:=/path/to/your/config.yaml</span><br></pre></td></tr></table></figure>
+<h3 id="55-调用标定服务"><a class="markdownIt-Anchor" href="#55-调用标定服务"></a> 5.5 调用标定服务</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ros2 service call /calibrate_handeye \</span><br><span class="line">    depth_chessboard_calib/srv/CalibrateHandEye \</span><br><span class="line">    <span class="string">&quot;&#123;data_dir: &#x27;/path/to/your/data&#x27;, \</span></span><br><span class="line"><span class="string">      profile_name: &#x27;my_robot_calib&#x27;, \</span></span><br><span class="line"><span class="string">      calibration_frame: &#x27;camera_color_optical_frame&#x27;, \</span></span><br><span class="line"><span class="string">      calibration_to_output_child: &#x27;camera_link&#x27;&#125;&quot;</span></span><br></pre></td></tr></table></figure>
+<h3 id="56-结果解读"><a class="markdownIt-Anchor" href="#56-结果解读"></a> 5.6 结果解读</h3>
+<p>标定成功后，会在输出目录保存：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">output/</span><br><span class="line">├── camera_intrinsics.yaml      # 相机内参</span><br><span class="line">├── handeye_pose.yaml           # 手眼变换矩阵</span><br><span class="line">└── calibration_report.txt      # 质量报告</span><br></pre></td></tr></table></figure>
+<p>报告中会给出：</p>
+<ul>
+<li>重投影误差 RMS</li>
+<li>闭环残差 RMS</li>
+<li>最终使用帧数（可能比采集帧数少，因为异常值被剔除了）</li>
+</ul>
+<p>一般来说：</p>
+<ul>
+<li>重投影误差 &lt; 0.5 px 优秀</li>
+<li>重投影误差 &lt; 1.0 px 可用</li>
+<li>重投影误差 &gt; 1.5 px 建议重新采集</li>
+</ul>
+<h2 id="6-常见问题排查"><a class="markdownIt-Anchor" href="#6-常见问题排查"></a> 6. 常见问题排查</h2>
+<h3 id="q1-标定失败提示机器人位姿变化不足"><a class="markdownIt-Anchor" href="#q1-标定失败提示机器人位姿变化不足"></a> Q1: 标定失败，提示&quot;机器人位姿变化不足&quot;</h3>
+<p><strong>原因</strong>：所有帧之间的最大平移跨度和最大旋转跨度都太小，AX=XB 问题病态。</p>
+<p><strong>解决</strong>：重新采集，让机械臂移动幅度更大一些。注意：只要平移变化足够大 <strong>或</strong> 旋转变化足够大，检查就能通过，不必两个维度都满足。</p>
+<h3 id="q2-位姿先验精炼失败提示优化后波动过大"><a class="markdownIt-Anchor" href="#q2-位姿先验精炼失败提示优化后波动过大"></a> Q2: 位姿先验精炼失败，提示&quot;优化后波动过大&quot;</h3>
+<p><strong>原因</strong>：原始数据几何一致性太差，即使允许修正到最大幅度，残差仍然很大。</p>
+<p><strong>解决</strong>：检查数据采集是否正确，棋盘检测是否正常。建议重新采集。</p>
+<h3 id="q3-重投影误差很大但看起来每帧棋盘都检测到了"><a class="markdownIt-Anchor" href="#q3-重投影误差很大但看起来每帧棋盘都检测到了"></a> Q3: 重投影误差很大，但看起来每帧棋盘都检测到了</h3>
+<p><strong>原因</strong>：可能有个别帧被误检测（角点顺序错了），或者标定板尺寸测量不准。</p>
+<p><strong>解决</strong>：</p>
+<ol>
+<li>确保 <code>outlier_rejection_enabled: true</code>（默认开启），系统会自动剔除坏帧</li>
+<li>检查 <code>square_size_m</code> 是否与实际一致</li>
+</ol>
+<h3 id="q4-采集时某一帧棋盘没检测到数据就废了吗"><a class="markdownIt-Anchor" href="#q4-采集时某一帧棋盘没检测到数据就废了吗"></a> Q4: 采集时某一帧棋盘没检测到，数据就废了吗？</h3>
+<p><strong>不会</strong>。<code>addObservation</code> 只会拒绝当前这一帧，之前已经存好的帧完全不受影响，继续采集下一帧即可。</p>
+<h2 id="7-质量验证"><a class="markdownIt-Anchor" href="#7-质量验证"></a> 7. 质量验证</h2>
+<p>标定完成后，建议用验证集评估精度：</p>
+<ol>
+<li>预留 3~5 帧不参与标定，作为验证集</li>
+<li>用标定好的内参和手眼矩阵，计算验证集的重投影误差和闭环残差</li>
+<li>如果验证集误差和标定集误差接近，说明标定结果泛化性好</li>
+</ol>
+<p>我们系统内置了 <code>CalibrationValidator</code> 可以直接输出误差统计。</p>
+<h2 id="8-总结"><a class="markdownIt-Anchor" href="#8-总结"></a> 8. 总结</h2>
+<p>本文介绍了一种鲁棒手眼标定系统。核心特点：</p>
+<p>✅ <strong>双模式支持</strong>：同时支持 Eye-in-Hand 和 Eye-to-Hand<br />
+✅ <strong>多层过滤体系</strong>：采集层逐帧过滤 → 预处理层整体准入 → 求解层自动剔除异常帧，各层各司其职<br />
+✅ <strong>多阶段优化</strong>：Zhang 初始化 → PnP → Ceres BA → AX=XB → Ceres SE(3) 精炼<br />
+✅ <strong>双重异常值剔除</strong>：闭环残差 MAD + 重投影误差 MAD，分别从几何一致性和投影精度两个维度过滤坏帧<br />
+✅ <strong>质量保证</strong>：闭环残差检查 + 重投影误差门禁 + 独立验证集支持<br />
+✅ <strong>生产就绪</strong>：YAML 持久化 + 自动 TF 发布 + profile 版本管理</p>
+
+                    
+                </div>
+
+                
+                        
+<div class="post-copyright-info-container border-box">
+    <div class="copyright-info-content border-box">
+        <div class="copyright-info-top border-box">
+            <div class="copyright-post-title border-box text-ellipsis">
+                基于ROS2的鲁棒手眼标定系统实现
+            </div>
+
+            <div class="copyright-post-link border-box text-ellipsis">
+                2026/09/03/基于ROS2的鲁棒手眼标定系统实现/
+            </div>
+        </div>
+
+        <div class="copyright-info-bottom border-box">
+            <div class="copyright-post-author bottom-item">
+                <div class="type">
+                    作者
+                </div>
+                <div class="content">云间之龙</div>
+            </div>
+
+            <div class="post-time bottom-item">
+                <div class="type">
+                    发布于
+                </div>
+                <div class="content">2026-09-03 12:00</div>
+            </div>
+
+
+            <div class="post-license bottom-item">
+                <div class="type">
+                    许可
+                </div>
+                <div class="content tooltip" data-tooltip-content="CC BY-NC-SA 4.0">
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank">
+                        
+                            <i class="fa-brands fa-creative-commons"></i>
+                            <i class="fa-brands fa-creative-commons-by"></i>
+                            <i class="fa-brands fa-creative-commons-nc"></i>
+                            <i class="fa-brands fa-creative-commons-sa"></i>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <i class="copyright-bg fa-solid fa-copyright"></i>
+    </div>
+    <div class="copy-copyright-info flex-center tooltip" data-tooltip-content="复制版权信息" data-tooltip-offset-y="-2px">
+        <i class="fa-solid fa-copy"></i>
+    </div>
+</div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/ROS2/">ROS2</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E6%89%8B%E7%9C%BC%E6%A0%87%E5%AE%9A/">手眼标定</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E6%9C%BA%E6%A2%B0%E8%87%82/">机械臂</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E7%9B%B8%E6%9C%BA/">相机</a>
+                                    </li>
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/%E6%A0%87%E5%AE%9A/">标定</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                            <div class="post-share-container border-box">
+    <ul class="share-list-wrap border-box">
+        <li class="qq share-item border-box flex-center tooltip"
+            data-tooltip-content="分享到 QQ"
+        >
+            <i class="fa-brands fa-qq"></i>
+        </li>
+        <li class="wechat share-item border-box flex-center tooltip tooltip-img"
+            data-tooltip-content="分享到微信"
+            data-tooltip-img-tip="微信扫一扫"
+            data-tooltip-img-style="background-color: #fff; top: -10px; padding: 0.6rem 0.6rem 0.1rem 0.6rem;"
+        >
+            <i class="fa-brands fa-weixin"></i>
+        </li>
+        <li class="weibo share-item border-box flex-center tooltip"
+            data-tooltip-content="分享到微博"
+        >
+            <i class="fa-brands fa-weibo"></i>
+        </li>
+    </ul>
+</div>
+
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/12/23/ROS2%20Fast%20DDS%20%E5%8D%A0%E7%94%A8%E8%B7%AF%E7%94%B1%E5%99%A8%E4%B8%8A%E4%BC%A0%E5%B8%A6%E5%AE%BD%20/"
+                                   title="ROS2 Fast DDS 占用路由器上传带宽"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">ROS2 Fast DDS 占用路由器上传带宽</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc left-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%BC%95%E8%A8%80"><span class="nav-text"> 1. 引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%89%8B%E7%9C%BC%E6%A0%87%E5%AE%9A%E9%97%AE%E9%A2%98%E5%9B%9E%E9%A1%BE"><span class="nav-text"> 2. 手眼标定问题回顾</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#21-%E4%B8%A4%E7%A7%8D%E9%85%8D%E7%BD%AE"><span class="nav-text"> 2.1 两种配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#22-%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC%E4%BB%8E%E9%97%AD%E7%8E%AF%E5%85%B3%E7%B3%BB%E5%88%B0-axxb"><span class="nav-text"> 2.2 数学推导：从闭环关系到 AX&#x3D;XB</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E-eye-in-hand"><span class="nav-text"> 对于 Eye-in-hand：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E-eye-to-hand"><span class="nav-text"> 对于 Eye-to-hand：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-text"> 3. 系统架构设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#31-%E5%A4%9A%E5%B1%82%E8%BF%87%E6%BB%A4%E4%B8%8E%E6%A0%87%E5%AE%9A%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-text"> 3.1 多层过滤与标定流水线</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%82%B9%E8%A7%A3%E6%9E%90"><span class="nav-text"> 4. 关键技术点解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#41-%E8%BF%90%E5%8A%A8%E5%A4%9A%E6%A0%B7%E6%80%A7%E9%A2%84%E6%A3%80%E6%9F%A5"><span class="nav-text"> 4.1 运动多样性预检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#42-%E8%81%94%E5%90%88%E6%A0%87%E5%AE%9A%E5%86%85%E5%8F%82%E4%B8%8E%E5%A4%96%E5%8F%82%E5%90%8C%E6%97%B6%E4%BC%B0%E8%AE%A1"><span class="nav-text"> 4.2 联合标定：内参与外参同时估计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#43-tsai-vs-park%E4%B8%A4%E7%A7%8D%E7%BB%8F%E5%85%B8%E8%A7%A3%E6%B3%95%E5%AF%B9%E6%AF%94"><span class="nav-text"> 4.3 Tsai vs Park：两种经典解法对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#44-%E4%BD%8D%E5%A7%BF%E5%85%88%E9%AA%8C%E7%B2%BE%E7%82%BC%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E7%90%86%E8%AE%BA%E4%BE%9D%E6%8D%AE%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-text"> 4.4 位姿先验精炼：为什么需要，理论依据是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#45-%E9%97%AD%E7%8E%AF%E5%BC%82%E5%B8%B8%E5%80%BC%E5%89%94%E9%99%A4mad-%E6%96%B9%E6%B3%95"><span class="nav-text"> 4.5 闭环异常值剔除：MAD 方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#46-%E9%87%8D%E6%8A%95%E5%BD%B1%E5%BC%82%E5%B8%B8%E5%80%BC%E5%89%94%E9%99%A4%E4%BA%8C%E6%AC%A1%E8%BF%87%E6%BB%A4"><span class="nav-text"> 4.6 重投影异常值剔除：二次过滤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%AE%9E%E9%99%85%E6%A0%87%E5%AE%9A%E6%95%99%E7%A8%8B"><span class="nav-text"> 5. 实际标定教程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#51-%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-text"> 5.1 环境准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#52-%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86%E5%87%86%E5%A4%87"><span class="nav-text"> 5.2 数据采集准备</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E-eye-in-hand%E7%9C%BC%E5%9C%A8%E6%89%8B%E4%B8%8A"><span class="nav-text"> 对于 Eye-in-hand（眼在手上）：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E-eye-to-hand%E7%9C%BC%E5%9C%A8%E6%89%8B%E5%A4%96"><span class="nav-text"> 对于 Eye-to-hand（眼在手外）：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#53-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text"> 5.3 配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#54-%E5%90%AF%E5%8A%A8%E6%A0%87%E5%AE%9A%E6%9C%8D%E5%8A%A1"><span class="nav-text"> 5.4 启动标定服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#55-%E8%B0%83%E7%94%A8%E6%A0%87%E5%AE%9A%E6%9C%8D%E5%8A%A1"><span class="nav-text"> 5.5 调用标定服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#56-%E7%BB%93%E6%9E%9C%E8%A7%A3%E8%AF%BB"><span class="nav-text"> 5.6 结果解读</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5"><span class="nav-text"> 6. 常见问题排查</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#q1-%E6%A0%87%E5%AE%9A%E5%A4%B1%E8%B4%A5%E6%8F%90%E7%A4%BA%E6%9C%BA%E5%99%A8%E4%BA%BA%E4%BD%8D%E5%A7%BF%E5%8F%98%E5%8C%96%E4%B8%8D%E8%B6%B3"><span class="nav-text"> Q1: 标定失败，提示&quot;机器人位姿变化不足&quot;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#q2-%E4%BD%8D%E5%A7%BF%E5%85%88%E9%AA%8C%E7%B2%BE%E7%82%BC%E5%A4%B1%E8%B4%A5%E6%8F%90%E7%A4%BA%E4%BC%98%E5%8C%96%E5%90%8E%E6%B3%A2%E5%8A%A8%E8%BF%87%E5%A4%A7"><span class="nav-text"> Q2: 位姿先验精炼失败，提示&quot;优化后波动过大&quot;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#q3-%E9%87%8D%E6%8A%95%E5%BD%B1%E8%AF%AF%E5%B7%AE%E5%BE%88%E5%A4%A7%E4%BD%86%E7%9C%8B%E8%B5%B7%E6%9D%A5%E6%AF%8F%E5%B8%A7%E6%A3%8B%E7%9B%98%E9%83%BD%E6%A3%80%E6%B5%8B%E5%88%B0%E4%BA%86"><span class="nav-text"> Q3: 重投影误差很大，但看起来每帧棋盘都检测到了</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#q4-%E9%87%87%E9%9B%86%E6%97%B6%E6%9F%90%E4%B8%80%E5%B8%A7%E6%A3%8B%E7%9B%98%E6%B2%A1%E6%A3%80%E6%B5%8B%E5%88%B0%E6%95%B0%E6%8D%AE%E5%B0%B1%E5%BA%9F%E4%BA%86%E5%90%97"><span class="nav-text"> Q4: 采集时某一帧棋盘没检测到，数据就废了吗？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E8%B4%A8%E9%87%8F%E9%AA%8C%E8%AF%81"><span class="nav-text"> 7. 质量验证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E6%80%BB%E7%BB%93"><span class="nav-text"> 8. 总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2021</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">云间之龙</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+        
+        <div class="deploy-info info-item">
+            
+            本站由 <span class="tooltip" data-tooltip-content="GitHub Pages"><img src="/images/brands/github.png"></span> 提供部署服务
+            
+        </div>
+    
+
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools left-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fas fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="close-popup-btn">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fas fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%BC%95%E8%A8%80"><span class="nav-text"> 1. 引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%89%8B%E7%9C%BC%E6%A0%87%E5%AE%9A%E9%97%AE%E9%A2%98%E5%9B%9E%E9%A1%BE"><span class="nav-text"> 2. 手眼标定问题回顾</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#21-%E4%B8%A4%E7%A7%8D%E9%85%8D%E7%BD%AE"><span class="nav-text"> 2.1 两种配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#22-%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC%E4%BB%8E%E9%97%AD%E7%8E%AF%E5%85%B3%E7%B3%BB%E5%88%B0-axxb"><span class="nav-text"> 2.2 数学推导：从闭环关系到 AX&#x3D;XB</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E-eye-in-hand"><span class="nav-text"> 对于 Eye-in-hand：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E-eye-to-hand"><span class="nav-text"> 对于 Eye-to-hand：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-text"> 3. 系统架构设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#31-%E5%A4%9A%E5%B1%82%E8%BF%87%E6%BB%A4%E4%B8%8E%E6%A0%87%E5%AE%9A%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-text"> 3.1 多层过滤与标定流水线</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%82%B9%E8%A7%A3%E6%9E%90"><span class="nav-text"> 4. 关键技术点解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#41-%E8%BF%90%E5%8A%A8%E5%A4%9A%E6%A0%B7%E6%80%A7%E9%A2%84%E6%A3%80%E6%9F%A5"><span class="nav-text"> 4.1 运动多样性预检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#42-%E8%81%94%E5%90%88%E6%A0%87%E5%AE%9A%E5%86%85%E5%8F%82%E4%B8%8E%E5%A4%96%E5%8F%82%E5%90%8C%E6%97%B6%E4%BC%B0%E8%AE%A1"><span class="nav-text"> 4.2 联合标定：内参与外参同时估计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#43-tsai-vs-park%E4%B8%A4%E7%A7%8D%E7%BB%8F%E5%85%B8%E8%A7%A3%E6%B3%95%E5%AF%B9%E6%AF%94"><span class="nav-text"> 4.3 Tsai vs Park：两种经典解法对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#44-%E4%BD%8D%E5%A7%BF%E5%85%88%E9%AA%8C%E7%B2%BE%E7%82%BC%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E7%90%86%E8%AE%BA%E4%BE%9D%E6%8D%AE%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-text"> 4.4 位姿先验精炼：为什么需要，理论依据是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#45-%E9%97%AD%E7%8E%AF%E5%BC%82%E5%B8%B8%E5%80%BC%E5%89%94%E9%99%A4mad-%E6%96%B9%E6%B3%95"><span class="nav-text"> 4.5 闭环异常值剔除：MAD 方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#46-%E9%87%8D%E6%8A%95%E5%BD%B1%E5%BC%82%E5%B8%B8%E5%80%BC%E5%89%94%E9%99%A4%E4%BA%8C%E6%AC%A1%E8%BF%87%E6%BB%A4"><span class="nav-text"> 4.6 重投影异常值剔除：二次过滤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%AE%9E%E9%99%85%E6%A0%87%E5%AE%9A%E6%95%99%E7%A8%8B"><span class="nav-text"> 5. 实际标定教程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#51-%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-text"> 5.1 环境准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#52-%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86%E5%87%86%E5%A4%87"><span class="nav-text"> 5.2 数据采集准备</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E-eye-in-hand%E7%9C%BC%E5%9C%A8%E6%89%8B%E4%B8%8A"><span class="nav-text"> 对于 Eye-in-hand（眼在手上）：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E-eye-to-hand%E7%9C%BC%E5%9C%A8%E6%89%8B%E5%A4%96"><span class="nav-text"> 对于 Eye-to-hand（眼在手外）：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#53-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text"> 5.3 配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#54-%E5%90%AF%E5%8A%A8%E6%A0%87%E5%AE%9A%E6%9C%8D%E5%8A%A1"><span class="nav-text"> 5.4 启动标定服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#55-%E8%B0%83%E7%94%A8%E6%A0%87%E5%AE%9A%E6%9C%8D%E5%8A%A1"><span class="nav-text"> 5.5 调用标定服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#56-%E7%BB%93%E6%9E%9C%E8%A7%A3%E8%AF%BB"><span class="nav-text"> 5.6 结果解读</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5"><span class="nav-text"> 6. 常见问题排查</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#q1-%E6%A0%87%E5%AE%9A%E5%A4%B1%E8%B4%A5%E6%8F%90%E7%A4%BA%E6%9C%BA%E5%99%A8%E4%BA%BA%E4%BD%8D%E5%A7%BF%E5%8F%98%E5%8C%96%E4%B8%8D%E8%B6%B3"><span class="nav-text"> Q1: 标定失败，提示&quot;机器人位姿变化不足&quot;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#q2-%E4%BD%8D%E5%A7%BF%E5%85%88%E9%AA%8C%E7%B2%BE%E7%82%BC%E5%A4%B1%E8%B4%A5%E6%8F%90%E7%A4%BA%E4%BC%98%E5%8C%96%E5%90%8E%E6%B3%A2%E5%8A%A8%E8%BF%87%E5%A4%A7"><span class="nav-text"> Q2: 位姿先验精炼失败，提示&quot;优化后波动过大&quot;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#q3-%E9%87%8D%E6%8A%95%E5%BD%B1%E8%AF%AF%E5%B7%AE%E5%BE%88%E5%A4%A7%E4%BD%86%E7%9C%8B%E8%B5%B7%E6%9D%A5%E6%AF%8F%E5%B8%A7%E6%A3%8B%E7%9B%98%E9%83%BD%E6%A3%80%E6%B5%8B%E5%88%B0%E4%BA%86"><span class="nav-text"> Q3: 重投影误差很大，但看起来每帧棋盘都检测到了</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#q4-%E9%87%87%E9%9B%86%E6%97%B6%E6%9F%90%E4%B8%80%E5%B8%A7%E6%A3%8B%E7%9B%98%E6%B2%A1%E6%A3%80%E6%B5%8B%E5%88%B0%E6%95%B0%E6%8D%AE%E5%B0%B1%E5%BA%9F%E4%BA%86%E5%90%97"><span class="nav-text"> Q4: 采集时某一帧棋盘没检测到，数据就废了吗？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E8%B4%A8%E9%87%8F%E9%AA%8C%E8%AF%81"><span class="nav-text"> 7. 质量验证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E6%80%BB%E7%BB%93"><span class="nav-text"> 8. 总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/utils.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/header-shrink.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/back2top.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/toggle-theme.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/code-block.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/main.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/libs/anime.min.js"></script>
+
+<!-- local search -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/local-search.min.js"></script>
+
+
+<!-- lazyload -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/lazyload.min.js"></script>
+
+
+<div class="">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/post/post-helper.min.js"></script>
+
+        <!-- toc -->
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/post/toc.min.js"></script>
+        
+
+        <!-- copyright-info -->
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/post/copyright-info.min.js"></script>
+        
+
+        <!-- share -->
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-keep/4.2.5/js/post/share.min.js"></script>
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+
+
+</body>
+</html>
